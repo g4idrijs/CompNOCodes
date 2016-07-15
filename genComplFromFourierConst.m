@@ -39,5 +39,5 @@ xcorr(seq1,seq1) + xcorr(seq2,seq2)
 dot(seq1,seq2)
 
 % These seem to be orthogonal but not complementary...
-
+ 
 
