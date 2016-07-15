@@ -22,4 +22,23 @@ iftToGetACF = ifft(spd)
 % So why do we have this implied shift in time?
 % Also, why does padding zeroes in time work?
 
+%% Demo finding symmetric code
+% g = [0 0 -1 0], f = [0 0 0 -1]
+% This is complementary pair, and g is symmetric
+f = [0 0 0 -1];
+abs(fft(xcorr(f)))
+
+g = [0 0 -1 0]
+abs(fft(xcorr(f)))
+
+sqrt(2 - abs(fft(xcorr(f))))
+
+% Probably need to padd zeroes somewhere
+% But this does tell us the magnitudes we need for g, which is nice
+
+
+
+
+
+
 
