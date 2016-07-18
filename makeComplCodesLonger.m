@@ -2,6 +2,9 @@
 % outputs a complementary set, where the individual elements are longer.
 % What we really want is MORE codes
 
+% Note that this method should work with complementary sets that have more
+% than two elements (we are not restricted to pairs)
+
 % We need an orthogonal matrix (Q*Q^T = k*I) [ex. Hadamard]s
 % and we need a complementary set of sequences.
 
