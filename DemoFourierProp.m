@@ -36,8 +36,22 @@ sqrt(2 - abs(fft(xcorr(f))))
 % Probably need to padd zeroes somewhere
 % But this does tell us the magnitudes we need for g, which is nice
 
+%% Demo how cross correlation properties show up in Fourier domain
 
+% Set up complementary orthogonal sequences
+A = [1 1 3 4   % A1
+    1 -1 5 6];  % A2
 
+B = [-1 1 7 8   % B1
+    -1 -1 9 1]; % B2
+
+corrFirst = fft(conv(A(1,:),fliplr(B(1,:))));
+orig = xcorr(A(1,:),B(1,:))
+
+corrResult = ifft(corrFirst)
+
+FFTFirst = fft([A(1,:) zeros(1,size(A,2))]) .* conj(fft([ B(1,:) zeros(1,size(B,2))]));
+FTResult = ifft(FFTFirst)
 
 
 
