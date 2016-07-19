@@ -11,8 +11,10 @@
 % A =[2  1  2 -1
 %     2 -1 -1  1];
 
-A = [-1 -1  0
-    0  1 -1];
+% A = [-1 -1  0
+%     0  1 -1];
+A = [1 1
+    1 -1];
 
 % We generate a pair that is a mate to A
 % That is, the pairwise cross correlation of A and Amate sums to zero
