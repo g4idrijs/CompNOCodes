@@ -62,30 +62,3 @@ while(merit < meritThresh)
     len = size(pairs,2);
 end
 a = 3;
-
-%% (NOT MUCH DONE HERE YET)
-% Use straightforward approach to generate small ones
-% Either generalize this approach or use papers to make longer codes
-
-% We need the autocorrelations to sum to zero at each shift (except center)
-% This puts N-1 constraints on two codes of length N each
-
-% So we have 2N - (N -1) = N + 1 free parameters
-% Ex. with length 4 codes, we have 5 free parameters
-
-% What if we set the first code entirely? (h1, h2, h3, h4)
-% And we also set the first value of the second code: h1'.
-
-% First equation F(h1,h4,h1',h4') -> solve -> h4'
-
-% The second equation puts a constrain on h3' and h4'
-% Then h2', h3', h4'
-% Sort of like backpropogation idea
-
-% Set first code randomly
-codeMean = 0;
-codeStd = 0.5;
-codeLen = 4;
-code1 = random('Normal',codeMean,codeStd,1,4);
-
-% Set second code to make it complementary
