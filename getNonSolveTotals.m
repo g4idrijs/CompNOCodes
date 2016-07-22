@@ -1,15 +1,14 @@
 function nonSolveTotals = getNonSolveTotals(solvePairs,lastIndSolvEqn,N,eqnCellArray,valList)
 
-assert(length(solvePairs) == 1, 'Not implemented solvePairs length.')
-
 % Keep track of the non-solve totals (form the "b" in Ax=b)
+% We two for each solve index: one for h and one for h'
 nonSolveTotals = zeros(1,length(solvePairs)*2);
 
 numEqnDone = 0;
 for eqnInd = (lastIndSolvEqn+1):(N-1)
     % Find the terms that contain the elements we are solving for
     currEq = eqnCellArray{eqnInd};
-    [rowInclSolveVar,~] = find(currEq == solvePairs);
+    [rowInclSolveVar,~] = find(ismember(currEq,solvePairs));
     
     % Go through each non-solving pair in the current equation
     % and compute the sum of these non-solving pairs

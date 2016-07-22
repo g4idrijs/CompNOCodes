@@ -4,7 +4,7 @@
 merit = 0;
 meritThresh = 4;
 
-numPairs = 4;
+numPairs = 5;
 while(merit < meritThresh)
 
     % Generate a few codes and see how they cross correlate
@@ -59,6 +59,6 @@ while(merit < meritThresh)
     if (merit > 3)
         disp(merit);
     end
-    len = size(pairs,2);
+    
 end
-a = 3;
+len = size(pairs,2)

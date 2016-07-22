@@ -1,6 +1,6 @@
 % For visualizing cross correlations
 
-v = 1:5;
+v = 1:10;
 
 numShift = length(v) - 1;
 
