@@ -1,0 +1,224 @@
+ Specification of the beamforming toolbox. The beamforming toolbox can 
+beamform one line or one image at a time.  The way it operates depends
+on the user.
+
+
+Commands :
+-------------------------------------------------------------------------   
+BFT_INIT - Initialize the beamforming toolbox. Set some of the constants
+   SYNTAX  : bft_init
+   INPUT   : None
+   OUTPUT  : None
+   
+   
+-------------------------------------------------------------------------   
+BFT_END - End working with the toolbox. Release all the allocated memory.
+   SYNAT   : bft_end
+   INPUT   : None
+   OUTPUT  : None
+   
+   
+   
+-------------------------------------------------------------------------   
+BFT_PARAM - Set a parameter, necessary for the beamforming. 
+   SYNTAX  : bft_param('param_name', param_value)
+   INPUT   : 'param_name' - String with the name of the parameter. 
+                            Currently recognized are :
+                            'c'  - Speed of sound         [ m / s]
+                            'fs' - Sampling frequency     [  Hz  ]
+   OUTPUT  : None
+
+
+
+
+-------------------------------------------------------------------------   
+BFT_NO_LINES - Number of lines beamformed at teh same time by calling
+       the command "bft_beamform". Calling this command makes all previous 
+       definitions of delays and focus points disappear.
+   SYNTAX  : bft_no_lines(no_lines)
+   INPUT   : no_lines  - Number of lines to define. The default value 
+                         is 1 (when this command is not invoked)
+   OUTPUT  : None
+
+
+
+-------------------------------------------------------------------------
+BFT_TRANSDUCER - Set the transducer. This command is necessary to call 
+       in order to set the transducer coordinates. They are used later in
+       the calculations of the delays.
+   SYNTAX  : xdc = bft_transducer(element_centers)
+   INPUT   : element_centers - a matrix of the form [x[1], y[2],  z[1];
+                                                     x[2], y[2],  z[2];
+                                                           . . .
+                                                     x[n], y[n],  z[n]]
+                               The coordinates [x,y,z] are given in meters.
+   OUNPUT  : xdc - handle to a transducer definition
+
+
+
+
+/************************************************************************
+ *   FUNCTIONS OPERATING ONLY ON ONE LINE AT A TIME. IN THIS CASE THE 
+ *   USER MUST DEFINE  A LOOP IN MATLAB AND BEAMFORM A SINGLE LINE PER
+ *   ITERATION. THESE ARE USEFUL WHEN THE DEMAND FOR MEMORY IS TOO BIG
+ *   OR WHEN THE USER USES THE SAME SYNTAX AS IN Field II.
+ ************************************************************************/
+-------------------------------------------------------------------------
+BFT_CENTER_FOCUS - Set the center focus for the focusing. This point is 
+      used as reference for calculating the focusing delay and times, and
+      as a starting point for the dynamic focusing.
+   SYNTAX  : bft_center_focus(xdc, point)
+   INPUT   : xdc - Handle of the aperture associated with the focusing
+             point - Focus center point (x,y,z)
+   OUTPUT  : None
+   
+   
+   
+   
+-------------------------------------------------------------------------   
+BFT_FOCUS  - Set the focus time line (for the definition of time-line 
+       look in the documentation of FieldII) for a given line in the 
+       image. The command must be used when there is only one line in 
+       the image. 
+   SYNTAX  : bft_focus(xdc, times, points)
+   INPUT   : xdc   - Handle of the transducer definition
+             times - Time after which the associated focus is valid
+             points- Focus points. Vector with three columns (x,y,z) and
+                     one row for each field point
+   OUTPUT  : None
+   
+
+
+
+-------------------------------------------------------------------------   
+BFT_FOCUS_TIMES - Set the delays for the beamforming. 
+      The command must be used when only one is defined.
+   SYNTAX  : bft_focus_times(xdc, times, delays, );
+   INPUT   : xdc - Handle of a transducer definition.
+             times - Time after which the associated focus is valid.
+             delays - Matrix with the delays - one column per element, 
+                      one row per field time.
+   OUTPUT  : None
+
+
+
+
+-------------------------------------------------------------------------   
+BFT_DYNAMIC_FOCUS - Use dynamic focusing.
+   SYNTAX  - bft_dynamic_focus(xdc, time, dir_zx, dir_zy)
+   INPUT   - xdc - Handle to the transducer definition.
+             time - Time after the dynamic focus is valid
+             dir_zx - Direction (andle) in radians for the dynamic focus
+                     The direction is taken from the center for the focus
+                     of the transducer in the z-x plane.
+             dir_zy - Direction (andle) in radians for the dynamic focus
+                     The direction is taken from the center for the focus
+                     of the transducer in the z-y plane.
+   OUTPUT  - None
+   
+
+
+
+/************************************************************************
+ * FUNCTIONS FOR BEAMFORMING A WHOLE IMAGE. THE USER MUST FIRST DEFINE 
+ * THE IMAGE AND THEN START CALLING THE BEAMFORMING ROUTINE IN ORDER TO 
+ * GAIN SPEED. USEFUL WHEN MAKING MOVIES OR PROCESSING HUGE AMOUNTS OF
+ * DATA.
+ *
+ ************************************************************************/
+
+-------------------------------------------------------------------------
+BFT_TIMES Set the times after which the next focusing zone for all the lines
+      is valid. This command must be called prior to calling the other 
+      routines for setting the focusing and the times.
+   SYNTAX  : bft_times(xdc, times)
+   INPUT   : xdc - Handle to trasnducer definition
+             times - Time after which the next focus is valid. 
+   OUTPUT  : None
+   
+   
+   
+-------------------------------------------------------------------------
+BFT_CENTER_FOCUSLN - Set the center focus for the focusing for. This point is 
+      used as reference for calculating the focusing delay and times, and
+      as a starting point for the dynamic focusing.
+   SYNTAX  : bft_center_focusln(xdc, point, line_no)
+   INPUT   : xdc - Handle of the aperture associated with the focusing
+             point - Focus center point (x,y,z)
+             line_no - Number of line for which we set the center.
+   OUTPUT  : None
+   
+   
+   
+   
+-------------------------------------------------------------------------   
+BFT_FOCUSLN - Set the focus time line (for the definition of time-line 
+       look in the documentation of FieldII) for a given line in the 
+       image. The command must be used when there is only one line in 
+       the image. 
+   SYNTAX  : bft_focusln(xdc, times, points, line_no)
+   INPUT   : xdc   - Handle of the transducer definition
+             points- Focus points. Vector with three columns (x,y,z) and
+                     one row for each field point. The number of points 
+                     must be equal to the number of times set by 
+                     BFT_TIMES
+             line_no - Number of line.
+   OUTPUT  : None
+   
+
+
+
+-------------------------------------------------------------------------   
+BFT_FOCUS_TIMESLN - Set the delays for the beamforming. 
+      The command must be used when only one is defined.
+   SYNTAX  : bft_focus_timesln(xdc, delays, line_no);
+   INPUT   : xdc - Handle of a transducer definition.
+             delays - Matrix with the delays - one column per element, 
+                      one row per field time. The number of rows is 
+                      equal to the number of times set by the BFT_TIMES
+             line_no - Number of line.
+   OUTPUT  : None
+
+
+
+
+-------------------------------------------------------------------------   
+BFT_DYNAMIC_FOCUSLN - Use dynamic focusing.
+   SYNTAX  - bft_dynamic_focus(xdc, time, dir_zx, dir_zy, line_no)
+   INPUT   - xdc - Handle to the transducer definition.
+             time - Time after the dynamic focus is valid
+             dir_zx - Direction (andle) in radians for the dynamic focus
+                     The direction is taken from the center for the focus
+                     of the transducer in the z-x plane.
+             dir_zy - Direction (andle) in radians for the dynamic focus
+                     The direction is taken from the center for the focus
+                     of the transducer in the z-y plane.
+             line_no - Number of line
+   OUTPUT  - None
+   
+   
+
+   
+   
+-------------------------------------------------------------------------   
+BFT_BEAMFORM Beamforms the image using the definitions associated with 
+      given aperture.
+   SYNTAX  : [bf_lines] = bft_beamform(xdc, start_time, rf_data)
+   INPUT   : xdc - Aperture defining the delays and the image and etc.
+             start_time - The acquisition time of the first sample.
+             rf_data    - The recorded RF lines.
+   OUTPUT  : bf_lines - Beamformed RF lines. The number of RF lines 
+                        corresponds to the number of lines defined by 
+                        the command BFT_NO_LINES.
+
+
+
+-------------------------------------------------------------------------   
+BFT_BEAMFORMLN Beamforms one line using the definitions associated with 
+      given aperture. 
+   SYNTAX  : [bf_line] = bft_beamformln(xdc, start_time, rf_lines, line_no)
+   INPUT   : xdc - Aperture defining the delays and the image and etc.
+             start_time - The acquisition time of the first sample.
+             rf_lines   - The recorded RF lines.
+             line_no    - Number of line to beamform.
+   OUTPUT  : bf_line - Beamformed RF line.

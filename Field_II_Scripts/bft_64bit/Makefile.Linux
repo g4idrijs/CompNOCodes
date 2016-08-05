@@ -1,0 +1,37 @@
+#
+#
+
+#DEFINES=-DDEBUG_TRACE  -DSHOW_ENTRIES -DDEBUG
+DEFINES+= -DSPECIAL_CASE -DMX_COMPAT_32
+
+CFILES = c/mex_beamform.c c/focus.c c/beamform.c c/geometry.c c/transducer.c
+CFILES += c/motion.c
+HFILES = h/beamform.h  h/focus.h   h/mex_beamform.h h/transducer.h h/error.h    
+HFILES+= h/geometry.h  h/sys_params.h h/types.h
+
+LINKS = -lpthread
+
+all: bft.mexglx
+
+bft.mexlx: ${CFILES}
+	mex -O -output bft.mexlx ${LINKS} ${CFILES} ${DEFINES}
+
+bft.mexglx: ${CFILES}
+	mex -O -output bft ${LINKS} ${CFILES}
+
+debug:
+	mex -O -output bft ${LINKS} ${CFILES} -DDEBUG -DDEBUG_TRACE ${DEFINES}
+
+
+	
+clean:
+	rm -f bft.mexlx
+	rm -f ../bft.tar.gz   
+
+pack:
+	rm -f ../bft.tar.gz
+	tar -c -f ../bft.tar ../bft/*
+	gzip ../bft.tar
+
+publish:
+	publish_bft

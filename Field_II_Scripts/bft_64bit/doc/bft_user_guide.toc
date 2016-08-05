@@ -1,0 +1,26 @@
+\contentsline {chapter}{\numberline {1}Introduction}{1}{chapter.1}
+\contentsline {chapter}{\numberline {2}Description of Matlab Functions}{3}{chapter.2}
+\contentsline {section}{\numberline {2.1}Functions list}{3}{section.2.1}
+\contentsline {section}{\numberline {2.2}Function description}{4}{section.2.2}
+\contentsline {subsection}{\numberline {\relax \fontsize {20.74}{25}\selectfont }bft\_add\_image}{4}{subsection.2.2.1}
+\contentsline {subsection}{\numberline {\relax \fontsize {20.74}{25}\selectfont }bft\_appodization}{4}{subsection.2.2.2}
+\contentsline {subsection}{\numberline {\relax \fontsize {20.74}{25}\selectfont }bft\_beamform}{4}{subsection.2.2.3}
+\contentsline {subsection}{\numberline {\relax \fontsize {20.74}{25}\selectfont }bft\_center\_focus}{5}{subsection.2.2.4}
+\contentsline {subsection}{\numberline {\relax \fontsize {20.74}{25}\selectfont }bft\_dynamic\_focus}{5}{subsection.2.2.5}
+\contentsline {subsection}{\numberline {\relax \fontsize {20.74}{25}\selectfont }bft\_end}{5}{subsection.2.2.6}
+\contentsline {subsection}{\numberline {\relax \fontsize {20.74}{25}\selectfont }bft\_focus}{5}{subsection.2.2.7}
+\contentsline {subsection}{\numberline {\relax \fontsize {20.74}{25}\selectfont }bft\_focus\_times}{6}{subsection.2.2.8}
+\contentsline {subsection}{\numberline {\relax \fontsize {20.74}{25}\selectfont }bft\_free\_xdc}{6}{subsection.2.2.9}
+\contentsline {subsection}{\numberline {\relax \fontsize {20.74}{25}\selectfont }bft\_init}{6}{subsection.2.2.10}
+\contentsline {subsection}{\numberline {\relax \fontsize {20.74}{25}\selectfont }bft\_linear\_array}{7}{subsection.2.2.11}
+\contentsline {subsection}{\numberline {\relax \fontsize {20.74}{25}\selectfont }bft\_no\_lines}{7}{subsection.2.2.12}
+\contentsline {subsection}{\numberline {\relax \fontsize {20.74}{25}\selectfont }bft\_param}{7}{subsection.2.2.13}
+\contentsline {subsection}{\numberline {\relax \fontsize {20.74}{25}\selectfont }bft\_sub\_image}{8}{subsection.2.2.14}
+\contentsline {subsection}{\numberline {\relax \fontsize {20.74}{25}\selectfont }bft\_sum\_apodization}{8}{subsection.2.2.15}
+\contentsline {subsection}{\numberline {\relax \fontsize {20.74}{25}\selectfont }bft\_sum\_images}{8}{subsection.2.2.16}
+\contentsline {subsection}{\numberline {\relax \fontsize {20.74}{25}\selectfont }bft\_transducer}{9}{subsection.2.2.17}
+\contentsline {chapter}{\numberline {3}Examples}{11}{chapter.3}
+\contentsline {section}{\numberline {3.1}Using Field II simulations}{11}{section.3.1}
+\contentsline {subsection}{\numberline {\relax \fontsize {20.74}{25}\selectfont }Phased array B-mode image}{11}{subsection.3.1.1}
+\contentsline {subsection}{\numberline {\relax \fontsize {20.74}{25}\selectfont }Dynamic focusing}{14}{subsection.3.1.2}
+\contentsline {subsection}{\numberline {\relax \fontsize {20.74}{25}\selectfont }Synthetic Aperture Focusing}{18}{subsection.3.1.3}

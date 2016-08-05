@@ -1,0 +1,1261 @@
+  <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+           "http://www.w3.org/TR/REC-html40/loose.dtd">
+<HTML>
+<META NAME="GENERATOR" CONTENT="TtH 2.64">
+                                                                               
+<title>Beamformation Toolbox</title>
+
+<p>
+    
+<title> Users' guide for the 
+Beamformation Toolbox</title>
+ 
+<H1 align="center">Users' guide for the 
+Beamformation Toolbox </H1>
+
+<H3 align=center>Svetoslav Ivanov Nikolov </H3>
+
+
+<p>
+
+<H3 align=center>Aug 31 2000 </H3>
+
+<p>
+                             <hr>
+Chapter 1.<br>&nbsp;&nbsp;&nbsp;<a href="#chap_intro">Introduction</a> <br>
+Chapter 2.<br>&nbsp;&nbsp;&nbsp;<a href="#chap_func_desc">Description of Matlab functions</a> <br>
+Chapter 3.<br>&nbsp;&nbsp;&nbsp;<a href="#chap_func_desc">Description of Matlab functions</a> <br>
+Chapter 4.<br>&nbsp;&nbsp;&nbsp;<a href="#chap_examples">Examples</a><br>
+<hr>
+
+<p>
+<hr>
+
+      <H1><A NAME="tth_chAp1">
+Chapter 1     </A><br>Introduction</H1>
+<A NAME="chap_intro">
+</A>
+<hr>
+
+<p>
+ This is the user guide to the Beamformation Toolbox. This toolbox is
+available only for Matlab under Linux, and is intended for processing 
+raw RF data recorded by an ultrasound system. Typical applications include
+synthetic aperture focusing and beamformation of data recorded by 
+experimental systems such as XTRA or the <em>Experimental Ultrasound 
+System for Real Time Synthetic Aperture Focusing</em>. 
+All the functions have calling conventions like 
+<b><a href="http://www.it.dtu.dk/~jaj/field">Field-II</a></b>.
+
+<p>
+The default behaviour of the toolbox is to beamform only one line at a time, 
+also like in Field II. In this case the user can omit the last of the 
+arguments in all the functions, which usually is <i>line_no</i>.
+
+<p>
+However, there are some differences between this toolbox and <b><a href="http://www.it.dtu.dk/~jaj/field">Field-II</a></b>. 
+For the purposes of the synthetic aperture focusing it is necessary to 
+beamform a whole low-resolution image at every emission. This can be 
+achieved by setting the number of simultaneously beamformed lines using the 
+command <a href="#bft_no_lines"><tt>bft_no_lines</a></tt>. Then each of the lines
+must be described before calling <a href="#bft_beamform"><tt>bft_beamform</a></tt>.
+
+<p>
+For the time-being there are some limitations :
+
+<UL>
+
+<li> Two low-resolution images can not be added if the lines are specified 
+       as dynamically focused.        
+</UL>
+<p>
+ As it can be seen the library is fully functional when the focus lines 
+are specified by a number of focal points<a href="#tthFtNtAAB" name="tthFrefAAB"><sup>1</sup></a>,
+and for the case of dynamic focusing, low resolution images cannot be summed.
+ 
+<p>
+In the future the toolbox will try to support many different types of strange and wacky 
+algorithms, so - stay tuned. 
+
+<p>
+<br><br>Svetoslav Ivanov Nikolov <br>
+February 29, 2000.
+
+<p>
+<hr>
+
+      <H1><A NAME="tth_chAp2">
+Chapter 2     </A><br>Description of Matlab Functions</H1>
+<A NAME="chap_func_desc">
+</A>
+<hr>
+
+<p>
+        <H2><A NAME="tth_sEc1">
+1</A>&nbsp;&nbsp;Functions list</H2>
+
+<TaBle>
+<tr><td><a href="#bft_add_image"><tt>bft_add_image</a></tt>      </td><td width="553">Add a low resolution to hi resolution image.</td>
+<tr><td><a href="#bft_apodization"><tt>bft_apodization</a></tt>     </td><td width="553">Create a  apodization time line. </td>
+<tr><td><a href="#bft_beamform"><tt>bft_beamform</a></tt>        </td><td width="553">Beamform a number of scan-lines. </td>
+<tr><td><a href="#bft_center_focus"><tt>bft_center_focus</a></tt>   </td><td width="553">Set the center focus point for the focusing. </td>
+<tr><td><a href="#bft_dynamic_focus"><tt>bft_dynamic_focus</a></tt>  </td><td width="553">Set dynamic focusing for a line. </td>
+<tr><td><a href="#bft_end"><tt>bft_end</a></tt>             </td><td width="553">Release all resources, allocated by the beamforming toolbox.</td>
+<tr><td><a href="#bft_focus"><tt>bft_focus</a></tt>           </td><td width="553">Create a focus time line defined by focus points.</td>
+<tr><td><a href="#bft_focus_times"><tt>bft_focus_times</a></tt>    </td><td width="553">Create a focus time line defined by focus delays.</td>
+<tr><td><a href="#bft_free_xdc"><tt>bft_free_xdc</a></tt>       </td><td width="553">Free the memory allocated for a transducer definition.</td>
+<tr><td><a href="#bft_init"><tt>bft_init</a></tt>            </td><td width="553">Initialize the BeamForming Toolbox.</td>
+<tr><td><a href="#bft_linear_array"><tt>bft_linear_array</a></tt>   </td><td width="553">Create a linear array.</td>
+<tr><td><a href="#bft_no_lines"><tt>bft_no_lines</a></tt>       </td><td width="553">Set the number of lines that will be beamformed in parallel.</td>
+<tr><td><a href="#bft_param"><tt>bft_param</a></tt>           </td><td width="553">Set a paramater of the BeamForming Toolbox.</td>
+<tr><td><a href="#bft_sub_image"><tt>bft_sub_image</a></tt>      </td><td width="553">Subtract one low-res image from  high-res one.</td>
+<tr><td><a href="#bft_sum_apodization"><tt>bft_sum_apodization</a></tt> </td><td width="553">Create a summation apodization time line.</td>
+<tr><td><a href="#bft_sum_images"><tt>bft_sum_images</a></tt>     </td><td width="553">Sum 2 low resolution images in 1 high resolution.</td>
+<tr><td><a href="#bft_transducer"><tt>bft_transducer</a></tt>      </td><td width="553">Create a new transducer definition.</td></TaBle>
+
+
+<p>
+        <H2><A NAME="tth_sEc2">
+2</A>&nbsp;&nbsp;Function description</H2>
+
+<title> bft\_add\_image</title>
+
+<br><br>
+<p>
+<hr>
+
+<H3>bft_add_image</H3>
+<hr>
+
+  <A NAME="bft_add_image">
+</A>
+  <a name="bft_add_image"></a>
+ 
+<p>
+Add a low resolution to high resolution image. 
+
+<p>
+
+<TaBle>
+<tr><td>USAGE: </td><td width="553"><tt> [hi_res]=bft_add_image(hi_res,lo_res,element,start_time)</tt> </td>
+<tr><td>INPUT: </td><td width="553">
+<TaBle>
+<tr><td><i>hi_res</i> </td><td width="434">High resolution RF image. One column per scan line. </td>
+<tr><td><i>lo_res</i> </td><td width="434">Low resolution RF image. One column per scan line. </td>
+<tr><td><i>element</i> </td><td width="434">Number of element, used to acquire the low resolution
+                        image. </td>
+<tr><td><i>time</i>   </td><td width="434">Arrival time of the first sample of the RF lines. [sec]</td></TaBle>
+</td>
+<tr><td>OUTPUT:</td><td width="553">hi_res - The high resolution image
+</td></TaBle>
+
+<p>
+
+<title> bft\_appodization</title>
+
+<br><br><br><br><br>
+<p>
+<hr>
+
+<H3>bft_appodization</H3>
+<hr>
+
+  <A NAME="bft_apodization">
+</A>
+  <a name="bft_apodization"></a>
+
+<p>
+Create an apodization time line.
+
+<p>
+
+<TaBle>
+<tr><td>USAGE: </td><td width="553"><tt>bft_apodization(xdc, times, values, line_no)</tt> </td>
+<tr><td>INPUT: </td><td width="553">
+<TaBle>
+<tr><td><i>xdc</i> </td><td width="434">Pointer to a transducer aperture </td>
+<tr><td><i>times</i>  </td><td width="434">Time after which the associated apodization is valid </td>
+<tr><td><i>values</i> </td><td width="434">Apodization values. Matrix with one row for each
+                   time value and a number of columns equal to the 
+                   number of physical elements in the aperture. </td>
+<tr><td><i>line_no</i> </td><td width="434">Number of line. If skipped, <i>line_no</i> is assumed
+                    to be equal to '1'.
+          </td></TaBle>
+ </td>
+<tr><td>OUTPUT: </td><td width="553">None
+</td></TaBle>
+
+<p>
+
+<title> bft\_beamform</title>
+
+<br><br><br><br><br>
+<p>
+<hr>
+
+<H3>bft_beamform</H3>
+<hr>
+
+  <A NAME="bft_beamform">
+</A>
+  <a name="bft_beamform"></a>
+
+<p>
+Beamform a number of scan-lines. The number of the simultaneously beamformed
+scan-lines is set by <a href="#bft_no_lines"><tt>bft_no_lines</a></tt>. 
+If <a href="#bft_no_lines"><tt>bft_no_lines</a></tt> is not called, only one scan
+line will be beamformed.
+
+<p>
+
+<TaBle>
+<tr><td>USAGE: </td><td width="553"><tt>bf_lines = bft_beamform(time, rf_data)</tt> </td>
+<tr><td>INPUT: </td><td width="553">
+<TaBle>
+<tr><td><i>time</i>   </td><td width="434">The time of the first sampled value </td>
+<tr><td><i>rf_data</i> </td><td width="434">The recorded RF data. The number of columns 
+                    is equal to the number of elements.
+          </td></TaBle>
+</td>
+<tr><td>OUTPUT: </td><td width="553"><i>bf_lines</i>  Matrix with the beamformed data. The number 
+                    of rows of <i>bf_lines</i> is equal to the number 
+                    of rows of <i>rf_data</i>. The number of columns 
+                    is equal to the number of lines </td></TaBle>
+
+
+<p>
+
+<title> bft\_center\_focus</title>
+
+<br><br><br><br><br>
+<p>
+<hr>
+
+<H3>bft_center_focus</H3>
+<hr>
+
+  <A NAME="bft_center_focus">
+</A>
+  <a name="bft_center_focus"></a>
+
+<p>
+ Set the center focus point for the focusing.
+  This point is used as a reference for calculating the
+   focusing delay times and as a starting point for dynamic
+    focusing.
+
+<p>
+
+<TaBle>
+<tr><td>USAGE: </td><td width="553"><tt>bft_center_focus(point, line_no)</tt> </td>
+<tr><td>INPUT: </td><td width="553">
+<TaBle>
+<tr><td><i>point</i> </td><td width="434">The center point [x,y,z]              [ m ]</td>
+<tr><td><i>line_no</i> </td><td width="434">Number of line. If omitted in the parameter
+                    list <i>line_no</i> is assumed equal to 1</td></TaBle>
+</td>
+<tr><td>OUTPUT: </td><td width="553">None
+</td></TaBle>
+
+<p>
+
+<title> bft\_dynamic\_focus</title>
+
+<br><br><br><br><br>
+<p>
+<hr>
+
+<H3>bft_dynamic_focus</H3>
+<hr>
+
+  <A NAME="bft_dynamic_focus">
+</A>
+  <a name="bft_dynamic_focus"></a>
+
+<p>
+Set dynamic focusing for a line
+
+<p>
+
+<TaBle>
+<tr><td>USAGE: </td><td width="553"><tt>bft_dynamic_focus(xdc, dir_xz, dir_zy, line_no)</tt> </td>
+<tr><td>INPUT: </td><td width="553">
+<TaBle>
+<tr><td><i>xdc</i>  </td><td width="434">Pointer to the transducer aperture</td>
+<tr><td><i>dir_zx</i> </td><td width="434">Direction (angle) in radians for the dynamic
+                    focus. The direction is taken from the center for
+                    the focus of the transducer in the z-x plane.</td>
+<tr><td><i>dir_zy</i> </td><td width="434">Direction (angle) in radians for the dynamic
+                    focus. The direction is taken from the center for
+                    the focus of the transducer in the z-y plane.</td>
+<tr><td><i>line_no</i> </td><td width="434">Number of line. If skipped, <i>line_no</i> is assumed
+                    to be equal to '1'.
+           </td></TaBle>
+ </td>
+<tr><td>OUTPUT: </td><td width="553">None 
+</td></TaBle>
+  
+<p>
+
+<title> bft\_end</title>
+
+<br><br><br><br><br>
+<p>
+<hr>
+
+<H3>bft_end</H3>
+<hr>
+
+  <A NAME="bft_end">
+</A>
+  <a name="bft_end"></a>
+
+<p>
+Release all resources allocated by the beamforming toolbox.
+
+<p>
+
+<TaBle>
+<tr><td>USAGE:</td><td width="553"><tt>bft_end</tt></td>
+<tr><td>INPUT:</td><td width="553">None</td>
+<tr><td>OUTPUT:</td><td width="553">None</td></TaBle>
+
+
+<p>
+
+<title> bft\_focus</title>
+
+<br><br><br><br><br>
+<p>
+<hr>
+
+<H3>bft_focus</H3>
+<hr>
+
+  <A NAME="bft_focus">
+</A>
+  <a name="bft_focus"></a>
+
+<p>
+Create a focus time line.
+
+<p>
+
+<TaBle>
+<tr><td>USAGE: </td><td width="553"><tt>bft_focus(xdc, times, points, line_no)</tt></td>
+<tr><td>INPUT:</td><td width="553">
+<TaBle>
+<tr><td><i>xdc</i>    </td><td width="434">Pointer to aperture.</td>
+<tr><td><i>times</i>  </td><td width="434">Time after which the associated focus is valid </td>
+<tr><td><i>points</i> </td><td width="434">Focus points. Vector with three columns (x,y,z) 
+                           and one row for each field point. </td>
+<tr><td><i>line_no</i> </td><td width="434">Number of line for which we set the focus. If 
+                     skipped, <i>line_no</i> is assumed equal to '1'.</td></TaBle>
+ </td>
+<tr><td>OUTPUT: </td><td width="553">none
+</td></TaBle>
+
+<p>
+
+<title> bft\_focus\_times</title>
+
+<br><br><br><br><br>
+<p>
+<hr>
+
+<H3>bft_focus_times</H3>
+<hr>
+
+  <A NAME="bft_focus_times">
+</A>
+  <a name="bft_focus_times"></a>
+
+<p>
+ Create a focus time line.
+    The user supplies the delay times for each element.
+
+<p>
+
+<TaBle>
+<tr><td>USAGE:</td><td width="553"><tt>bft_focus_times(xdc, times, delays, line_no)</tt></td>
+<tr><td>INPUT:</td><td width="553">
+<TaBle>
+<tr><td><i>xdc</i>  </td><td width="434">Pointer to a transducer aperture. </td>
+<tr><td><i>times</i> </td><td width="434">Time after which the associated delay is valid. </td>
+<tr><td><i>delays</i> </td><td width="434">Delay values. Matrix with one row for each
+                    time value and a number of columns equal to the
+                    number of physical elements in the aperture. </td>
+<tr><td><i>line_no</i> </td><td width="434">Number of line. If skipped, <i>line_no</i> is 
+                          assumed to be equal to 1.
+          </td></TaBle>
+</td>
+<tr><td>OUTPUT: </td><td width="553">None
+</td></TaBle>
+ 
+<p>
+
+<title> bft\_free\_xdc</title>
+
+<br><br><br><br><br>
+<p>
+<hr>
+
+<H3>bft_free_xdc</H3>
+<hr>
+
+  <A NAME="bft_free_xdc">
+</A>
+  <a name="bft_free_xdc"></a>
+
+<p>
+Free the memory allocated for a transducer definition
+
+<p>
+
+<TaBle>
+<tr><td>USAGE:</td><td width="553"><tt>bft_free_xdc(xdc)</tt></td>
+<tr><td>INPUT:</td><td width="553"><i>xdc</i> Pointer to the memory location returned by the
+                 function <a href="#bft_transducer">bft_transducer</a></td>
+<tr><td>OUTPUT:</td><td width="553">Nothing
+</td></TaBle>
+
+<p>
+
+<title> bft\_init</title>
+
+<br><br><br><br><br>
+<p>
+<hr>
+
+<H3>bft_init</H3>
+<hr>
+
+  <A NAME="bft_init">
+</A>
+  <a name="bft_init"></a>
+
+<p>
+Initialize the BeamForming Toolbox. This command must be
+    executed first in order to set some parameters and allocate the 
+    the necessary memory
+    
+<p>
+
+<TaBle>
+<tr><td>USAGE:</td><td width="553"><tt>bft_init</tt></td>
+<tr><td>INPUT:</td><td width="553">None </td>
+<tr><td>OUTPUT:</td><td width="553">None
+</td></TaBle>
+
+<p>
+
+<title> bft\_linear\_array</title>
+
+<br><br><br><br><br>
+<p>
+<hr>
+
+<H3>bft_linear_array</H3>
+<hr>
+
+  <A NAME="bft_linear_array">
+</A>
+  <a name="bft_linear_array"></a>
+
+<p>
+ Create a linear array aperture.
+ 
+<p>
+
+<TaBle>
+<tr><td>USAGE: </td><td width="553"><tt>xdc = bft_linear_array(no_elements, width, kerf)</tt> </td>
+<tr><td></td><td width="553"><tt>xdc = bft_linear_array(no_elements, pitch)</tt> </td>
+<tr><td>INPUT:</td><td width="553">
+<TaBle>
+<tr><td><i>no_elements</i> </td><td width="434">Number of elelements in the array </td>
+<tr><td><i>pitch</i> </td><td width="434">Distance between the centers of two elements [m] </td>
+<tr><td><i>width</i> </td><td width="434">Width in x-direction                         [m]</td>
+<tr><td><i>kerf</i>  </td><td width="434">Distance between two elements                [m] 
+         </td></TaBle>
+ </td>
+<tr><td></td><td width="553">The function assumes that <i>kerf + width = pitch</i> </td>
+<tr><td>OUTPUT:</td><td width="553"><i>xdc</i> - Pointer to the allocated aperture.
+</td></TaBle>
+
+<p>
+
+<title> bft\_no\_lines</title>
+
+<br><br><br><br><br>
+<p>
+<hr>
+
+<H3>bft_no_lines</H3>
+<hr>
+
+  <A NAME="bft_no_lines">
+</A>
+  <a name="bft_no_lines"></a>
+
+<p>
+Set the number of lines that will be beamformed in parallel.
+  After calling <a href="#bft_init">bft_init</a>, the number of lines 
+that are beamformed in   parallel is 1. If the user wants to beamform
+a whole image in one  command, he/she must set the number of lines,
+and then specify the focal zones for each of the lines.
+
+<p>
+
+<TaBle>
+<tr><td>USAGE: </td><td width="553"><tt>bft_no_lines(no_lines)</tt></td>
+<tr><td>INPUT:</td><td width="553"><i>no_lines</i>  &nbsp;&nbsp;Number of lines beamformed in parallel </td>
+<tr><td>OUTPUT: </td><td width="553">None
+</td></TaBle>
+
+<p>
+
+<title> bft\_param</title>
+
+<br><br><br><br><br>
+<p>
+<hr> 
+
+<H3>bft_param</H3>
+<hr>
+
+  <A NAME="bft_param">
+</A>
+  <a name="bft_param"></a>
+
+<p>
+Set a parameter of the BeamForming Toolbox
+
+<p>
+
+<TaBle>
+<tr><td>USAGE: </td><td width="553"><tt>bft_param(name, value)</tt></td>
+<tr><td>INPUT: </td><td width="553">
+<TaBle>
+<tr><td><i>name</i> </td><td width="434">Name of  the parameter (string). Currently supported:</td>
+<tr><td></td><td width="434">
+<TaBle>
+<tr><td align="center">name </td><td align="center">Meaning       </td><td align="center">Default value </td><td align="center">Unit </td>
+<tr><td align="center">'c' </td><td align="center">Speed of sound.       </td><td align="center">1540         </td><td align="center">m/s </td>
+<tr><td align="center">'fs'</td><td align="center">Sampling frequency    </td><td align="center">40,000,000   </td><td align="center">Hz </td></TaBle>
+ </td>
+<tr><td></td>
+<tr><td><i>value</i> </td><td width="434">New value for the parameter. Must be scalar. 
+          </td></TaBle>
+ </td>
+<tr><td>OUTPUT: </td><td width="553">None
+</td></TaBle>
+
+<p>
+
+<title> bft\_sub\_image</title>
+
+<br><br><br><br><br>
+<p>
+<hr> 
+
+<H3>bft_sub_image</H3>
+<hr>
+
+  <A NAME="bft_sub_image">
+</A>
+  <a name="bft_sub_image"></a>
+
+<p>
+Subtract one low-res image from  high-res one.
+
+<p>
+
+<TaBle>
+<tr><td>USAGE: </td><td width="553"><tt>[hi_res] = bft_sub_image(hi_res, lo_res, element, start_time)</tt> </td>
+<tr><td>INPUT:</td><td width="553">
+<TaBle>
+<tr><td><i>hi_res</i>  </td><td width="434">High resolution RF image. One column per scan line.</td>
+<tr><td><i>lo_res</i>  </td><td width="434">Low resolution RF image. One column per scan line.</td>
+<tr><td><i>element</i> </td><td width="434">Number of element, used to acquire the low resolution
+                    image. </td>
+<tr><td><i>start_time</i>    </td><td width="434">Arrival time of the first sample of the RF lines.
+          </td></TaBle>
+ </td>
+<tr><td>OUTPUT:</td><td width="553">hi_res - The high resolution image.
+</td></TaBle>
+
+<p>
+
+<title> bft\_sum\_apodization</title>
+
+<br><br><br><br><br>
+<p>
+<hr> 
+
+<H3>bft_sum_apodization</H3>
+<hr>
+
+  <A NAME="bft_sum_apodization">
+</A>
+  <a name="bft_sum_apodization"></a>
+
+<p>
+Create a summation apodization time line.
+    This function is used in the case that the individual low
+    resolution images must be weighted during the summation
+
+<p>
+
+<TaBle>
+<tr><td>USAGE: </td><td width="553"><tt>bft_sum_apodization(xdc, times, values, line_no)</tt> </td>
+<tr><td>INPUT: </td><td width="553">
+<TaBle>
+<tr><td><i>xdc</i> </td><td width="553">Pointer to a transducer aperture.</td>
+<tr><td><i>times</i> </td><td width="553">Time after which the associated apodization is valid.</td>
+<tr><td><i>values</i> </td><td width="553">Apodization values. Matrix with one row for each
+                   time value and a number of columns equal to the 
+                   number of physical elements in the aperture. </td>
+<tr><td><i>line_no</i> </td><td width="553">Number of line. If skipped, <i>line_no</i> is assumed
+                    to be equal to '1'.
+         </td></TaBle>
+</td>
+<tr><td>OUTPUT: </td><td width="553">None         
+</td></TaBle>
+
+<p>
+
+<title> bft\_sum\_images</title>
+
+<br><br><br><br><br>
+<p>
+<hr> 
+
+<H3>bft_sum_images</H3>
+<hr>
+
+  <A NAME="bft_sum_images">
+</A>
+  <a name="bft_sum_images"></a>
+
+<p>
+ Sum 2 low resolution images in 1 high resolution.
+
+<p>
+
+<TaBle>
+<tr><td>USAGE  : <tt>[hi_res] = bft_sum_images(image1, ele1, image2, ele2, time) </tt></td>
+<tr><td>INPUT  : 
+<TaBle>
+<tr><td><i>image1</i> </td><td width="5572">Matrix with the RF data for the image. The number
+                   of columns corresponds to the number of lines </td>
+<tr><td><i>ele1</i>   </td><td width="5572">Number of emitting element used to obtain the image.</td>
+<tr><td><i>image2</i> </td><td width="5572">Matrix with the RF data for the image. The number
+                   of columns corresponding to the number of lines </td>
+<tr><td><i>ele2</i>   </td><td width="5572">Number of emitting element used to obtain the image.</td>
+<tr><td><i>time</i>   </td><td width="5572">The arrival time of the first samples. The two images
+                    must be aligned in time 
+          </td></TaBle>
+
+<p>
+ OUTPUT : hi_res - Higher resolution image
+</td></TaBle>
+
+<p>
+
+<title> bft\_transducer</title>
+
+<br><br><br><br><br>
+<p>
+<hr> 
+
+<H3>bft_transducer</H3>
+<hr>
+
+  <A NAME="bft_transducer">
+</A>
+  <a name="bft_transducer"></a>
+
+<p>
+  Create a new transducer definition. 
+    The transducer definition is necessary for the calculation of 
+    the delays.
+
+<p>
+
+<TaBle>
+<tr><td>USAGE: </td><td width="553"><tt>xdc = bft_transducer(centers)</tt></td>
+<tr><td>INPUT: </td><td width="553">
+<TaBle>
+<tr><td><i>centers</i> </td><td width="434">Matrix with the coordinates of the centers of 
+                   the elements. It has 3 columns (x,y,z) and a
+                   number of rows equal to the number of elements.
+                   The coordinates are specified in [m]
+         </td></TaBle>
+</td>
+<tr><td>OUTPUT: </td><td width="553">
+<TaBle>
+<tr><td>xdc </td><td width="434">Pointer to the memory location with the transducer 
+               definition. Do not alter this value !!!
+          </td></TaBle>
+
+<p>
+</td></TaBle>
+<hr>
+
+      <H1><A NAME="tth_chAp3">
+Chapter 3     </A><br>Examples</H1>
+<A NAME="chap_examples">
+</A>
+<hr>
+
+<p>
+        <H2><A NAME="tth_sEc1">
+1</A>&nbsp;&nbsp;Using Field II simulations</H2>
+
+<p>
+
+<title> Phased array B-mode image</title>
+
+<br><br><br><br><br>
+<p>
+<hr> 
+
+<H3>phased array B-mode image</H3>
+<hr>
+
+  <A NAME="phased_bmode">
+</A>
+  <a name="phased_bmode"></a>
+
+<p>
+<font size="-2">1<tt>&nbsp;&nbsp;&nbsp;&nbsp;</tt><tt><i>%PHASED_IMAGE&nbsp;Create&nbsp;phased&nbsp;array&nbsp;B-mode&nbsp;image&nbsp;with&nbsp;BFT.</i></tt><br>
+2<tt>&nbsp;&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;script&nbsp;creates&nbsp;a&nbsp;B-mode&nbsp;PSF&nbsp;line&nbsp;by&nbsp;line.&nbsp;Each&nbsp;line&nbsp;is&nbsp;</i></tt><br>
+3<tt>&nbsp;&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;&nbsp;&nbsp;&nbsp;calculated&nbsp;using&nbsp;CALC_SCAT&nbsp;and&nbsp;CALC_SCAT_MULTY.&nbsp;The&nbsp;rf_data</i></tt><br>
+4<tt>&nbsp;&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;&nbsp;&nbsp;&nbsp;from&nbsp;CALC_SCAT_MULTI&nbsp;is&nbsp;passed&nbsp;to&nbsp;&nbsp;the&nbsp;beamforming&nbsp;toolbox,</i></tt><br>
+5<tt>&nbsp;&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;in&nbsp;the&nbsp;end&nbsp;the&nbsp;results&nbsp;are&nbsp;compared.</i></tt><br>
+6<tt>&nbsp;&nbsp;&nbsp;&nbsp;</tt><tt><i>%</i></tt><br>
+7<tt>&nbsp;&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;function&nbsp;calls&nbsp;XDC_FOCUS,&nbsp;and&nbsp;BFT_FOCUS&nbsp;in&nbsp;order&nbsp;to&nbsp;set&nbsp;the</i></tt><br>
+8<tt>&nbsp;&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;&nbsp;&nbsp;&nbsp;the&nbsp;delays.&nbsp;</i></tt><br>
+9<tt>&nbsp;&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+10<tt>&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;VERSION&nbsp;1.0,&nbsp;29&nbsp;Feb.&nbsp;2000,&nbsp;Svetoslav&nbsp;Nikolov</i></tt><br>
+11<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+12<tt>&nbsp;&nbsp;&nbsp;</tt><tt>f0&nbsp;=&nbsp;4e6;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>%&nbsp;&nbsp;Central&nbsp;frequency&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Hz]</i></tt><br>
+13<tt>&nbsp;&nbsp;&nbsp;</tt><tt>fs&nbsp;=&nbsp;100e6;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>%&nbsp;&nbsp;Sampling&nbsp;frequency&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Hz]</i></tt><br>
+14<tt>&nbsp;&nbsp;&nbsp;</tt><tt>c&nbsp;=&nbsp;1540;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>%&nbsp;&nbsp;Speed&nbsp;of&nbsp;sound&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[m/s]</i></tt><br>
+15<tt>&nbsp;&nbsp;&nbsp;</tt><tt>no_elements&nbsp;=&nbsp;64;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>%&nbsp;&nbsp;Number&nbsp;of&nbsp;elements&nbsp;in&nbsp;the&nbsp;transducer</i></tt><br>
+16<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+17<tt>&nbsp;&nbsp;&nbsp;</tt><tt>lambda&nbsp;=&nbsp;c&nbsp;/&nbsp;f0;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>%&nbsp;Wavelength&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[m]</i></tt><br>
+18<tt>&nbsp;&nbsp;&nbsp;</tt><tt>pitch&nbsp;=&nbsp;lambda&nbsp;/&nbsp;2;&nbsp;&nbsp;&nbsp;&nbsp;<i>%&nbsp;Pitch&nbsp;-&nbsp;center-to-center&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[m]</i></tt><br>
+19<tt>&nbsp;&nbsp;&nbsp;</tt><tt>width&nbsp;=&nbsp;.95*pitch;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>%&nbsp;Width&nbsp;of&nbsp;the&nbsp;element&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[m]</i></tt><br>
+20<tt>&nbsp;&nbsp;&nbsp;</tt><tt>kerf&nbsp;=&nbsp;pitch&nbsp;-&nbsp;width;&nbsp;&nbsp;<i>%&nbsp;Inter-element&nbsp;spacing&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[m]</i></tt><br>
+21<tt>&nbsp;&nbsp;&nbsp;</tt><tt>height&nbsp;=&nbsp;10/1000;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>%&nbsp;Size&nbsp;in&nbsp;the&nbsp;Y&nbsp;direction&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[m]</i></tt><br>
+22<tt>&nbsp;&nbsp;&nbsp;</tt><tt>&nbsp;</tt><br>
+23<tt>&nbsp;&nbsp;&nbsp;</tt><tt>&nbsp;</tt><br>
+24<tt>&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;&nbsp;Define&nbsp;the&nbsp;impulse&nbsp;response&nbsp;of&nbsp;the&nbsp;transducer</i></tt><br>
+25<tt>&nbsp;&nbsp;&nbsp;</tt><tt>impulse_response&nbsp;=&nbsp;sin(2*pi*f0*(0:1/fs:2/f0));</tt><br>
+26<tt>&nbsp;&nbsp;&nbsp;</tt><tt>impulse_response&nbsp;=&nbsp;impulse_response.*hanning(length(impulse_response))';</tt><br>
+27<tt>&nbsp;&nbsp;&nbsp;</tt><tt>excitation&nbsp;=&nbsp;impulse_response;</tt><br>
+28<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+29<tt>&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;&nbsp;Define&nbsp;the&nbsp;phantom</i></tt><br>
+30<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+31<tt>&nbsp;&nbsp;&nbsp;</tt><tt>pht_pos&nbsp;=&nbsp;[0&nbsp;0&nbsp;20;</tt><br>
+32<tt>&nbsp;&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;0&nbsp;30;</tt><br>
+33<tt>&nbsp;&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;0&nbsp;40;</tt><br>
+34<tt>&nbsp;&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;0&nbsp;50;</tt><br>
+35<tt>&nbsp;&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;0&nbsp;60;</tt><br>
+36<tt>&nbsp;&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;0&nbsp;70;</tt><br>
+37<tt>&nbsp;&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;0&nbsp;80;</tt><br>
+38<tt>&nbsp;&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;0&nbsp;90;</tt><br>
+39<tt>&nbsp;&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]&nbsp;/&nbsp;1000;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>%&nbsp;&nbsp;The&nbsp;position&nbsp;of&nbsp;the&nbsp;phantom</i></tt><br>
+40<tt>&nbsp;&nbsp;&nbsp;</tt><tt>pht_amp&nbsp;=&nbsp;20*ones(8,1);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>%&nbsp;&nbsp;The&nbsp;amplitude&nbsp;of&nbsp;the&nbsp;back-scatter</i></tt><br>
+41<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+42<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+43<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+44<tt>&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;&nbsp;Define&nbsp;the&nbsp;focus&nbsp;</i></tt><br>
+45<tt>&nbsp;&nbsp;&nbsp;</tt><tt>focus_r&nbsp;=&nbsp;[20;30;40;50;60;70;80;90]&nbsp;/&nbsp;1000;</tt><br>
+46<tt>&nbsp;&nbsp;&nbsp;</tt><tt>T&nbsp;=&nbsp;(focus_r-5/1000)/c&nbsp;*2;</tt><br>
+47<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+48<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+49<tt>&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;&nbsp;Initialize&nbsp;the&nbsp;program</i></tt><br>
+50<tt>&nbsp;&nbsp;&nbsp;</tt><tt>field_init(0);</tt><br>
+51<tt>&nbsp;&nbsp;&nbsp;</tt><tt>bft_init;</tt><br>
+52<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+53<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+54<tt>&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;&nbsp;Set&nbsp;some&nbsp;paramters</i></tt><br>
+55<tt>&nbsp;&nbsp;&nbsp;</tt><tt>set_field('c',&nbsp;c);</tt><br>
+56<tt>&nbsp;&nbsp;&nbsp;</tt><tt>bft_param('c',&nbsp;c);</tt><br>
+57<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+58<tt>&nbsp;&nbsp;&nbsp;</tt><tt>set_field('fs',&nbsp;fs);</tt><br>
+59<tt>&nbsp;&nbsp;&nbsp;</tt><tt>bft_param('fs',&nbsp;fs);</tt><br>
+60<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+61<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+62<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+63<tt>&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;Create&nbsp;some&nbsp;apertures.</i></tt><br>
+64<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+65<tt>&nbsp;&nbsp;&nbsp;</tt><tt>xmt&nbsp;=&nbsp;xdc_linear_array(no_elements,width,height,kerf,1,1,[0&nbsp;0&nbsp;0]);</tt><br>
+66<tt>&nbsp;&nbsp;&nbsp;</tt><tt>rcv&nbsp;=&nbsp;xdc_linear_array(no_elements,width,height,kerf,1,1,[0&nbsp;0&nbsp;0]);</tt><br>
+67<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+68<tt>&nbsp;&nbsp;&nbsp;</tt><tt>xdc&nbsp;=&nbsp;bft_linear_array(no_elements,&nbsp;width,&nbsp;kerf);</tt><br>
+69<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+70<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+71<tt>&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;Set&nbsp;the&nbsp;impulse&nbsp;responses</i></tt><br>
+72<tt>&nbsp;&nbsp;&nbsp;</tt><tt>xdc_impulse(rcv,&nbsp;impulse_response);</tt><br>
+73<tt>&nbsp;&nbsp;&nbsp;</tt><tt>xdc_impulse(xmt,&nbsp;impulse_response);</tt><br>
+74<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+75<tt>&nbsp;&nbsp;&nbsp;</tt><tt>xdc_excitation(xmt,&nbsp;excitation);</tt><br>
+76<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+77<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+78<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+79<tt>&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;&nbsp;Define&nbsp;and&nbsp;create&nbsp;the&nbsp;image</i></tt><br>
+80<tt>&nbsp;&nbsp;&nbsp;</tt><tt>sector&nbsp;=&nbsp;30&nbsp;*&nbsp;pi&nbsp;/&nbsp;180;</tt><br>
+81<tt>&nbsp;&nbsp;&nbsp;</tt><tt>no_lines&nbsp;=&nbsp;32;</tt><br>
+82<tt>&nbsp;&nbsp;&nbsp;</tt><tt>d_theta&nbsp;=&nbsp;sector&nbsp;/&nbsp;(no_lines-1);</tt><br>
+83<tt>&nbsp;&nbsp;&nbsp;</tt><tt>theta&nbsp;=&nbsp;-(no_lines-1)&nbsp;/&nbsp;2&nbsp;*&nbsp;d_theta;</tt><br>
+84<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+85<tt>&nbsp;&nbsp;&nbsp;</tt><tt>Rmax&nbsp;=&nbsp;max(sqrt(pht_pos(:,1).^&nbsp;2&nbsp;+&nbsp;pht_pos(:,2).^&nbsp;2&nbsp;&nbsp;+&nbsp;pht_pos(:,3).^&nbsp;2))&nbsp;+&nbsp;15/1000;</tt><br>
+86<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+87<tt>&nbsp;&nbsp;&nbsp;</tt><tt>no_rf_samples&nbsp;=&nbsp;ceil(2*Rmax/c&nbsp;*&nbsp;fs);</tt><br>
+88<tt>&nbsp;&nbsp;&nbsp;</tt><tt>rf_line&nbsp;=&nbsp;zeros(no_rf_samples,&nbsp;1);</tt><br>
+89<tt>&nbsp;&nbsp;&nbsp;</tt><tt>bf_line&nbsp;=&nbsp;zeros(no_rf_samples,&nbsp;1);</tt><br>
+90<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+91<tt>&nbsp;&nbsp;&nbsp;</tt><tt>env_line&nbsp;=&nbsp;zeros(no_rf_samples,&nbsp;no_lines);</tt><br>
+92<tt>&nbsp;&nbsp;&nbsp;</tt><tt>env_bf&nbsp;=&nbsp;&nbsp;zeros(no_rf_samples,&nbsp;no_lines);</tt><br>
+93<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+94<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+95<tt>&nbsp;&nbsp;&nbsp;</tt><tt>xmt_r&nbsp;=&nbsp;(max(focus_r)&nbsp;+&nbsp;min(focus_r)&nbsp;)/2;</tt><br>
+96<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+97<tt>&nbsp;&nbsp;&nbsp;</tt><tt>for&nbsp;i&nbsp;=&nbsp;1&nbsp;:&nbsp;no_lines</tt><br>
+98<tt>&nbsp;&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;rf_line(:)&nbsp;=&nbsp;0;&nbsp;&nbsp;</tt><br>
+99<tt>&nbsp;&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;disp(['Line&nbsp;no&nbsp;'&nbsp;num2str(i)])</tt><br>
+100<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;</tt><br>
+101<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;focus&nbsp;=&nbsp;[sin(theta)*focus_r,&nbsp;zeros(length(focus_r),1),&nbsp;cos(theta)*focus_r];</tt><br>
+102<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;xmt_f&nbsp;=&nbsp;[sin(theta)*xmt_r,&nbsp;zeros(length(xmt_r),1),&nbsp;cos(theta)*xmt_r];</tt><br>
+103<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;xdc_center_focus(xmt,[0&nbsp;0&nbsp;0])</tt><br>
+104<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;xdc_center_focus(rcv,[0&nbsp;0&nbsp;0])</tt><br>
+105<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;bft_center_focus([0&nbsp;0&nbsp;0]);</tt><br>
+106<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;</tt><br>
+107<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;xdc_focus(xmt,&nbsp;0,&nbsp;xmt_f);</tt><br>
+108<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;xdc_focus(rcv,&nbsp;T,&nbsp;focus);</tt><br>
+109<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;bft_focus(xdc,&nbsp;T,&nbsp;focus);</tt><br>
+110<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;</tt><br>
+111<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;<i>%&nbsp;&nbsp;Beamform&nbsp;with&nbsp;Field&nbsp;II</i></tt><br>
+112<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;[rf_temp,&nbsp;t(i)]&nbsp;=&nbsp;calc_scat(xmt,rcv,&nbsp;pht_pos,&nbsp;pht_amp);</tt><br>
+113<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;</tt><br>
+114<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;<i>%&nbsp;&nbsp;Beamform&nbsp;with&nbsp;BFT</i></tt><br>
+115<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;xdc_focus_times(rcv,&nbsp;0,&nbsp;zeros(1,no_elements));</tt><br>
+116<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;[rf_data,&nbsp;start_t]&nbsp;=&nbsp;calc_scat_multi(xmt,rcv,&nbsp;pht_pos,&nbsp;pht_amp);</tt><br>
+117<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;rf_data&nbsp;=&nbsp;[zeros(300,no_elements);&nbsp;rf_data;&nbsp;zeros(300,no_elements)];</tt><br>
+118<tt>&nbsp;&nbsp;</tt><tt></tt><br>
+119<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;start_t&nbsp;=&nbsp;start_t&nbsp;-&nbsp;300&nbsp;&nbsp;/&nbsp;fs;</tt><br>
+120<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;bf_temp&nbsp;=&nbsp;bft_beamform(start_t,&nbsp;rf_data);</tt><br>
+121<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;</tt><br>
+122<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;start_sample&nbsp;=&nbsp;t(i)*fs;&nbsp;no_temp_samples&nbsp;=&nbsp;length(rf_temp);</tt><br>
+123<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;</tt><br>
+124<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;rf_line(start_sample:start_sample+no_temp_samples-1)&nbsp;=&nbsp;rf_temp(1:no_temp_samples);</tt><br>
+125<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;env_line(:,i)&nbsp;=&nbsp;abs(hilbert(rf_line(:)));</tt><br>
+126<tt>&nbsp;&nbsp;</tt><tt></tt><br>
+127<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;start_sample&nbsp;=&nbsp;floor(start_t*fs);&nbsp;no_temp_samples&nbsp;=&nbsp;length(bf_temp);</tt><br>
+128<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;bf_line(start_sample:start_sample+no_temp_samples-1)&nbsp;=&nbsp;bf_temp(1:no_temp_samples);</tt><br>
+129<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;env_bf(:,i)&nbsp;=&nbsp;abs(hilbert(bf_line(:)));</tt><br>
+130<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;theta&nbsp;=&nbsp;theta&nbsp;+&nbsp;d_theta;</tt><br>
+131<tt>&nbsp;&nbsp;</tt><tt></tt><br>
+132<tt>&nbsp;&nbsp;</tt><tt>end</tt><br>
+133<tt>&nbsp;&nbsp;</tt><tt></tt><br>
+134<tt>&nbsp;&nbsp;</tt><tt><i>%&nbsp;&nbsp;Release&nbsp;the&nbsp;allocated&nbsp;memory</i></tt><br>
+135<tt>&nbsp;&nbsp;</tt><tt></tt><br>
+136<tt>&nbsp;&nbsp;</tt><tt>field_end</tt><br>
+137<tt>&nbsp;&nbsp;</tt><tt>bft_end</tt><br>
+138<tt>&nbsp;&nbsp;</tt><tt></tt><br>
+139<tt>&nbsp;&nbsp;</tt><tt>env_line&nbsp;=&nbsp;env_line&nbsp;/&nbsp;max(max(abs(env_line)));</tt><br>
+140<tt>&nbsp;&nbsp;</tt><tt>env_bf&nbsp;=&nbsp;env_bf&nbsp;/&nbsp;max(max(abs(env_bf)));</tt><br>
+141<tt>&nbsp;&nbsp;</tt><tt></tt><br>
+142<tt>&nbsp;&nbsp;</tt><tt>figure;</tt><br>
+143<tt>&nbsp;&nbsp;</tt><tt>subplot(1,2,1)</tt><br>
+144<tt>&nbsp;&nbsp;</tt><tt>imagesc([-sector/2&nbsp;sector/2]*180/pi,[0&nbsp;Rmax]*1000,20*log10(env_line&nbsp;+&nbsp;0.001))</tt><br>
+145<tt>&nbsp;&nbsp;</tt><tt>axis('image')</tt><br>
+146<tt>&nbsp;&nbsp;</tt><tt>xlabel('Angle&nbsp;[deg]');</tt><br>
+147<tt>&nbsp;&nbsp;</tt><tt>ylabel('Axial&nbsp;distance&nbsp;[mm]')</tt><br>
+148<tt>&nbsp;&nbsp;</tt><tt>title('Beamformed&nbsp;by&nbsp;Field&nbsp;II&nbsp;');</tt><br>
+149<tt>&nbsp;&nbsp;</tt><tt></tt><br>
+150<tt>&nbsp;&nbsp;</tt><tt>subplot(1,2,2)</tt><br>
+151<tt>&nbsp;&nbsp;</tt><tt>imagesc([-sector/2&nbsp;sector/2]*180/pi,[0&nbsp;Rmax]*1000,20*log10(env_bf&nbsp;+&nbsp;0.001));</tt><br>
+152<tt>&nbsp;&nbsp;</tt><tt>title('Beamformed&nbsp;by&nbsp;BFT');</tt><br>
+153<tt>&nbsp;&nbsp;</tt><tt>xlabel('Angle&nbsp;[deg]');</tt><br>
+154<tt>&nbsp;&nbsp;</tt><tt>ylabel('Axial&nbsp;distance&nbsp;[mm]')</tt><br>
+155<tt>&nbsp;&nbsp;</tt><tt>axis('image')</tt><br>
+156<tt>&nbsp;&nbsp;</tt><tt></tt><br>
+157<tt>&nbsp;&nbsp;</tt><tt>colorbar</tt><br>
+158<tt>&nbsp;&nbsp;</tt><tt>colormap(gray)</tt><br>
+159<tt>&nbsp;&nbsp;</tt><tt></tt><br>
+160<tt>&nbsp;&nbsp;</tt><tt>clc</tt><br>
+161<tt>&nbsp;&nbsp;</tt><tt>disp(['&nbsp;'&nbsp;10&nbsp;10&nbsp;10&nbsp;10&nbsp;]);</tt><br>
+162<tt>&nbsp;&nbsp;</tt><tt>disp([9&nbsp;'*****************************************************']);</tt><br>
+163<tt>&nbsp;&nbsp;</tt><tt>disp([9&nbsp;'*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*']);</tt><br>
+164<tt>&nbsp;&nbsp;</tt><tt>disp([9&nbsp;'*&nbsp;The&nbsp;image&nbsp;beamformed&nbsp;by&nbsp;Field&nbsp;II&nbsp;is&nbsp;in&nbsp;&#235;nv_line"&nbsp;*']);</tt><br>
+165<tt>&nbsp;&nbsp;</tt><tt>disp([9&nbsp;'*&nbsp;The&nbsp;image&nbsp;beamformed&nbsp;by&nbsp;BFT&nbsp;is&nbsp;in&nbsp;&#235;nv_bf"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*']);</tt><br>
+166<tt>&nbsp;&nbsp;</tt><tt>disp([9&nbsp;'*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*'])</tt><br>
+167<tt>&nbsp;&nbsp;</tt><tt>disp([9&nbsp;'*****************************************************']);</tt><br>
+168<tt>&nbsp;&nbsp;</tt><tt>disp(['&nbsp;'&nbsp;10&nbsp;10&nbsp;]);</tt><br>
+169<tt>&nbsp;&nbsp;</tt><tt></tt><br>
+170<tt>&nbsp;&nbsp;</tt><tt></tt><br>
+</font>
+
+<p>
+
+<title> Dynamic focusing</title>
+
+<br><br><br><br><br>
+<p>
+<hr> 
+
+<H3>Dynamic focusing</H3>
+<hr>
+
+  <A NAME="dynamic_focusing">
+</A>
+  <a name="dynamic_focusing"></a>
+
+<p>
+<font size="-2">1<tt>&nbsp;&nbsp;&nbsp;&nbsp;</tt><tt><i>%PHASED_DYN_IMAGE&nbsp;Create&nbsp;a&nbsp;phased-array&nbsp;B-mode&nbsp;image,&nbsp;using&nbsp;the&nbsp;</i></tt><br>
+2<tt>&nbsp;&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;&nbsp;&nbsp;&nbsp;commands&nbsp;for&nbsp;setting&nbsp;a&nbsp;dynamic&nbsp;focusing</i></tt><br>
+3<tt>&nbsp;&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+4<tt>&nbsp;&nbsp;&nbsp;&nbsp;</tt><tt><i>%VERSION&nbsp;1.0,&nbsp;29&nbsp;Feb&nbsp;2000,&nbsp;Svetoslav&nbsp;Nikolov</i></tt><br>
+5<tt>&nbsp;&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+6<tt>&nbsp;&nbsp;&nbsp;&nbsp;</tt><tt>f0&nbsp;=&nbsp;4e6;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>%&nbsp;&nbsp;Central&nbsp;frequency&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Hz]</i></tt><br>
+7<tt>&nbsp;&nbsp;&nbsp;&nbsp;</tt><tt>fs&nbsp;=&nbsp;100e6;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>%&nbsp;&nbsp;Sampling&nbsp;frequency&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[Hz]</i></tt><br>
+8<tt>&nbsp;&nbsp;&nbsp;&nbsp;</tt><tt>c&nbsp;=&nbsp;1540;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>%&nbsp;&nbsp;Speed&nbsp;of&nbsp;sound&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[m/s]</i></tt><br>
+9<tt>&nbsp;&nbsp;&nbsp;&nbsp;</tt><tt>B&nbsp;=&nbsp;.35;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>%&nbsp;&nbsp;Relative&nbsp;bandwith&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[fraction]</i></tt><br>
+10<tt>&nbsp;&nbsp;&nbsp;</tt><tt>no_elements&nbsp;=&nbsp;64;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>%&nbsp;&nbsp;Number&nbsp;of&nbsp;elements&nbsp;in&nbsp;the&nbsp;transducer&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</i></tt><br>
+11<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+12<tt>&nbsp;&nbsp;&nbsp;</tt><tt>lambda&nbsp;=&nbsp;c&nbsp;/&nbsp;f0;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>%&nbsp;Wavelength&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[m]</i></tt><br>
+13<tt>&nbsp;&nbsp;&nbsp;</tt><tt>pitch&nbsp;=&nbsp;lambda&nbsp;/&nbsp;2;&nbsp;&nbsp;&nbsp;&nbsp;<i>%&nbsp;Pitch&nbsp;-&nbsp;center-to-center&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[m]</i></tt><br>
+14<tt>&nbsp;&nbsp;&nbsp;</tt><tt>width&nbsp;=&nbsp;.95*pitch;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>%&nbsp;Width&nbsp;of&nbsp;the&nbsp;element&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[m]</i></tt><br>
+15<tt>&nbsp;&nbsp;&nbsp;</tt><tt>kerf&nbsp;=&nbsp;pitch&nbsp;-&nbsp;width;&nbsp;&nbsp;<i>%&nbsp;Inter-element&nbsp;spacing&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[m]</i></tt><br>
+16<tt>&nbsp;&nbsp;&nbsp;</tt><tt>height&nbsp;=&nbsp;10/1000;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>%&nbsp;Size&nbsp;in&nbsp;the&nbsp;Y&nbsp;direction&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[m]</i></tt><br>
+17<tt>&nbsp;&nbsp;&nbsp;</tt><tt>&nbsp;</tt><br>
+18<tt>&nbsp;&nbsp;&nbsp;</tt><tt>&nbsp;</tt><br>
+19<tt>&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;&nbsp;Define&nbsp;the&nbsp;impulse&nbsp;response&nbsp;of&nbsp;the&nbsp;transducer</i></tt><br>
+20<tt>&nbsp;&nbsp;&nbsp;</tt><tt>impulse_response&nbsp;=&nbsp;sin(2*pi*f0*(0:1/fs:2/f0));</tt><br>
+21<tt>&nbsp;&nbsp;&nbsp;</tt><tt>impulse_response&nbsp;=&nbsp;impulse_response.*hanning(length(impulse_response))';</tt><br>
+22<tt>&nbsp;&nbsp;&nbsp;</tt><tt>excitation&nbsp;=&nbsp;impulse_response;</tt><br>
+23<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+24<tt>&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;&nbsp;Define&nbsp;the&nbsp;phantom</i></tt><br>
+25<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+26<tt>&nbsp;&nbsp;&nbsp;</tt><tt>pht_pos&nbsp;=&nbsp;[0&nbsp;0&nbsp;20;</tt><br>
+27<tt>&nbsp;&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;0&nbsp;30;</tt><br>
+28<tt>&nbsp;&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;0&nbsp;40;</tt><br>
+29<tt>&nbsp;&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;0&nbsp;50;</tt><br>
+30<tt>&nbsp;&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;0&nbsp;60;</tt><br>
+31<tt>&nbsp;&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;0&nbsp;70;</tt><br>
+32<tt>&nbsp;&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;0&nbsp;80;]&nbsp;/&nbsp;1000;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>%&nbsp;&nbsp;The&nbsp;position&nbsp;of&nbsp;the&nbsp;phantom</i></tt><br>
+33<tt>&nbsp;&nbsp;&nbsp;</tt><tt>pht_amp&nbsp;=&nbsp;20*ones(7,1);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>%&nbsp;&nbsp;The&nbsp;amplitude&nbsp;of&nbsp;the&nbsp;back-scatter</i></tt><br>
+34<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+35<tt>&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;&nbsp;Define&nbsp;the&nbsp;focus&nbsp;</i></tt><br>
+36<tt>&nbsp;&nbsp;&nbsp;</tt><tt>focus_r&nbsp;=&nbsp;[20;30;40;50;60;70;80;90]&nbsp;/&nbsp;1000;</tt><br>
+37<tt>&nbsp;&nbsp;&nbsp;</tt><tt>T&nbsp;=&nbsp;(focus_r-5/1000)/c&nbsp;*2;</tt><br>
+38<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+39<tt>&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;&nbsp;Initialize&nbsp;the&nbsp;program</i></tt><br>
+40<tt>&nbsp;&nbsp;&nbsp;</tt><tt>field_init(0);</tt><br>
+41<tt>&nbsp;&nbsp;&nbsp;</tt><tt>bft_init;</tt><br>
+42<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+43<tt>&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;&nbsp;Set&nbsp;some&nbsp;paramters</i></tt><br>
+44<tt>&nbsp;&nbsp;&nbsp;</tt><tt>set_field('c',&nbsp;c);</tt><br>
+45<tt>&nbsp;&nbsp;&nbsp;</tt><tt>bft_param('c',&nbsp;c);</tt><br>
+46<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+47<tt>&nbsp;&nbsp;&nbsp;</tt><tt>set_field('fs',&nbsp;fs);</tt><br>
+48<tt>&nbsp;&nbsp;&nbsp;</tt><tt>bft_param('fs',&nbsp;fs);</tt><br>
+49<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+50<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+51<tt>&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;Create&nbsp;some&nbsp;apertures.</i></tt><br>
+52<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+53<tt>&nbsp;&nbsp;&nbsp;</tt><tt>xmt&nbsp;=&nbsp;xdc_linear_array(no_elements,width,height,kerf,1,1,[0&nbsp;0&nbsp;0]);</tt><br>
+54<tt>&nbsp;&nbsp;&nbsp;</tt><tt>rcv&nbsp;=&nbsp;xdc_linear_array(no_elements,width,height,kerf,1,1,[0&nbsp;0&nbsp;0]);</tt><br>
+55<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+56<tt>&nbsp;&nbsp;&nbsp;</tt><tt>xdc&nbsp;=&nbsp;bft_linear_array(no_elements,&nbsp;width,&nbsp;kerf);</tt><br>
+57<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+58<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+59<tt>&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;Set&nbsp;the&nbsp;impulse&nbsp;responses</i></tt><br>
+60<tt>&nbsp;&nbsp;&nbsp;</tt><tt>xdc_impulse(rcv,&nbsp;impulse_response);</tt><br>
+61<tt>&nbsp;&nbsp;&nbsp;</tt><tt>xdc_impulse(xmt,&nbsp;impulse_response);</tt><br>
+62<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+63<tt>&nbsp;&nbsp;&nbsp;</tt><tt>xdc_excitation(xmt,&nbsp;excitation);</tt><br>
+64<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+65<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+66<tt>&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;Set&nbsp;the&nbsp;apodization</i></tt><br>
+67<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+68<tt>&nbsp;&nbsp;&nbsp;</tt><tt>xdc_apodization(xmt,&nbsp;0,&nbsp;ones(1,no_elements))</tt><br>
+69<tt>&nbsp;&nbsp;&nbsp;</tt><tt>xdc_apodization(rcv,&nbsp;0,&nbsp;ones(1,no_elements))</tt><br>
+70<tt>&nbsp;&nbsp;&nbsp;</tt><tt>bft_apodization(xdc,&nbsp;0&nbsp;,&nbsp;ones(1,no_elements))</tt><br>
+71<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+72<tt>&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;&nbsp;Define&nbsp;and&nbsp;create&nbsp;the&nbsp;image</i></tt><br>
+73<tt>&nbsp;&nbsp;&nbsp;</tt><tt>sector&nbsp;=&nbsp;30&nbsp;*&nbsp;pi&nbsp;/&nbsp;180;</tt><br>
+74<tt>&nbsp;&nbsp;&nbsp;</tt><tt>no_lines&nbsp;=&nbsp;32;</tt><br>
+75<tt>&nbsp;&nbsp;&nbsp;</tt><tt>d_theta&nbsp;=&nbsp;sector&nbsp;/&nbsp;(no_lines-1);</tt><br>
+76<tt>&nbsp;&nbsp;&nbsp;</tt><tt>theta&nbsp;=&nbsp;-(no_lines-1)&nbsp;/&nbsp;2&nbsp;*&nbsp;d_theta;</tt><br>
+77<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+78<tt>&nbsp;&nbsp;&nbsp;</tt><tt>Rmax&nbsp;=&nbsp;max(sqrt(pht_pos(:,1).^&nbsp;2&nbsp;+&nbsp;pht_pos(:,2).^&nbsp;2&nbsp;&nbsp;+&nbsp;pht_pos(:,3).^&nbsp;2))&nbsp;+&nbsp;15/1000;</tt><br>
+79<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+80<tt>&nbsp;&nbsp;&nbsp;</tt><tt>no_rf_samples&nbsp;=&nbsp;ceil(2*Rmax/c&nbsp;*&nbsp;fs);</tt><br>
+81<tt>&nbsp;&nbsp;&nbsp;</tt><tt>rf_line&nbsp;=&nbsp;zeros(no_rf_samples,&nbsp;1);</tt><br>
+82<tt>&nbsp;&nbsp;&nbsp;</tt><tt>bf_line&nbsp;=&nbsp;zeros(no_rf_samples,&nbsp;1);</tt><br>
+83<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+84<tt>&nbsp;&nbsp;&nbsp;</tt><tt>env_line&nbsp;=&nbsp;zeros(no_rf_samples,&nbsp;no_lines);</tt><br>
+85<tt>&nbsp;&nbsp;&nbsp;</tt><tt>env_bf&nbsp;=&nbsp;&nbsp;zeros(no_rf_samples,&nbsp;no_lines);</tt><br>
+86<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+87<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+88<tt>&nbsp;&nbsp;&nbsp;</tt><tt>xmt_r&nbsp;=&nbsp;(max(focus_r)&nbsp;+&nbsp;min(focus_r)&nbsp;)/2;</tt><br>
+89<tt>&nbsp;&nbsp;&nbsp;</tt><tt>bf&nbsp;=&nbsp;cell(no_lines,1);</tt><br>
+90<tt>&nbsp;&nbsp;&nbsp;</tt><tt>for&nbsp;i&nbsp;=&nbsp;1&nbsp;:&nbsp;no_lines</tt><br>
+91<tt>&nbsp;&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;rf_line(:)&nbsp;=&nbsp;0;&nbsp;&nbsp;</tt><br>
+92<tt>&nbsp;&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;theta</tt><br>
+93<tt>&nbsp;&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;</tt><br>
+94<tt>&nbsp;&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;xmt_f&nbsp;=&nbsp;[sin(theta)*xmt_r,&nbsp;zeros(length(xmt_r),1),&nbsp;cos(theta)*xmt_r];</tt><br>
+95<tt>&nbsp;&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;xdc_center_focus(xmt,[0&nbsp;0&nbsp;0])</tt><br>
+96<tt>&nbsp;&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;xdc_center_focus(rcv,[0&nbsp;0&nbsp;0])</tt><br>
+97<tt>&nbsp;&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;bft_center_focus([0&nbsp;0&nbsp;0]);</tt><br>
+98<tt>&nbsp;&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;</tt><br>
+99<tt>&nbsp;&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;xdc_focus(xmt,&nbsp;0,&nbsp;xmt_f);</tt><br>
+100<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;xdc_dynamic_focus(rcv,&nbsp;0,&nbsp;theta,&nbsp;0);</tt><br>
+101<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;</tt><br>
+102<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;<i>%&nbsp;&nbsp;Beamform&nbsp;with&nbsp;Field&nbsp;II</i></tt><br>
+103<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;[rf_temp,&nbsp;t(i)]&nbsp;=&nbsp;calc_scat(xmt,rcv,&nbsp;pht_pos,&nbsp;pht_amp);</tt><br>
+104<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;</tt><br>
+105<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;<i>%&nbsp;&nbsp;Beamform&nbsp;with&nbsp;BFT</i></tt><br>
+106<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;bft_dynamic_focus(xdc,&nbsp;theta,&nbsp;0)</tt><br>
+107<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;xdc_focus_times(rcv,&nbsp;0,&nbsp;zeros(1,no_elements));</tt><br>
+108<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;[rf_data,&nbsp;start_t]&nbsp;=&nbsp;calc_scat_multi(xmt,rcv,&nbsp;pht_pos,&nbsp;pht_amp);</tt><br>
+109<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;</tt><br>
+110<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;rf_data&nbsp;=&nbsp;[zeros(300,no_elements);&nbsp;rf_data;&nbsp;zeros(300,no_elements)];</tt><br>
+111<tt>&nbsp;&nbsp;</tt><tt></tt><br>
+112<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;start_t&nbsp;=&nbsp;start_t&nbsp;-&nbsp;300&nbsp;&nbsp;/&nbsp;fs;</tt><br>
+113<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;bf_temp&nbsp;=&nbsp;bft_beamform(start_t,&nbsp;rf_data);</tt><br>
+114<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;</tt><br>
+115<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;start_sample&nbsp;=&nbsp;t(i)*fs;&nbsp;no_temp_samples&nbsp;=&nbsp;length(rf_temp);</tt><br>
+116<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;</tt><br>
+117<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;rf_line(start_sample:start_sample+no_temp_samples-1)&nbsp;=&nbsp;rf_temp(1:no_temp_samples);</tt><br>
+118<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;env_line(:,i)&nbsp;=&nbsp;abs(hilbert(rf_line(:)));</tt><br>
+119<tt>&nbsp;&nbsp;</tt><tt></tt><br>
+120<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;start_sample&nbsp;=&nbsp;floor(start_t*fs);&nbsp;no_temp_samples&nbsp;=&nbsp;length(bf_temp);</tt><br>
+121<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;bfi&nbsp;=&nbsp;bf_temp;</tt><br>
+122<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;</tt><br>
+123<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;bf_line(start_sample:start_sample+no_temp_samples-1)&nbsp;=&nbsp;bf_temp(1:no_temp_samples);</tt><br>
+124<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;env_bf(:,i)&nbsp;=&nbsp;abs(hilbert(bf_line(:)));</tt><br>
+125<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;theta&nbsp;=&nbsp;theta&nbsp;+&nbsp;d_theta;</tt><br>
+126<tt>&nbsp;&nbsp;</tt><tt></tt><br>
+127<tt>&nbsp;&nbsp;</tt><tt>end</tt><br>
+128<tt>&nbsp;&nbsp;</tt><tt></tt><br>
+129<tt>&nbsp;&nbsp;</tt><tt><i>%&nbsp;&nbsp;Release&nbsp;the&nbsp;allocated&nbsp;memory</i></tt><br>
+130<tt>&nbsp;&nbsp;</tt><tt></tt><br>
+131<tt>&nbsp;&nbsp;</tt><tt>field_end</tt><br>
+132<tt>&nbsp;&nbsp;</tt><tt>bft_end</tt><br>
+133<tt>&nbsp;&nbsp;</tt><tt>env_line&nbsp;=&nbsp;env_line&nbsp;/&nbsp;max(max(abs(env_line)));</tt><br>
+134<tt>&nbsp;&nbsp;</tt><tt>env_bf&nbsp;=&nbsp;env_bf&nbsp;/&nbsp;max(max(abs(env_bf)));</tt><br>
+135<tt>&nbsp;&nbsp;</tt><tt></tt><br>
+136<tt>&nbsp;&nbsp;</tt><tt>figure;</tt><br>
+137<tt>&nbsp;&nbsp;</tt><tt>subplot(1,2,1)</tt><br>
+138<tt>&nbsp;&nbsp;</tt><tt>imagesc([-sector/2&nbsp;sector/2]*180/pi,[0&nbsp;Rmax]*1000,20*log10(env_line&nbsp;+&nbsp;0.001))</tt><br>
+139<tt>&nbsp;&nbsp;</tt><tt>axis('image')</tt><br>
+140<tt>&nbsp;&nbsp;</tt><tt>xlabel('Angle&nbsp;[deg]');</tt><br>
+141<tt>&nbsp;&nbsp;</tt><tt>ylabel('Axial&nbsp;distance&nbsp;[mm]')</tt><br>
+142<tt>&nbsp;&nbsp;</tt><tt>title('Beamformed&nbsp;by&nbsp;Field&nbsp;II&nbsp;');</tt><br>
+143<tt>&nbsp;&nbsp;</tt><tt></tt><br>
+144<tt>&nbsp;&nbsp;</tt><tt>subplot(1,2,2)</tt><br>
+145<tt>&nbsp;&nbsp;</tt><tt>imagesc([-sector/2&nbsp;sector/2]*180/pi,[0&nbsp;Rmax]*1000,20*log10(env_bf&nbsp;+&nbsp;0.001));</tt><br>
+146<tt>&nbsp;&nbsp;</tt><tt>title('Beamformed&nbsp;by&nbsp;BFT');</tt><br>
+147<tt>&nbsp;&nbsp;</tt><tt>xlabel('Angle&nbsp;[deg]');</tt><br>
+148<tt>&nbsp;&nbsp;</tt><tt>ylabel('Axial&nbsp;distance&nbsp;[mm]')</tt><br>
+149<tt>&nbsp;&nbsp;</tt><tt>axis('image')</tt><br>
+150<tt>&nbsp;&nbsp;</tt><tt></tt><br>
+151<tt>&nbsp;&nbsp;</tt><tt>colorbar</tt><br>
+152<tt>&nbsp;&nbsp;</tt><tt>colormap(gray)</tt><br>
+153<tt>&nbsp;&nbsp;</tt><tt></tt><br>
+154<tt>&nbsp;&nbsp;</tt><tt>clc</tt><br>
+155<tt>&nbsp;&nbsp;</tt><tt>disp(['&nbsp;'&nbsp;10&nbsp;10&nbsp;10&nbsp;10&nbsp;]);</tt><br>
+156<tt>&nbsp;&nbsp;</tt><tt>disp([9&nbsp;'*****************************************************']);</tt><br>
+157<tt>&nbsp;&nbsp;</tt><tt>disp([9&nbsp;'*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*']);</tt><br>
+158<tt>&nbsp;&nbsp;</tt><tt>disp([9&nbsp;'*&nbsp;The&nbsp;image&nbsp;beamformed&nbsp;by&nbsp;Field&nbsp;II&nbsp;is&nbsp;in&nbsp;&#235;nv_line"&nbsp;*']);</tt><br>
+159<tt>&nbsp;&nbsp;</tt><tt>disp([9&nbsp;'*&nbsp;The&nbsp;image&nbsp;beamformed&nbsp;by&nbsp;BFT&nbsp;is&nbsp;in&nbsp;&#235;nv_bf"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*']);</tt><br>
+160<tt>&nbsp;&nbsp;</tt><tt>disp([9&nbsp;'*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*'])</tt><br>
+161<tt>&nbsp;&nbsp;</tt><tt>disp([9&nbsp;'*****************************************************']);</tt><br>
+162<tt>&nbsp;&nbsp;</tt><tt>disp(['&nbsp;'&nbsp;10&nbsp;10&nbsp;]);</tt><br>
+163<tt>&nbsp;&nbsp;</tt><tt></tt><br>
+164<tt>&nbsp;&nbsp;</tt><tt></tt><br>
+</font>
+
+<p>
+
+<title> Synthetic Aperture Focusing</title>
+
+<br><br><br><br><br>
+<p>
+<hr> 
+
+<H3>Synthetic Aperture Focusing</H3>
+<hr>
+
+  <A NAME="sar_focusing">
+</A>
+  <a name="sar_focusing"></a>
+
+<p>
+<font size="-2">1<tt>&nbsp;&nbsp;&nbsp;&nbsp;</tt><tt><i>%SYNTHETIC&nbsp;Synthetic&nbsp;aperture&nbsp;beamforming&nbsp;with&nbsp;BFT</i></tt><br>
+2<tt>&nbsp;&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;</i></tt><br>
+3<tt>&nbsp;&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+4<tt>&nbsp;&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+5<tt>&nbsp;&nbsp;&nbsp;&nbsp;</tt><tt>f0&nbsp;=&nbsp;4e6;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>%&nbsp;&nbsp;Central&nbsp;frequency</i></tt><br>
+6<tt>&nbsp;&nbsp;&nbsp;&nbsp;</tt><tt>fs&nbsp;=&nbsp;100e6;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>%&nbsp;&nbsp;Sampling&nbsp;frequency</i></tt><br>
+7<tt>&nbsp;&nbsp;&nbsp;&nbsp;</tt><tt>c&nbsp;=&nbsp;1540;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>%&nbsp;&nbsp;Speed&nbsp;of&nbsp;sound</i></tt><br>
+8<tt>&nbsp;&nbsp;&nbsp;&nbsp;</tt><tt>no_elements&nbsp;=&nbsp;64;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>%&nbsp;&nbsp;Number&nbsp;of&nbsp;elements&nbsp;in&nbsp;the&nbsp;transducer</i></tt><br>
+9<tt>&nbsp;&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+10<tt>&nbsp;&nbsp;&nbsp;</tt><tt>lambda&nbsp;=&nbsp;c&nbsp;/&nbsp;f0;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>%&nbsp;Wavelength</i></tt><br>
+11<tt>&nbsp;&nbsp;&nbsp;</tt><tt>pitch&nbsp;=&nbsp;lambda&nbsp;/&nbsp;2;&nbsp;&nbsp;&nbsp;&nbsp;<i>%&nbsp;Pitch&nbsp;-&nbsp;center-to-center</i></tt><br>
+12<tt>&nbsp;&nbsp;&nbsp;</tt><tt>width&nbsp;=&nbsp;.95*pitch;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>%&nbsp;Width&nbsp;of&nbsp;the&nbsp;element</i></tt><br>
+13<tt>&nbsp;&nbsp;&nbsp;</tt><tt>kerf&nbsp;=&nbsp;pitch&nbsp;-&nbsp;width;&nbsp;&nbsp;<i>%&nbsp;Inter-element&nbsp;spacing</i></tt><br>
+14<tt>&nbsp;&nbsp;&nbsp;</tt><tt>height&nbsp;=&nbsp;10/1000;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>%&nbsp;Size&nbsp;in&nbsp;the&nbsp;Y&nbsp;direction</i></tt><br>
+15<tt>&nbsp;&nbsp;&nbsp;</tt><tt>&nbsp;</tt><br>
+16<tt>&nbsp;&nbsp;&nbsp;</tt><tt>&nbsp;</tt><br>
+17<tt>&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;&nbsp;Define&nbsp;the&nbsp;impulse&nbsp;response&nbsp;of&nbsp;the&nbsp;transducer</i></tt><br>
+18<tt>&nbsp;&nbsp;&nbsp;</tt><tt>impulse_response&nbsp;=&nbsp;sin(3*pi*f0*(0:1/fs:2/f0));</tt><br>
+19<tt>&nbsp;&nbsp;&nbsp;</tt><tt>impulse_response&nbsp;=&nbsp;impulse_response.*hanning(length(impulse_response))';</tt><br>
+20<tt>&nbsp;&nbsp;&nbsp;</tt><tt>excitation&nbsp;=&nbsp;sin(2*pi*f0*(0:1/fs:3/f0));</tt><br>
+21<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+22<tt>&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;&nbsp;Define&nbsp;the&nbsp;phantom</i></tt><br>
+23<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+24<tt>&nbsp;&nbsp;&nbsp;</tt><tt>pht_pos&nbsp;=&nbsp;[0&nbsp;0&nbsp;40]&nbsp;/&nbsp;1000;&nbsp;&nbsp;&nbsp;<i>%&nbsp;&nbsp;The&nbsp;position&nbsp;of&nbsp;the&nbsp;phantom</i></tt><br>
+25<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+26<tt>&nbsp;&nbsp;&nbsp;</tt><tt>[m&nbsp;n]&nbsp;=&nbsp;size(pht_pos);</tt><br>
+27<tt>&nbsp;&nbsp;&nbsp;</tt><tt>pht_amp&nbsp;=&nbsp;20*ones(m,1);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>%&nbsp;&nbsp;The&nbsp;amplitude&nbsp;of&nbsp;the&nbsp;back-scatter</i></tt><br>
+28<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+29<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+30<tt>&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;&nbsp;Define&nbsp;the&nbsp;focus&nbsp;</i></tt><br>
+31<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+32<tt>&nbsp;&nbsp;&nbsp;</tt><tt>focus_r&nbsp;=&nbsp;[1:max(sqrt(pht_pos(:,1).^&nbsp;2&nbsp;+&nbsp;pht_pos(:,2).^&nbsp;2&nbsp;+&nbsp;pht_pos(:,3).^&nbsp;2))*1000]'&nbsp;/&nbsp;1000;</tt><br>
+33<tt>&nbsp;&nbsp;&nbsp;</tt><tt>T&nbsp;=&nbsp;(focus_r-.5/1000)/c&nbsp;*2;</tt><br>
+34<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+35<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+36<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+37<tt>&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;&nbsp;Initialize&nbsp;the&nbsp;program</i></tt><br>
+38<tt>&nbsp;&nbsp;&nbsp;</tt><tt>field_init(0);</tt><br>
+39<tt>&nbsp;&nbsp;&nbsp;</tt><tt>bft_init;</tt><br>
+40<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+41<tt>&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;&nbsp;Set&nbsp;some&nbsp;paramters</i></tt><br>
+42<tt>&nbsp;&nbsp;&nbsp;</tt><tt>set_field('c',&nbsp;c);</tt><br>
+43<tt>&nbsp;&nbsp;&nbsp;</tt><tt>bft_param('c',&nbsp;c);</tt><br>
+44<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+45<tt>&nbsp;&nbsp;&nbsp;</tt><tt>set_field('fs',&nbsp;fs);</tt><br>
+46<tt>&nbsp;&nbsp;&nbsp;</tt><tt>bft_param('fs',&nbsp;fs);</tt><br>
+47<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+48<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+49<tt>&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;Create&nbsp;some&nbsp;apertures.</i></tt><br>
+50<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+51<tt>&nbsp;&nbsp;&nbsp;</tt><tt>xmt&nbsp;=&nbsp;xdc_linear_array(no_elements,width,height,kerf,1,1,[0&nbsp;0&nbsp;0]);</tt><br>
+52<tt>&nbsp;&nbsp;&nbsp;</tt><tt>rcv&nbsp;=&nbsp;xdc_linear_array(no_elements,width,height,kerf,1,1,[0&nbsp;0&nbsp;0]);</tt><br>
+53<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+54<tt>&nbsp;&nbsp;&nbsp;</tt><tt>xdc&nbsp;=&nbsp;bft_linear_array(no_elements,&nbsp;width,&nbsp;kerf);</tt><br>
+55<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+56<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+57<tt>&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;Set&nbsp;the&nbsp;impulse&nbsp;responses</i></tt><br>
+58<tt>&nbsp;&nbsp;&nbsp;</tt><tt>xdc_impulse(rcv,&nbsp;impulse_response);</tt><br>
+59<tt>&nbsp;&nbsp;&nbsp;</tt><tt>xdc_impulse(xmt,&nbsp;impulse_response);</tt><br>
+60<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+61<tt>&nbsp;&nbsp;&nbsp;</tt><tt>xdc_excitation(xmt,&nbsp;excitation);</tt><br>
+62<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+63<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+64<tt>&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;&nbsp;Define&nbsp;and&nbsp;create&nbsp;the&nbsp;image</i></tt><br>
+65<tt>&nbsp;&nbsp;&nbsp;</tt><tt>sector&nbsp;=&nbsp;60&nbsp;*&nbsp;pi&nbsp;/&nbsp;180;</tt><br>
+66<tt>&nbsp;&nbsp;&nbsp;</tt><tt>no_lines&nbsp;=&nbsp;64;</tt><br>
+67<tt>&nbsp;&nbsp;&nbsp;</tt><tt>d_theta&nbsp;=&nbsp;sector&nbsp;/&nbsp;(no_lines-1);</tt><br>
+68<tt>&nbsp;&nbsp;&nbsp;</tt><tt>theta&nbsp;=&nbsp;-(no_lines-1)&nbsp;/&nbsp;2&nbsp;*&nbsp;d_theta;</tt><br>
+69<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+70<tt>&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;&nbsp;Set&nbsp;the&nbsp;delays&nbsp;for&nbsp;one&nbsp;whole&nbsp;image</i></tt><br>
+71<tt>&nbsp;&nbsp;&nbsp;</tt><tt><i>%</i></tt><br>
+72<tt>&nbsp;&nbsp;&nbsp;</tt><tt>bft_no_lines(no_lines);</tt><br>
+73<tt>&nbsp;&nbsp;&nbsp;</tt><tt>for&nbsp;i&nbsp;=&nbsp;1&nbsp;:&nbsp;no_lines</tt><br>
+74<tt>&nbsp;&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;bft_apodization(xdc,0,hanning(no_elements)',i);</tt><br>
+75<tt>&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;&nbsp;bft_sum_apodization(xdc,0,ones(1,no_elements),i);</i></tt><br>
+76<tt>&nbsp;&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;focus&nbsp;=&nbsp;[sin(theta)*focus_r,&nbsp;zeros(length(focus_r),1),&nbsp;cos(theta)*focus_r];</tt><br>
+77<tt>&nbsp;&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;bft_center_focus([0&nbsp;0&nbsp;0],i);</tt><br>
+78<tt>&nbsp;&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;bft_focus(xdc,&nbsp;T,&nbsp;focus,i);</tt><br>
+79<tt>&nbsp;&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;theta&nbsp;=&nbsp;theta&nbsp;+&nbsp;d_theta;</tt><br>
+80<tt>&nbsp;&nbsp;&nbsp;</tt><tt>end</tt><br>
+81<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+82<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+83<tt>&nbsp;&nbsp;&nbsp;</tt><tt><i>%</i></tt><br>
+84<tt>&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;&nbsp;Allocate&nbsp;memory&nbsp;for&nbsp;the&nbsp;image</i></tt><br>
+85<tt>&nbsp;&nbsp;&nbsp;</tt><tt><i>%</i></tt><br>
+86<tt>&nbsp;&nbsp;&nbsp;</tt><tt>Rmax&nbsp;=&nbsp;max(sqrt(pht_pos(:,1).^&nbsp;2&nbsp;+&nbsp;pht_pos(:,2).^&nbsp;2&nbsp;&nbsp;+&nbsp;pht_pos(:,3).^&nbsp;2))&nbsp;+&nbsp;10/1000;</tt><br>
+87<tt>&nbsp;&nbsp;&nbsp;</tt><tt>Rmin&nbsp;=&nbsp;min(sqrt(pht_pos(:,1).^&nbsp;2&nbsp;+&nbsp;pht_pos(:,2).^&nbsp;2&nbsp;&nbsp;+&nbsp;pht_pos(:,3).^&nbsp;2))&nbsp;-&nbsp;10/1000;</tt><br>
+88<tt>&nbsp;&nbsp;&nbsp;</tt><tt>if&nbsp;(Rmin&nbsp;&lt;&nbsp;0)&nbsp;Rmin&nbsp;=&nbsp;0;&nbsp;end;</tt><br>
+89<tt>&nbsp;&nbsp;&nbsp;</tt><tt>Tmin&nbsp;=&nbsp;2*Rmin&nbsp;/&nbsp;c;&nbsp;Tmax&nbsp;=&nbsp;2*Rmax&nbsp;/&nbsp;c;</tt><br>
+90<tt>&nbsp;&nbsp;&nbsp;</tt><tt>Smin&nbsp;=&nbsp;floor(Tmin&nbsp;*&nbsp;fs);&nbsp;Smax&nbsp;=&nbsp;ceil(Tmax&nbsp;*&nbsp;fs);</tt><br>
+91<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+92<tt>&nbsp;&nbsp;&nbsp;</tt><tt>no_rf_samples&nbsp;=&nbsp;Smax&nbsp;-&nbsp;Smin&nbsp;+&nbsp;1;</tt><br>
+93<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+94<tt>&nbsp;&nbsp;&nbsp;</tt><tt>bf_image&nbsp;=&nbsp;zeros(no_rf_samples,&nbsp;no_lines);</tt><br>
+95<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+96<tt>&nbsp;&nbsp;&nbsp;</tt><tt><i>%</i></tt><br>
+97<tt>&nbsp;&nbsp;&nbsp;</tt><tt><i>%&nbsp;Make&nbsp;one&nbsp;low-resolution&nbsp;image&nbsp;at&nbsp;a&nbsp;time&nbsp;and&nbsp;sum&nbsp;them</i></tt><br>
+98<tt>&nbsp;&nbsp;&nbsp;</tt><tt><i>%</i></tt><br>
+99<tt>&nbsp;&nbsp;&nbsp;</tt><tt></tt><br>
+100<tt>&nbsp;&nbsp;</tt><tt>xdc_focus_times(xmt,0,zeros(1,no_elements));&nbsp;</tt><br>
+101<tt>&nbsp;&nbsp;</tt><tt>xdc_focus_times(rcv,0,zeros(1,no_elements));</tt><br>
+102<tt>&nbsp;&nbsp;</tt><tt>for&nbsp;emission_no&nbsp;=&nbsp;1:no_elements</tt><br>
+103<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;disp(['emission&nbsp;no:&nbsp;'&nbsp;num2str(emission_no)]);&nbsp;&nbsp;</tt><br>
+104<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;xdc_apodization(xmt,0,[zeros(1,emission_no-1)&nbsp;1&nbsp;zeros(1,&nbsp;no_elements&nbsp;-&nbsp;emission_no)]);</tt><br>
+105<tt>&nbsp;&nbsp;</tt><tt></tt><br>
+106<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;[scat,&nbsp;start_time]&nbsp;=&nbsp;calc_scat_multi&nbsp;(xmt,&nbsp;rcv,&nbsp;pht_pos,&nbsp;pht_amp);</tt><br>
+107<tt>&nbsp;&nbsp;</tt><tt></tt><br>
+108<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;start_sample&nbsp;=&nbsp;floor(start_time&nbsp;*&nbsp;fs&nbsp;+&nbsp;0.5);</tt><br>
+109<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;end_sample&nbsp;=&nbsp;start_sample&nbsp;+&nbsp;max(size(scat))-1;</tt><br>
+110<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;</tt><br>
+111<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;scat&nbsp;=&nbsp;[zeros(start_sample&nbsp;-&nbsp;Smin,&nbsp;no_elements);&nbsp;scat;&nbsp;zeros(Smax&nbsp;-&nbsp;end_sample,no_elements)];</tt><br>
+112<tt>&nbsp;&nbsp;</tt><tt>&nbsp;</tt><br>
+113<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;start_time&nbsp;=&nbsp;Tmin;</tt><br>
+114<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;beamformed&nbsp;=&nbsp;bft_beamform(start_time,scat);</tt><br>
+115<tt>&nbsp;&nbsp;</tt><tt>&nbsp;&nbsp;bf_image&nbsp;=&nbsp;bft_add_image(bf_image,&nbsp;beamformed,&nbsp;emission_no,&nbsp;start_time);</tt><br>
+116<tt>&nbsp;&nbsp;</tt><tt>end</tt><br>
+117<tt>&nbsp;&nbsp;</tt><tt></tt><br>
+118<tt>&nbsp;&nbsp;</tt><tt></tt><br>
+119<tt>&nbsp;&nbsp;</tt><tt></tt><br>
+120<tt>&nbsp;&nbsp;</tt><tt><i>%&nbsp;&nbsp;Release&nbsp;the&nbsp;allocated&nbsp;memory</i></tt><br>
+121<tt>&nbsp;&nbsp;</tt><tt></tt><br>
+122<tt>&nbsp;&nbsp;</tt><tt>field_end</tt><br>
+123<tt>&nbsp;&nbsp;</tt><tt>bft_end</tt><br>
+124<tt>&nbsp;&nbsp;</tt><tt></tt><br>
+125<tt>&nbsp;&nbsp;</tt><tt></tt><br>
+126<tt>&nbsp;&nbsp;</tt><tt></tt><br>
+127<tt>&nbsp;&nbsp;</tt><tt><i>%</i></tt><br>
+128<tt>&nbsp;&nbsp;</tt><tt><i>%&nbsp;&nbsp;Dispplay&nbsp;the&nbsp;image</i></tt><br>
+129<tt>&nbsp;&nbsp;</tt><tt><i>%</i></tt><br>
+130<tt>&nbsp;&nbsp;</tt><tt></tt><br>
+131<tt>&nbsp;&nbsp;</tt><tt>bf_image&nbsp;=&nbsp;abs(hilbert(bf_image));&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>%&nbsp;Envelope&nbsp;detection</i></tt><br>
+132<tt>&nbsp;&nbsp;</tt><tt>bf_image&nbsp;=&nbsp;bf_image&nbsp;/&nbsp;max(max(bf_image));</tt><br>
+133<tt>&nbsp;&nbsp;</tt><tt></tt><br>
+134<tt>&nbsp;&nbsp;</tt><tt>figure;</tt><br>
+135<tt>&nbsp;&nbsp;</tt><tt>imagesc([-sector/2&nbsp;sector/2]*180/pi,[Rmin&nbsp;Rmax]*1000,20*log10(bf_image&nbsp;+&nbsp;0.001))</tt><br>
+136<tt>&nbsp;&nbsp;</tt><tt>axis('image')</tt><br>
+137<tt>&nbsp;&nbsp;</tt><tt>xlabel('Angle&nbsp;[deg]');</tt><br>
+138<tt>&nbsp;&nbsp;</tt><tt>ylabel('Axial&nbsp;distance&nbsp;[mm]')</tt><br>
+139<tt>&nbsp;&nbsp;</tt><tt>title('Beamformed&nbsp;by&nbsp;BFT&nbsp;');</tt><br>
+140<tt>&nbsp;&nbsp;</tt><tt>clc</tt><br>
+141<tt>&nbsp;&nbsp;</tt><tt>disp(['&nbsp;'&nbsp;10&nbsp;10&nbsp;10&nbsp;10&nbsp;]);</tt><br>
+142<tt>&nbsp;&nbsp;</tt><tt>disp([9&nbsp;'*****************************************************']);</tt><br>
+143<tt>&nbsp;&nbsp;</tt><tt>disp([9&nbsp;'*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*']);</tt><br>
+144<tt>&nbsp;&nbsp;</tt><tt>disp([9&nbsp;'*&nbsp;The&nbsp;image&nbsp;beamformed&nbsp;by&nbsp;BFT&nbsp;is&nbsp;in&nbsp;"bf_image"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*']);</tt><br>
+145<tt>&nbsp;&nbsp;</tt><tt>disp([9&nbsp;'*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*'])</tt><br>
+146<tt>&nbsp;&nbsp;</tt><tt>disp([9&nbsp;'*****************************************************']);</tt><br>
+147<tt>&nbsp;&nbsp;</tt><tt>disp(['&nbsp;'&nbsp;10&nbsp;10&nbsp;]);</tt><br>
+148<tt>&nbsp;&nbsp;</tt><tt></tt><br>
+</font>
+
+<p>
+<hr><H3>Footnotes:</H3>
+
+<p><a name="tthFtNtAAB"></a><a href="#tthFrefAAB"><sup>1</sup></a>There is a speed difference 
+when the apodization is set to <em>ones</em> or if no apodization is set at all.
+<p><hr><small>File translated from
+T<sub><font size="-1">E</font></sub>X
+by <a href="http://hutchinson.belmont.ma.us/tth/">
+T<sub><font size="-1">T</font></sub>H</a>,
+version 2.64.<br>On  4 Sep 2000, 14:14.</small>
+</HTML>

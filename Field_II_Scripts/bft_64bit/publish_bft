@@ -1,0 +1,8 @@
+#!/bin/bash
+
+cd ..
+rm -f bft.tar.bz2
+tar -c -f bft.tar bft/*.m  bft/*.mexlx bft/*mexglx bft/*.dll bft/doc/bft_user_guide.pdf bft/examples/*.m 
+bzip2 bft.tar
+mv bft.tar.bz2 /home/esftp/pub/sn/bft/
+cd bft

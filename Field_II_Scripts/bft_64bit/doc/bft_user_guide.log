@@ -1,0 +1,591 @@
+This is pdfTeX, Version 3.14159-13d (Web2C 7.3.1) (format=pdflatex 2000.3.7)  4 SEP 2000 13:56
+**bft_user_guide.tex
+(bft_user_guide.tex[/usr/share/texmf/pdftex/config/pdftex.cfg]
+LaTeX2e <1998/12/01> patch level 1
+Babel <v3.6x> and hyphenation patterns for american, french, german, ngerman, i
+talian, nohyphenation, loaded.
+(manual.cls
+Document Class: manual 1998/03/03 Document class (Python manual)
+(pypaper.sty (/usr/share/texmf/tex/latex/psnfss/times.sty
+Package: times 1999/03/29 PSNFSS v.7.2 Times font as default roman : S Rahtz
+)
+Using Times instead of Computer Modern.
+) (/usr/share/texmf/tex/latex/base/report.cls
+Document Class: report 1999/01/07 v1.4a Standard LaTeX document class
+(/usr/share/texmf/tex/latex/base/size10.clo
+File: size10.clo 1999/01/07 v1.4a Standard LaTeX file (size option)
+)
+\c@part=\count79
+\c@chapter=\count80
+\c@section=\count81
+\c@subsection=\count82
+\c@subsubsection=\count83
+\c@paragraph=\count84
+\c@subparagraph=\count85
+\c@figure=\count86
+\c@table=\count87
+\abovecaptionskip=\skip41
+\belowcaptionskip=\skip42
+\bibindent=\dimen102
+)
+(/usr/share/texmf/tex/latex/fancyhdr/fancyhdr.sty
+\headwidth=\dimen103
+)
+Using fancier footers than usual.
+(fncychap.sty
+Package: fncychap 1997/04/06 v1.11 LaTeX package (Revised chapters)
+\RW=\skip43
+\mylen=\skip44
+\myhi=\skip45
+\px=\skip46
+\py=\skip47
+\pyy=\skip48
+\pxx=\skip49
+\c@AlphaCnt=\count88
+\c@AlphaDecCnt=\count89
+)
+Using fancy chapter headings.
+(python.sty
+Package: python 1998/01/11 LaTeX package (Python markup)
+ (/usr/share/texmf/pdftex/plain/misc/pdfcolor.tex)
+(/usr/share/texmf/tex/latex/tools/verbatim.sty
+Package: verbatim 1997/04/30 v1.5k LaTeX2e package for verbatim enhancements
+\every@verbatim=\toks14
+\verbatim@line=\toks15
+\verbatim@in@stream=\read1
+)
+\py@codewidth=\skip50
+\py@ModSynopsisFile=\write3
+))
+(/usr/share/texmf/tex/latex/mathptm/mathptm.sty
+Package: mathptm 1997/01/23{} Times + math package from fontinst
+LaTeX Font Info:    Redeclaring symbol font `operators' on input line 25.
+LaTeX Font Info:    Overwriting symbol font `operators' in version `normal'
+(Font)                  OT1/cmr/m/n --> OT1/ptmcm/m/n on input line 25.
+LaTeX Font Info:    Overwriting symbol font `operators' in version `bold'
+(Font)                  OT1/cmr/bx/n --> OT1/ptmcm/m/n on input line 25.
+LaTeX Font Info:    Redeclaring symbol font `letters' on input line 26.
+LaTeX Font Info:    Overwriting symbol font `letters' in version `normal'
+(Font)                  OML/cmm/m/it --> OML/ptmcm/m/it on input line 26.
+LaTeX Font Info:    Overwriting symbol font `letters' in version `bold'
+(Font)                  OML/cmm/b/it --> OML/ptmcm/m/it on input line 26.
+LaTeX Font Info:    Redeclaring symbol font `symbols' on input line 27.
+LaTeX Font Info:    Overwriting symbol font `symbols' in version `normal'
+(Font)                  OMS/cmsy/m/n --> OMS/pzccm/m/n on input line 27.
+LaTeX Font Info:    Overwriting symbol font `symbols' in version `bold'
+(Font)                  OMS/cmsy/b/n --> OMS/pzccm/m/n on input line 27.
+LaTeX Font Info:    Redeclaring symbol font `largesymbols' on input line 28.
+LaTeX Font Info:    Overwriting symbol font `largesymbols' in version `normal'
+(Font)                  OMX/cmex/m/n --> OMX/psycm/m/n on input line 28.
+LaTeX Font Info:    Overwriting symbol font `largesymbols' in version `bold'
+(Font)                  OMX/cmex/m/n --> OMX/psycm/m/n on input line 28.
+\symbold=\mathgroup4
+\symitalic=\mathgroup5
+LaTeX Font Info:    Redeclaring math alphabet \mathbf on input line 31.
+LaTeX Font Info:    Overwriting math alphabet `\mathbf' in version `normal'
+(Font)                  OT1/cmr/bx/n --> OT1/ptm/bx/n on input line 31.
+LaTeX Font Info:    Overwriting math alphabet `\mathbf' in version `bold'
+(Font)                  OT1/cmr/bx/n --> OT1/ptm/bx/n on input line 31.
+LaTeX Font Info:    Redeclaring math alphabet \mathit on input line 32.
+LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `normal'
+(Font)                  OT1/cmr/m/it --> OT1/ptm/m/it on input line 32.
+LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `bold'
+(Font)                  OT1/cmr/bx/it --> OT1/ptm/m/it on input line 32.
+)
+(/usr/share/texmf/tex/latex/tools/longtable.sty
+Package: longtable 1998/05/13 v4.09 Multi-page Table package (DPC)
+\LTleft=\skip51
+\LTright=\skip52
+\LTpre=\skip53
+\LTpost=\skip54
+\LTchunksize=\count90
+\LTcapwidth=\dimen104
+\LT@head=\box26
+\LT@firsthead=\box27
+\LT@foot=\box28
+\LT@lastfoot=\box29
+\LT@cols=\count91
+\LT@rows=\count92
+\c@LT@tables=\count93
+\c@LT@chunks=\count94
+\LT@p@ftn=\toks16
+)
+(/usr/share/texmf/tex/latex/graphics/graphics.sty
+Package: graphics 1999/02/16 v1.0l Standard LaTeX Graphics (DPC,SPQR)
+
+(/usr/share/texmf/tex/latex/graphics/trig.sty
+Package: trig 1999/03/16 v1.09 sin cos tan (DPC)
+)
+(/usr/share/texmf/tex/latex/config/graphics.cfg)
+Package graphics Info: Driver file: pdftex.def on input line 80.
+
+(/usr/share/texmf/tex/latex/graphics/pdftex.def
+File: pdftex.def 1999/01/26 v0.02l graphics/color for pdftex
+\Gread@gobject=\count95
+))
+(/usr/share/texmf/tex/latex/misc/geometry.sty
+Package: geometry 1998/04/08 v2.0a Page Geometry
+
+(/usr/share/texmf/tex/latex/graphics/keyval.sty
+Package: keyval 1999/03/16 v1.13 key=value parser (DPC)
+\KV@toks@=\toks17
+)
+\geom@cnth=\count96
+\geom@cntv=\count97
+
+(/usr/share/texmf/tex/latex/config/geometry.cfg))
+(/usr/share/texmf/tex/latex/hyperref/hyperref.sty
+Package: hyperref 1999/04/13 6.56 Hypertext links for LaTeX
+
+(/usr/share/texmf/tex/latex/hyperref/nameref.sty
+Package: nameref 1999/02/17 Cross-referencing by name of section
+)
+\@linkdim=\dimen105
+
+(/usr/share/texmf/tex/latex/hyperref/pd1enc.def
+File: pd1enc.def 1999/03/30 v0.3 PDFDocEncoding (Heiko Oberdiek)
+)
+Package hyperref Info: option colorlinks set true on input line 715.
+Package hyperref Info: Bookmarks ON on input line 732.
+Package hyperref Info: Hyper figures OFF on input line 744.
+Package hyperref Info: Link nesting OFF on input line 749.
+Package hyperref Info: Hyper index ON on input line 752.
+Package hyperref Info: Plain pages ON on input line 757.
+Package hyperref Info: Backreferencing OFF on input line 764.
+
+Implicit mode ON; LaTeX internals redefined
+(/usr/share/texmf/tex/latex/misc/url.sty
+Package: url 1999/03/02  ver 1.4  Verb mode for urls, email addresses, and file
+ names
+)
+\Fld@menulength=\count98
+\Field@Width=\dimen106
+\Fld@charsize=\dimen107
+\Choice@toks=\toks18
+\Field@toks=\toks19
+Package hyperref Info: Hyper figures OFF on input line 1244.
+Package hyperref Info: Link nesting OFF on input line 1249.
+Package hyperref Info: Hyper index ON on input line 1252.
+Package hyperref Info: backreferencing OFF on input line 1259.
+Package hyperref Info: Link coloring ON on input line 1262.
+\c@Item=\count99
+\c@Hfootnote=\count100
+\OddToc=\count101
+LaTeX Info: Redefining \ref on input line 1914.
+LaTeX Info: Redefining \pageref on input line 1915.
+)
+*hyperref using default driver pdftex*
+(/usr/share/texmf/tex/latex/hyperref/hpdftex.def
+(/usr/share/texmf/tex/latex/psnfss/pifont.sty
+Package: pifont 1999/03/29 PSNFSS v.7.2 Pi font support : S Rahtz
+LaTeX Font Info:    Try loading font information for U+pzd on input line 63.
+
+(/usr/share/texmf/tex/latex/psnfss/upzd.fd
+File: upzd.fd 1998/07/06 font definitions for U/pzd.
+)
+LaTeX Font Info:    Try loading font information for U+psy on input line 64.
+
+(/usr/share/texmf/tex/latex/psnfss/upsy.fd
+File: upsy.fd 1998/07/06 font definitions for U/psy.
+))
+\Fld@listcount=\count102
+\@outlinefile=\write4
+)
+(/usr/share/texmf/tex/latex/graphics/epsfig.sty
+Package: epsfig 1999/02/16 v1.7a (e)psfig emulation (SPQR)
+
+(/usr/share/texmf/tex/latex/graphics/graphicx.sty
+Package: graphicx 1999/02/16 v1.0f Enhanced LaTeX Graphics (DPC,SPQR)
+\Gin@req@height=\dimen108
+\Gin@req@width=\dimen109
+)
+\epsfxsize=\dimen110
+\epsfysize=\dimen111
+) (bft_user_guide.aux)
+\openout1 = `bft_user_guide.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 87.
+LaTeX Font Info:    ... okay on input line 87.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 87.
+LaTeX Font Info:    ... okay on input line 87.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 87.
+LaTeX Font Info:    ... okay on input line 87.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 87.
+LaTeX Font Info:    ... okay on input line 87.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 87.
+LaTeX Font Info:    ... okay on input line 87.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 87.
+LaTeX Font Info:    ... okay on input line 87.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 87.
+LaTeX Font Info:    ... okay on input line 87.
+LaTeX Font Info:    Try loading font information for OT1+ptm on input line 87.
+
+(/usr/share/texmf/tex/latex/psnfss/ot1ptm.fd
+File: ot1ptm.fd 1998/07/06 Fontinst v1.800 font definitions for OT1/ptm.
+)
+(/usr/share/texmf/tex/context/base/supp-pdf.tex
+(/usr/share/texmf/tex/context/base/supp-mis.tex
+loading : Context Support Macros / Missing
+\protectiondepth=\count103
+\scratchcounter=\count104
+\scratchdimen=\dimen112
+\scratchskip=\skip55
+\scratchmuskip=\muskip10
+\scratchbox=\box30
+\scratchread=\read2
+\scratchwrite=\write5
+\nextbox=\box31
+\nextdepth=\dimen113
+\everyline=\toks20
+\!!counta=\count105
+\!!countb=\count106
+\recursecounter=\count107
+)
+loading : Context Support Macros / PDF
+\nofMPsegments=\count108
+\nofMParguments=\count109
+) (/usr/share/texmf/tex/latex/graphics/color.sty
+Package: color 1999/02/16 v1.0i Standard LaTeX Color (DPC)
+LaTeX Info: Redefining \color on input line 71.
+
+(/usr/share/texmf/tex/latex/config/color.cfg)
+Package color Info: Driver file: pdftex.def on input line 125.
+)
+Package hyperref Info: Link coloring ON on input line 87.
+ (bft_user_guide.out)
+(bft_user_guide.out)
+\openout4 = `bft_user_guide.out'.
+
+LaTeX Font Info:    Try loading font information for OT1+phv on input line 92.
+ (/usr/share/texmf/tex/latex/psnfss/ot1phv.fd
+File: ot1phv.fd 1998/07/06 Fontinst v1.800 font definitions for OT1/phv.
+)
+LaTeX Font Info:    Font shape `OT1/phv/m/it' in size <17.28> not available
+(Font)              Font shape `OT1/phv/m/sl' tried instead on input line 92.
+ [1
+
+[/usr/share/texmf/dvips/config/pdftex.map]] (bft_user_guide.toc
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 1.
+LaTeX Font Info:    Try loading font information for OT1+ptmcm on input line 3.
+
+
+(/usr/share/texmf/tex/latex/mathptm/ot1ptmcm.fd
+File: ot1ptmcm.fd 1998/07/01 Fontinst v1.800 font definitions for OT1/ptmcm.
+)
+LaTeX Font Info:    Try loading font information for OML+ptmcm on input line 3.
+
+
+(/usr/share/texmf/tex/latex/mathptm/omlptmcm.fd
+File: omlptmcm.fd 1998/07/01 Fontinst v1.800 font definitions for OML/ptmcm.
+)
+LaTeX Font Info:    Try loading font information for OMS+pzccm on input line 3.
+
+
+(/usr/share/texmf/tex/latex/mathptm/omspzccm.fd
+File: omspzccm.fd 1998/07/01 Fontinst v1.800 font definitions for OMS/pzccm.
+)
+LaTeX Font Info:    Try loading font information for OMX+psycm on input line 3.
+
+
+(/usr/share/texmf/tex/latex/mathptm/omxpsycm.fd
+File: omxpsycm.fd 1998/07/01 Fontinst v1.800 font definitions for OMX/psycm.
+)
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <7.4> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 3.
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <6> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 3.
+)
+\tf@toc=\write6
+\openout6 = `bft_user_guide.toc'.
+
+
+Adding blank page after the table of contents.
+Warning (ext1): destination with the same identifier (name{page.1}) already exi
+sts!
+\new@pdflink ...e anchor #1}\fi \pdfdest name {#1}
+                                                  \@pdfview \ifvmode \nobrea...
+l.95 \tableofcontents
+                      [1
+
+] [2]
+Chapter 1.
+LaTeX Font Info:    Font shape `OT1/phv/bx/n' in size <10> not available
+(Font)              Font shape `OT1/phv/b/n' tried instead on input line 105.
+LaTeX Font Info:    Font shape `OT1/phv/bx/n' in size <14.4> not available
+(Font)              Font shape `OT1/phv/b/n' tried instead on input line 105.
+LaTeX Font Info:    Try loading font information for OT1+pcr on input line 126.
+
+(/usr/share/texmf/tex/latex/psnfss/ot1pcr.fd
+File: ot1pcr.fd 1998/07/06 Fontinst v1.800 font definitions for OT1/pcr.
+)
+LaTeX Font Info:    Try loading font information for OMS+ptm on input line 131.
+
+
+(/usr/share/texmf/tex/latex/psnfss/omsptm.fd
+File: omsptm.fd 
+)
+LaTeX Font Info:    Font shape `OMS/ptm/m/n' in size <10> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 131.
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <8> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 137.
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <5> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 137.
+
+Warning (ext1): destination with the same identifier (name{page.1}) already exi
+sts!
+\new@pdflink ...e anchor #1}\fi \pdfdest name {#1}
+                                                  \@pdfview \ifvmode \nobrea...
+l.150 \chapter
+              {Description of Matlab Functions} [1
+
+
+]
+Warning (ext1): destination with the same identifier (name{page.2}) already exi
+sts!
+\new@pdflink ...e anchor #1}\fi \pdfdest name {#1}
+                                                  \@pdfview \ifvmode \nobrea...
+l.150 \chapter
+              {Description of Matlab Functions} [2
+
+]
+Chapter 2.
+
+Overfull \hbox (81.29453pt too wide) in paragraph at lines 155--174
+[] 
+ []
+
+[3]
+Overfull \hbox (452.39844pt too wide) detected at line 177
+[]
+ []
+
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <14.4> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 177.
+
+Overfull \hbox (8.81421pt too wide) in paragraph at lines 186--198
+[][] 
+ []
+
+
+Overfull \hbox (452.39844pt too wide) detected at line 200
+[]
+ []
+
+
+Overfull \hbox (8.81421pt too wide) in paragraph at lines 209--224
+[][] 
+ []
+
+
+Overfull \hbox (452.39844pt too wide) detected at line 227
+[]
+ []
+
+
+Overfull \hbox (8.81421pt too wide) in paragraph at lines 239--252
+[][] 
+ []
+
+
+Overfull \hbox (452.39844pt too wide) detected at line 255
+[]
+ []
+
+[4]
+Overfull \hbox (8.81421pt too wide) in paragraph at lines 267--277
+[][] 
+ []
+
+
+Overfull \hbox (452.39844pt too wide) detected at line 280
+[]
+ []
+
+
+Overfull \hbox (8.81421pt too wide) in paragraph at lines 289--306
+[][] 
+ []
+
+
+Overfull \hbox (452.39844pt too wide) detected at line 308
+[]
+ []
+
+
+Overfull \hbox (8.81421pt too wide) in paragraph at lines 317--323
+[][] 
+ []
+
+
+Overfull \hbox (452.39844pt too wide) detected at line 327
+[]
+ []
+
+[5]
+Overfull \hbox (8.81421pt too wide) in paragraph at lines 336--350
+[][] 
+ []
+
+
+Overfull \hbox (452.39844pt too wide) detected at line 352
+[]
+ []
+
+
+Overfull \hbox (8.81421pt too wide) in paragraph at lines 362--376
+[][] 
+ []
+
+
+Overfull \hbox (452.39844pt too wide) detected at line 378
+[]
+ []
+
+
+Overfull \hbox (8.81421pt too wide) in paragraph at lines 387--393
+[][] 
+ []
+
+
+Overfull \hbox (452.39844pt too wide) detected at line 396
+[]
+ []
+
+
+Overfull \hbox (8.81421pt too wide) in paragraph at lines 407--412
+[][] 
+ []
+
+[6]
+Overfull \hbox (452.39844pt too wide) detected at line 415
+[]
+ []
+
+
+Overfull \hbox (8.81421pt too wide) in paragraph at lines 425--439
+[][] 
+ []
+
+
+Overfull \hbox (452.39844pt too wide) detected at line 441
+[]
+ []
+
+
+Overfull \hbox (8.81421pt too wide) in paragraph at lines 454--460
+[][] 
+ []
+
+
+Overfull \hbox (452.39844pt too wide) detected at line 463
+[]
+ []
+
+
+Overfull \hbox (8.81421pt too wide) in paragraph at lines 472--491
+[][] 
+ []
+
+[7]
+Overfull \hbox (452.39844pt too wide) detected at line 494
+[]
+ []
+
+
+Overfull \hbox (8.81421pt too wide) in paragraph at lines 503--516
+[][] 
+ []
+
+
+Overfull \hbox (452.39844pt too wide) detected at line 518
+[]
+ []
+
+
+Overfull \hbox (55.09975pt too wide) in paragraph at lines 533--542
+[][]| 
+ []
+
+
+Overfull \hbox (8.81421pt too wide) in paragraph at lines 529--544
+[][] 
+ []
+
+
+Overfull \hbox (452.39844pt too wide) detected at line 546
+[]
+ []
+
+
+Overfull \hbox (3840.05215pt too wide) in paragraph at lines 555--571
+[][] 
+ []
+
+[8]
+Overfull \hbox (452.39844pt too wide) detected at line 572
+[]
+ []
+
+
+Overfull \hbox (8.81421pt too wide) in paragraph at lines 583--598
+[][] 
+ []
+
+[9] [10
+
+]
+Chapter 3.
+
+Overfull \hbox (452.39844pt too wide) detected at line 606
+[]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 613--785
+
+ []
+
+[11] [12] [13]
+Overfull \hbox (452.39844pt too wide) detected at line 787
+[]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 794--960
+
+ []
+
+[14] [15] [16]
+Overfull \hbox (452.39844pt too wide) detected at line 961
+[]
+ []
+
+[17]
+Overfull \hbox (13.87622pt too wide) in paragraph at lines 968--1118
+\OT1/ptm/m/n/8 32   \OT1/pcr/m/n/8 fo-cus[]r = [1:max(sqrt(pht[]pos(:,1).^ 2 + 
+pht[]pos(:,2).^ 2 + pht[]pos(:,3).^ 2))*1000]' / 1000; 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 968--1118
+\OT1/ptm/m/n/8 111    \OT1/pcr/m/n/8 scat = [ze-ros(start[]sample - Smin, no[]e
+lements); scat; ze-ros(Smax -
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 968--1118
+
+ []
+
+[18] [19] [20] (bft_user_guide.aux) ) 
+Here is how much of TeX's memory you used:
+ 3232 strings out of 10628
+ 40511 string characters out of 92864
+ 106237 words of memory out of 263001
+ 6094 multiletter control sequences out of 10000+0
+ 51004 words of font info for 90 fonts, out of 400000 for 1000
+ 15 hyphenation exceptions out of 1000
+ 29i,22n,42p,261b,451s stack positions out of 300i,100n,500p,50000b,4000s
+<cmsy10.pfb><8r.enc><utmr8a.pfb>
+Output written on bft_user_guide.pdf (23 pages, 88549 bytes).

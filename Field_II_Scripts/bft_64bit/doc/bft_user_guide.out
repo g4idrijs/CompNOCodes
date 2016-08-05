@@ -1,0 +1,26 @@
+\BOOKMARK [0]{chapter.1}{Introduction}{}
+\BOOKMARK [0]{chapter.2}{Description of Matlab Functions}{}
+\BOOKMARK [1]{section.2.1}{Functions list}{chapter.2}
+\BOOKMARK [1]{section.2.2}{Function description}{chapter.2}
+\BOOKMARK [2]{subsection.2.2.1}{bft\137add\137image}{section.2.2}
+\BOOKMARK [2]{subsection.2.2.2}{bft\137appodization}{section.2.2}
+\BOOKMARK [2]{subsection.2.2.3}{bft\137beamform}{section.2.2}
+\BOOKMARK [2]{subsection.2.2.4}{bft\137center\137focus}{section.2.2}
+\BOOKMARK [2]{subsection.2.2.5}{bft\137dynamic\137focus}{section.2.2}
+\BOOKMARK [2]{subsection.2.2.6}{bft\137end}{section.2.2}
+\BOOKMARK [2]{subsection.2.2.7}{bft\137focus}{section.2.2}
+\BOOKMARK [2]{subsection.2.2.8}{bft\137focus\137times}{section.2.2}
+\BOOKMARK [2]{subsection.2.2.9}{bft\137free\137xdc}{section.2.2}
+\BOOKMARK [2]{subsection.2.2.10}{bft\137init}{section.2.2}
+\BOOKMARK [2]{subsection.2.2.11}{bft\137linear\137array}{section.2.2}
+\BOOKMARK [2]{subsection.2.2.12}{bft\137no\137lines}{section.2.2}
+\BOOKMARK [2]{subsection.2.2.13}{bft\137param}{section.2.2}
+\BOOKMARK [2]{subsection.2.2.14}{bft\137sub\137image}{section.2.2}
+\BOOKMARK [2]{subsection.2.2.15}{bft\137sum\137apodization}{section.2.2}
+\BOOKMARK [2]{subsection.2.2.16}{bft\137sum\137images}{section.2.2}
+\BOOKMARK [2]{subsection.2.2.17}{bft\137transducer}{section.2.2}
+\BOOKMARK [0]{chapter.3}{Examples}{}
+\BOOKMARK [1]{section.3.1}{Using Field II simulations}{chapter.3}
+\BOOKMARK [2]{subsection.3.1.1}{Phased array B-mode image}{section.3.1}
+\BOOKMARK [2]{subsection.3.1.2}{Dynamic focusing}{section.3.1}
+\BOOKMARK [2]{subsection.3.1.3}{Synthetic Aperture Focusing}{section.3.1}

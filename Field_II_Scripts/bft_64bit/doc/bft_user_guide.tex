@@ -1,0 +1,1120 @@
+%\documentclass[11pt]{report}
+\documentclass{manual}
+
+%%tth:\begin{html}<title>Beamformation Toolbox</title>\end{html}
+
+%  version 1.0, 29/2-1999, SN
+
+%  Set TeX to use only Post Script fonts for both the
+%  text and the equations
+
+\usepackage{times}
+\usepackage{mathptm}
+\usepackage{longtable}
+\usepackage[pdftex]{graphics}   %  For including links in a pdf document.
+\usepackage{geometry}
+\usepackage[colorlinks, linkcolor = BrickRed]{hyperref}
+\usepackage{epsfig}
+
+%  Set the text height and width
+
+\textwidth 16cm
+%\textheight 24cm
+%\oddsidemargin 0cm
+%\evensidemargin 0cm
+%\topmargin -1cm
+
+%  Set the indentation for each new paragraph
+
+\setlength{\parindent}{0ex}
+\setlength{\parskip}{2ex} 
+
+%  Define a macro for making headers for each procedure description
+
+\def\thesubsection{\huge }
+\def\boldindex#1{\textbf{\hyperpage{#1}}}
+
+\newcommand{\funlnk}[1]
+{
+  \label{#1}
+  \hypertarget{#1}{}
+}
+
+\newcommand{\headline}[1]
+{
+% \clearpage
+  \subsection[#1]{}
+  \setlength{\unitlength}{1cm}
+  \begin{center}
+  \begin{picture}(15.9,1.7)
+    \thicklines
+    \put(0,0){\framebox(15.9,1.3)}
+    \put(0,0){\makebox(15.9,1.3)[l]{\Large\em \hspace{0.2 cm} BFT user's guide}}
+    \put(0,0){\makebox(15.9,1.3)[r]{\Large\bf #1 \hspace{0.2cm}}}
+   \end{picture}
+   \end{center}
+  % \vspace{0.2cm}
+}
+
+%  Create some useful macros
+%  Insert a figure, where the size is determined in the text
+
+\newcommand{\insertfigure}[2]
+{
+  \setlength{\epsfxsize}{#2} 
+  \begin{center}
+    \mbox{\epsfbox{#1}}
+  \end{center}
+  \vspace*{-0.5cm}
+%  \begin{center}
+%    \epsfig{file=#1, height=#2}
+%  \end{center}
+}
+\title{Users' guide for the 
+Beamformation Toolbox}
+\author{Svetoslav Ivanov Nikolov}
+\authoraddress{
+Department of Information Technology, Build. 344, \\
+Technical University of Denmark \\
+DK-2800 Lyngby, Denmark
+}
+
+\date{Aug 31 2000}
+
+\release{1.3}
+
+
+\begin{document}           % End of preamble and beginning of text.
+\definecolor{BrickRed}{rgb}{0.5 , 0 , .3}
+
+%\input epsf
+ 
+\maketitle                 % Produces the title.
+
+%\pdfbookmark{Contents}{content}
+\tableofcontents
+%%%tth:\tableofcontents
+%%tth:\begin{html}<hr>\end{html}
+%%tth:Chapter 1.\\ ~~~\hyperlink{chap_intro}{Introduction} \\
+%%tth:Chapter 2.\\ ~~~\hyperlink{chap_func_desc}{Description of Matlab functions} \\
+%%tth:Chapter 3.\\ ~~~\hyperlink{chap_func_desc}{Description of Matlab functions} \\
+%%tth:Chapter 4.\\ ~~~\hyperlink{chap_examples}{Examples}\\
+%%tth:\begin{html}<hr>\end{html}
+
+%%tth:\begin{html}<hr>\end{html}
+\chapter{Introduction}
+\label{chap_intro}
+%%tth:\begin{html}<hr>\end{html}
+
+ This is the user guide to the Beamformation Toolbox. This toolbox is
+available only for Matlab under Linux, and is intended for processing 
+raw RF data recorded by an ultrasound system. Typical applications include
+synthetic aperture focusing and beamformation of data recorded by 
+experimental systems such as XTRA or the \emph{Experimental Ultrasound 
+System for Real Time Synthetic Aperture Focusing}. 
+All the functions have calling conventions like 
+{\bf \href{http://www.it.dtu.dk/~jaj/field}{Field-II}}.
+
+The default behaviour of the toolbox is to beamform only one line at a time, 
+also like in Field II. In this case the user can omit the last of the 
+arguments in all the functions, which usually is {\sl line\_no}.
+
+However, there are some differences between this toolbox and {\bf \href{http://www.it.dtu.dk/~jaj/field}{Field-II}}. 
+For the purposes of the synthetic aperture focusing it is necessary to 
+beamform a whole low-resolution image at every emission. This can be 
+achieved by setting the number of simultaneously beamformed lines using the 
+command \hyperlink{bft_no_lines}{\tt bft\_no\_lines}. Then each of the lines
+must be described before calling \hyperlink{bft_beamform}{\tt bft\_beamform}.
+
+For the time-being there are some limitations :
+\begin{itemize}
+\item Two low-resolution images can not be added if the lines are specified 
+       as dynamically focused.        
+\end{itemize}
+
+ As it can be seen the library is fully functional when the focus lines 
+are specified by a number of focal points\footnote{There is a speed difference 
+when the apodization is set to \emph{ones} or if no apodization is set at all.},
+and for the case of dynamic focusing, low resolution images cannot be summed.
+ 
+In the future the toolbox will try to support many different types of strange and wacky 
+algorithms, so - stay tuned. 
+
+
+\vspace{1cm}
+Svetoslav Ivanov Nikolov \\
+February 29, 2000.
+
+
+%%tth:\begin{html}<hr>\end{html}
+\chapter{Description of Matlab Functions}
+\label{chap_func_desc}
+%%tth:\begin{html}<hr>\end{html}
+
+\section{Functions list}
+\begin{tabular}[t]{lp{14cm}}
+ \hyperlink{bft_add_image}{\tt bft\_add\_image}      & Add a low resolution to hi resolution image.\\
+ \hyperlink{bft_apodization}{\tt bft\_apodization}     & Create a  apodization time line. \\
+ \hyperlink{bft_beamform}{\tt bft\_beamform}        & Beamform a number of scan-lines. \\
+ \hyperlink{bft_center_focus}{\tt bft\_center\_focus}   & Set the center focus point for the focusing. \\
+ \hyperlink{bft_dynamic_focus}{\tt bft\_dynamic\_focus}  & Set dynamic focusing for a line. \\
+ \hyperlink{bft_end}{\tt bft\_end}             & Release all resources, allocated by the beamforming toolbox.\\
+ \hyperlink{bft_focus}{\tt bft\_focus}           & Create a focus time line defined by focus points.\\
+ \hyperlink{bft_focus_times}{\tt bft\_focus\_times}    & Create a focus time line defined by focus delays.\\
+ \hyperlink{bft_free_xdc}{\tt bft\_free\_xdc}       & Free the memory allocated for a transducer definition.\\
+ \hyperlink{bft_init}{\tt bft\_init}            & Initialize the BeamForming Toolbox.\\
+ \hyperlink{bft_linear_array}{\tt bft\_linear\_array}   & Create a linear array.\\
+ \hyperlink{bft_no_lines}{\tt bft\_no\_lines}       & Set the number of lines that will be beamformed in parallel.\\
+ \hyperlink{bft_param}{\tt bft\_param}           & Set a paramater of the BeamForming Toolbox.\\
+ \hyperlink{bft_sub_image}{\tt bft\_sub\_image}      & Subtract one low-res image from  high-res one.\\
+ \hyperlink{bft_sum_apodization}{\tt bft\_sum\_apodization} & Create a summation apodization time line.\\
+ \hyperlink{bft_sum_images}{\tt bft\_sum\_images}     & Sum 2 low resolution images in 1 high resolution.\\
+ \hyperlink{bft_transducer}{\tt bft\_transducer}      & Create a new transducer definition.\\
+\end{tabular}
+
+\newpage
+\section{Function description}
+\headline{bft\_add\_image}
+%%tth:\vspace{1cm}
+%%tth:\begin{html}<hr>\end{html}
+%%tth:\subsection*{bft\_add\_image}
+%%tth:\begin{html}<hr>\end{html}
+\funlnk{bft_add_image} 
+
+Add a low resolution to high resolution image. 
+
+\begin{tabular}[t]{lp{14cm}}  
+USAGE: & {\verb+ [hi_res]=bft_add_image(hi_res,lo_res,element,start_time)+ }\\
+INPUT: & \begin{tabular}[t]{lp{11cm}}
+          {\sl hi\_res} & High resolution RF image. One column per scan line. \\
+          {\sl lo\_res} & Low resolution RF image. One column per scan line. \\
+          {\sl element} & Number of element, used to acquire the low resolution
+                        image. \\
+           {\sl time}   & Arrival time of the first sample of the RF lines. [sec]\\
+         \end{tabular}\\
+         
+OUTPUT:& hi\_res - The high resolution image
+\end{tabular}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\headline{bft\_appodization}
+%%tth:\vspace{2cm}
+%%tth:\begin{html}<hr>\end{html}
+%%tth:\subsection*{bft\_appodization}
+%%tth:\begin{html}<hr>\end{html}
+\funlnk{bft_apodization}
+
+Create an apodization time line.
+
+\begin{tabular}[t]{lp{14cm}}  
+ 
+  USAGE: & {\tt bft\_apodization(xdc, times, values, line\_no)} \\
+ 
+  INPUT: & \begin{tabular}[t]{lp{11cm}}
+          {\sl xdc} & Pointer to a transducer aperture \\
+          {\sl times}  & Time after which the associated apodization is valid \\
+          {\sl values} & Apodization values. Matrix with one row for each
+                   time value and a number of columns equal to the 
+                   number of physical elements in the aperture. \\
+          {\sl line\_no} & Number of line. If skipped, {\sl line\_no} is assumed
+                    to be equal to '1'.
+          \end{tabular} \\
+  OUTPUT: & None
+\end{tabular}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\headline{bft\_beamform}
+%%tth:\vspace{2cm}
+%%tth:\begin{html}<hr>\end{html}
+%%tth:\subsection*{bft\_beamform}
+%%tth:\begin{html}<hr>\end{html}
+\funlnk{bft_beamform}
+
+Beamform a number of scan-lines. The number of the simultaneously beamformed
+scan-lines is set by \hyperlink{bft_no_lines}{\tt bft\_no\_lines}. 
+If \hyperlink{bft_no_lines}{\tt bft\_no\_lines} is not called, only one scan
+line will be beamformed.
+
+\begin{tabular}[t]{lp{14cm}}  
+ USAGE: & {\tt bf\_lines = bft\_beamform(time, rf\_data)} \\
+ INPUT: & \begin{tabular}[t]{lp{11cm}}
+          {\sl time}   & The time of the first sampled value \\
+          {\sl rf\_data} & The recorded RF data. The number of columns 
+                    is equal to the number of elements.
+          \end{tabular}\\
+ OUTPUT: & {\sl bf\_lines}  Matrix with the beamformed data. The number 
+                    of rows of {\sl bf\_lines} is equal to the number 
+                    of rows of {\sl rf\_data}. The number of columns 
+                    is equal to the number of lines \\
+ 
+\end{tabular}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\headline{bft\_center\_focus}
+%%tth:\vspace{2cm}
+%%tth:\begin{html}<hr>\end{html}
+%%tth:\subsection*{bft\_center\_focus}
+%%tth:\begin{html}<hr>\end{html}
+\funlnk{bft_center_focus}
+
+ Set the center focus point for the focusing.
+  This point is used as a reference for calculating the
+   focusing delay times and as a starting point for dynamic
+    focusing.
+
+\begin{tabular}[t]{lp{14cm}}  
+  USAGE: & {\tt bft\_center\_focus(point, line\_no)} \\
+ 
+  INPUT: & \begin{tabular}[t]{lp{11cm}}  
+           {\sl point} & The center point [x,y,z]              [ m ]\\
+           {\sl line\_no} & Number of line. If omitted in the parameter
+                    list {\sl line\_no} is assumed equal to 1\\
+          \end{tabular}\\
+  OUTPUT: & None
+\end{tabular}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\headline{bft\_dynamic\_focus}
+%%tth:\vspace{2cm}
+%%tth:\begin{html}<hr>\end{html}
+%%tth:\subsection*{bft\_dynamic\_focus}
+%%tth:\begin{html}<hr>\end{html}
+\funlnk{bft_dynamic_focus}
+
+Set dynamic focusing for a line
+
+\begin{tabular}[t]{lp{14cm}}  
+ 
+  USAGE: & {\tt bft\_dynamic\_focus(xdc, dir\_xz, dir\_zy, line\_no)} \\
+  
+  INPUT: & \begin{tabular}[t]{lp{11cm}}  
+           {\sl xdc}  & Pointer to the transducer aperture\\
+           {\sl dir\_zx} & Direction (angle) in radians for the dynamic
+                    focus. The direction is taken from the center for
+                    the focus of the transducer in the z-x plane.\\
+          {\sl dir\_zy} & Direction (angle) in radians for the dynamic
+                    focus. The direction is taken from the center for
+                    the focus of the transducer in the z-y plane.\\
+          {\sl line\_no} & Number of line. If skipped, {\sl line\_no} is assumed
+                    to be equal to '1'.
+           \end{tabular} \\
+  OUTPUT: & None 
+\end{tabular}  
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%55
+\headline{bft\_end}
+%%tth:\vspace{2cm}
+%%tth:\begin{html}<hr>\end{html}
+%%tth:\subsection*{bft\_end}
+%%tth:\begin{html}<hr>\end{html}
+\funlnk{bft_end}
+
+Release all resources allocated by the beamforming toolbox.
+
+\begin{tabular}[t]{lp{14cm}}  
+ 
+ USAGE:& {\tt bft\_end}\\
+ INPUT:& None\\
+ OUTPUT:& None\\
+\end{tabular}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\headline{bft\_focus}
+%%tth:\vspace{2cm}
+%%tth:\begin{html}<hr>\end{html}
+%%tth:\subsection*{bft\_focus}
+%%tth:\begin{html}<hr>\end{html}
+\funlnk{bft_focus}
+
+Create a focus time line.
+
+\begin{tabular}[t]{lp{14cm}}  
+
+  USAGE: & {\tt bft\_focus(xdc, times, points, line\_no)}\\
+ 
+  INPUT:& \begin{tabular}[t]{lp{11cm}}  
+           {\sl xdc}    & Pointer to aperture.\\
+           {\sl times}  &  Time after which the associated focus is valid \\
+           {\sl points} & Focus points. Vector with three columns (x,y,z) 
+                           and one row for each field point. \\
+           {\sl line\_no} & Number of line for which we set the focus. If 
+                     skipped, {\sl line\_no} is assumed equal to '1'.\\
+          \end{tabular} \\
+  OUTPUT: & none
+\end{tabular}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\headline{bft\_focus\_times}
+%%tth:\vspace{2cm}
+%%tth:\begin{html}<hr>\end{html}
+%%tth:\subsection*{bft\_focus\_times}
+%%tth:\begin{html}<hr>\end{html}
+\funlnk{bft_focus_times}
+
+ Create a focus time line.
+    The user supplies the delay times for each element.
+
+\begin{tabular}[t]{lp{14cm}}  
+  USAGE:& {\tt bft\_focus\_times(xdc, times, delays, line\_no)}\\
+ 
+  INPUT:&  \begin{tabular}[t]{lp{11cm}}  
+           {\sl xdc}  & Pointer to a transducer aperture. \\
+           {\sl times} & Time after which the associated delay is valid. \\
+           {\sl delays} & Delay values. Matrix with one row for each
+                    time value and a number of columns equal to the
+                    number of physical elements in the aperture. \\
+           {\sl line\_no} & Number of line. If skipped, {\sl line\_no} is 
+                          assumed to be equal to 1.
+          \end{tabular}\\
+  OUTPUT: & None
+\end{tabular} 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\headline{bft\_free\_xdc}
+%%tth:\vspace{2cm}
+%%tth:\begin{html}<hr>\end{html}
+%%tth:\subsection*{bft\_free\_xdc}
+%%tth:\begin{html}<hr>\end{html}
+\funlnk{bft_free_xdc}
+
+Free the memory allocated for a transducer definition
+
+\begin{tabular}[t]{lp{14cm}}  
+  USAGE:& {\tt bft\_free\_xdc(xdc)}\\
+  INPUT:& {\sl xdc} Pointer to the memory location returned by the
+                 function \hyperlink{bft_transducer}{bft\_transducer}\\
+  OUTPUT:& Nothing
+\end{tabular}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+\headline{bft\_init}
+%%tth:\vspace{2cm}
+%%tth:\begin{html}<hr>\end{html}
+%%tth:\subsection*{bft\_init}
+%%tth:\begin{html}<hr>\end{html}
+\funlnk{bft_init}
+
+Initialize the BeamForming Toolbox. This command must be
+    executed first in order to set some parameters and allocate the 
+    the necessary memory
+    
+\begin{tabular}[t]{lp{14cm}}  
+USAGE:& {\tt bft\_init}\\
+INPUT:& None \\
+OUTPUT:& None
+\end{tabular}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+\headline{bft\_linear\_array}
+%%tth:\vspace{2cm}
+%%tth:\begin{html}<hr>\end{html}
+%%tth:\subsection*{bft\_linear\_array}
+%%tth:\begin{html}<hr>\end{html}
+\funlnk{bft_linear_array}
+
+
+ Create a linear array aperture.
+ 
+\begin{tabular}[t]{lp{14cm}}  
+ USAGE: & {\tt xdc = bft\_linear\_array(no\_elements, width, kerf)} \\
+   &     {\tt xdc = bft\_linear\_array(no\_elements, pitch)} \\
+ 
+ INPUT:& \begin{tabular}[t]{lp{11cm}}  
+          {\sl no\_elements} & Number of elelements in the array \\
+          {\sl pitch} & Distance between the centers of two elements [m] \\
+          {\sl width} & Width in x-direction                         [m]\\
+          {\sl kerf}  & Distance between two elements                [m] 
+         \end{tabular} \\
+          
+        & The function assumes that {\sl kerf + width = pitch} \\
+ OUTPUT:& {\sl xdc} - Pointer to the allocated aperture.
+\end{tabular}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+\headline{bft\_no\_lines}
+%%tth:\vspace{2cm}
+%%tth:\begin{html}<hr>\end{html}
+%%tth:\subsection*{bft\_no\_lines}
+%%tth:\begin{html}<hr>\end{html}
+\funlnk{bft_no_lines}
+
+Set the number of lines that will be beamformed in parallel.
+  After calling \hyperlink{bft_init}{bft\_init}, the number of lines 
+that are beamformed in   parallel is 1. If the user wants to beamform
+a whole image in one  command, he/she must set the number of lines,
+and then specify the focal zones for each of the lines.
+
+\begin{tabular}[t]{lp{14cm}}  
+ 
+ USAGE: & {\tt bft\_no\_lines(no\_lines)}\\
+ INPUT:& {\sl no\_lines}  ~~Number of lines beamformed in parallel \\
+ OUTPUT: & None
+\end{tabular}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+\headline{bft\_param}
+%%tth:\vspace{2cm}
+%%tth:\begin{html}<hr>\end{html} 
+%%tth:\subsection*{bft\_param}
+%%tth:\begin{html}<hr>\end{html}
+\funlnk{bft_param}
+
+Set a parameter of the BeamForming Toolbox
+
+\begin{tabular}[t]{lp{14cm}}  
+
+ USAGE: & {\tt bft\_param(name, value)}\\
+ 
+ INPUT: & \begin{tabular}[t]{lp{11cm}}  
+          {\sl name} & Name of  the parameter (string). Currently supported:\\
+        &  \begin{tabular}[t]{c|c|c|c}
+           \hline 
+            name &        Meaning       & Default value &  Unit \\
+            \hline 
+                  'c' & Speed of sound.       & 1540         &  m/s \\
+                  'fs'& Sampling frequency    & 40,000,000   &  Hz \\
+            \hline       
+          \end{tabular} \\\\
+         
+          {\sl value} & New value for the parameter. Must be scalar. 
+          \end{tabular} \\
+ OUTPUT: & None
+\end{tabular}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+\headline{bft\_sub\_image}
+%%tth:\vspace{2cm}
+%%tth:\begin{html}<hr>\end{html} 
+%%tth:\subsection*{bft\_sub\_image}
+%%tth:\begin{html}<hr>\end{html}
+\funlnk{bft_sub_image}
+
+Subtract one low-res image from  high-res one.
+
+\begin{tabular}[t]{lp{14cm}}  
+ 
+ USAGE: & {\tt [hi\_res] = bft\_sub\_image(hi\_res, lo\_res, element, start\_time)} \\
+ 
+ INPUT:& \begin{tabular}[t]{lp{11cm}}  
+          {\sl hi\_res}  & High resolution RF image. One column per scan line.\\
+          {\sl lo\_res}  & Low resolution RF image. One column per scan line.\\
+          {\sl element} & Number of element, used to acquire the low resolution
+                    image. \\
+          {\sl start\_time}    & Arrival time of the first sample of the RF lines.
+          \end{tabular} \\
+ OUTPUT:& hi\_res - The high resolution image.
+\end{tabular}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+\headline{bft\_sum\_apodization}
+%%tth:\vspace{2cm}
+%%tth:\begin{html}<hr>\end{html} 
+%%tth:\subsection*{bft\_sum\_apodization}
+%%tth:\begin{html}<hr>\end{html}
+\funlnk{bft_sum_apodization}
+
+Create a summation apodization time line.
+    This function is used in the case that the individual low
+    resolution images must be weighted during the summation
+
+\begin{tabular}[t]{lp{14cm}}  
+ 
+  USAGE: & {\tt  bft\_sum\_apodization(xdc, times, values, line\_no)} \\
+ 
+  INPUT: & \begin{tabular}[t]{lp{14cm}}  
+          {\sl xdc} & Pointer to a transducer aperture.\\
+          {\sl times} & Time after which the associated apodization is valid.\\
+          {\sl values} & Apodization values. Matrix with one row for each
+                   time value and a number of columns equal to the 
+                   number of physical elements in the aperture. \\
+          {\sl line\_no} & Number of line. If skipped, {\sl line\_no} is assumed
+                    to be equal to '1'.
+         \end{tabular}\\
+  OUTPUT: & None         
+\end{tabular}
+
+
+\headline{bft\_sum\_images}
+%%tth:\vspace{2cm}
+%%tth:\begin{html}<hr>\end{html} 
+%%tth:\subsection*{bft\_sum\_images}
+%%tth:\begin{html}<hr>\end{html}
+\funlnk{bft_sum_images}
+
+ Sum 2 low resolution images in 1 high resolution.
+
+\begin{tabular}[t]{lp{14cm}}  
+ 
+ USAGE  : {\tt [hi\_res] = bft\_sum\_images(image1, ele1, image2, ele2, time) }\\
+ 
+ INPUT  : \begin{tabular}[t]{lp{141cm}}  
+          {\sl image1} & Matrix with the RF data for the image. The number
+                   of columns corresponds to the number of lines \\
+          {\sl ele1}   & Number of emitting element used to obtain the image.\\ 
+          {\sl image2} & Matrix with the RF data for the image. The number
+                   of columns corresponding to the number of lines \\
+          {\sl ele2}   & Number of emitting element used to obtain the image.\\
+          {\sl time}   &  The arrival time of the first samples. The two images
+                    must be aligned in time 
+          \end{tabular}
+ OUTPUT : hi\_res - Higher resolution image
+\end{tabular}
+
+\headline{bft\_transducer}
+%%tth:\vspace{2cm}
+%%tth:\begin{html}<hr>\end{html} 
+%%tth:\subsection*{bft\_transducer}
+%%tth:\begin{html}<hr>\end{html}
+\funlnk{bft_transducer}
+ 
+ Create a new transducer definition. 
+    The transducer definition is necessary for the calculation of 
+    the delays.
+
+\begin{tabular}[t]{lp{14cm}}  
+ 
+ USAGE: &  {\tt xdc = bft\_transducer(centers)}\\
+ 
+ INPUT: & \begin{tabular}[t]{lp{11cm}}  
+            {\sl centers} & Matrix with the coordinates of the centers of 
+                   the elements. It has 3 columns (x,y,z) and a
+                   number of rows equal to the number of elements.
+                   The coordinates are specified in [m]
+         \end{tabular}\\ 
+ OUTPUT: & \begin{tabular}[t]{lp{11cm}}  
+          xdc & Pointer to the memory location with the transducer 
+               definition. Do not alter this value !!!
+          \end{tabular}
+\end{tabular}
+
+%%tth:\begin{html}<hr>\end{html}
+\chapter{Examples}
+\label{chap_examples}
+%%tth:\begin{html}<hr>\end{html}
+
+\section{Using Field II simulations}
+
+\headline{Phased array B-mode image}
+%%tth:\vspace{2cm}
+%%tth:\begin{html}<hr>\end{html} 
+%%tth:\subsection*{phased array B-mode image}
+%%tth:\begin{html}<hr>\end{html}
+\funlnk{phased_bmode}
+
+{\footnotesize\noindent
+1{\tt~~~~}{\tt {\sl \%PHASED\_IMAGE~Create~phased~array~B-mode~image~with~BFT.}}\\
+2{\tt~~~~}{\tt {\sl \%~~~~This~script~creates~a~B-mode~PSF~line~by~line.~Each~line~is~}}\\
+3{\tt~~~~}{\tt {\sl \%~~~~calculated~using~CALC\_SCAT~and~CALC\_SCAT\_MULTY.~The~rf\_data}}\\
+4{\tt~~~~}{\tt {\sl \%~~~~from~CALC\_SCAT\_MULTI~is~passed~to~~the~beamforming~toolbox,}}\\
+5{\tt~~~~}{\tt {\sl \%~~~~and~in~the~end~the~results~are~compared.}}\\
+6{\tt~~~~}{\tt {\sl \%}}\\
+7{\tt~~~~}{\tt {\sl \%~~~~The~function~calls~XDC\_FOCUS,~and~BFT\_FOCUS~in~order~to~set~the}}\\
+8{\tt~~~~}{\tt {\sl \%~~~~the~delays.~}}\\
+9{\tt~~~~}{\tt }\\
+10{\tt~~~}{\tt {\sl \%~VERSION~1.0,~29~Feb.~2000,~Svetoslav~Nikolov}}\\
+11{\tt~~~}{\tt }\\
+12{\tt~~~}{\tt f0~=~4e6;~~~~~~~~~~~~~~{\sl \%~~Central~frequency~~~~~~~~~~~~~~~~~~~~~~~[Hz]}}\\
+13{\tt~~~}{\tt fs~=~100e6;~~~~~~~~~~~~{\sl \%~~Sampling~frequency~~~~~~~~~~~~~~~~~~~~~~[Hz]}}\\
+14{\tt~~~}{\tt c~=~1540;~~~~~~~~~~~~~~{\sl \%~~Speed~of~sound~~~~~~~~~~~~~~~~~~~~~~~~~~[m/s]}}\\
+15{\tt~~~}{\tt no\_elements~=~64;~~~~~~{\sl \%~~Number~of~elements~in~the~transducer}}\\
+16{\tt~~~}{\tt }\\
+17{\tt~~~}{\tt lambda~=~c~/~f0;~~~~~~~{\sl \%~Wavelength~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m]}}\\
+18{\tt~~~}{\tt pitch~=~lambda~/~2;~~~~{\sl \%~Pitch~-~center-to-center~~~~~~~~~~~~~~~~~[m]}}\\
+19{\tt~~~}{\tt width~=~.95*pitch;~~~~~{\sl \%~Width~of~the~element~~~~~~~~~~~~~~~~~~~~~[m]}}\\
+20{\tt~~~}{\tt kerf~=~pitch~-~width;~~{\sl \%~Inter-element~spacing~~~~~~~~~~~~~~~~~~~~[m]}}\\
+21{\tt~~~}{\tt height~=~10/1000;~~~~~~{\sl \%~Size~in~the~Y~direction~~~~~~~~~~~~~~~~~~[m]}}\\
+22{\tt~~~}{\tt ~}\\
+23{\tt~~~}{\tt ~}\\
+24{\tt~~~}{\tt {\sl \%~~Define~the~impulse~response~of~the~transducer}}\\
+25{\tt~~~}{\tt impulse\_response~=~sin(2*pi*f0*(0:1/fs:2/f0));}\\
+26{\tt~~~}{\tt impulse\_response~=~impulse\_response.*hanning(length(impulse\_response))';}\\
+27{\tt~~~}{\tt excitation~=~impulse\_response;}\\
+28{\tt~~~}{\tt }\\
+29{\tt~~~}{\tt {\sl \%~~Define~the~phantom}}\\
+30{\tt~~~}{\tt }\\
+31{\tt~~~}{\tt pht\_pos~=~[0~0~20;}\\
+32{\tt~~~}{\tt ~~~~~~~~~~~0~0~30;}\\
+33{\tt~~~}{\tt ~~~~~~~~~~~0~0~40;}\\
+34{\tt~~~}{\tt ~~~~~~~~~~~0~0~50;}\\
+35{\tt~~~}{\tt ~~~~~~~~~~~0~0~60;}\\
+36{\tt~~~}{\tt ~~~~~~~~~~~0~0~70;}\\
+37{\tt~~~}{\tt ~~~~~~~~~~~0~0~80;}\\
+38{\tt~~~}{\tt ~~~~~~~~~~~0~0~90;}\\
+39{\tt~~~}{\tt ~~~~~~~~~~~]~/~1000;~~~~~~~~~{\sl \%~~The~position~of~the~phantom}}\\
+40{\tt~~~}{\tt pht\_amp~=~20*ones(8,1);~~~~~~{\sl \%~~The~amplitude~of~the~back-scatter}}\\
+41{\tt~~~}{\tt }\\
+42{\tt~~~}{\tt }\\
+43{\tt~~~}{\tt }\\
+44{\tt~~~}{\tt {\sl \%~~Define~the~focus~}}\\
+45{\tt~~~}{\tt focus\_r~=~[20;30;40;50;60;70;80;90]~/~1000;}\\
+46{\tt~~~}{\tt T~=~(focus\_r-5/1000)/c~*2;}\\
+47{\tt~~~}{\tt }\\
+48{\tt~~~}{\tt }\\
+49{\tt~~~}{\tt {\sl \%~~Initialize~the~program}}\\
+50{\tt~~~}{\tt field\_init(0);}\\
+51{\tt~~~}{\tt bft\_init;}\\
+52{\tt~~~}{\tt }\\
+53{\tt~~~}{\tt }\\
+54{\tt~~~}{\tt {\sl \%~~Set~some~paramters}}\\
+55{\tt~~~}{\tt set\_field('c',~c);}\\
+56{\tt~~~}{\tt bft\_param('c',~c);}\\
+57{\tt~~~}{\tt }\\
+58{\tt~~~}{\tt set\_field('fs',~fs);}\\
+59{\tt~~~}{\tt bft\_param('fs',~fs);}\\
+60{\tt~~~}{\tt }\\
+61{\tt~~~}{\tt }\\
+62{\tt~~~}{\tt }\\
+63{\tt~~~}{\tt {\sl \%~Create~some~apertures.}}\\
+64{\tt~~~}{\tt }\\
+65{\tt~~~}{\tt xmt~=~xdc\_linear\_array(no\_elements,width,height,kerf,1,1,[0~0~0]);}\\
+66{\tt~~~}{\tt rcv~=~xdc\_linear\_array(no\_elements,width,height,kerf,1,1,[0~0~0]);}\\
+67{\tt~~~}{\tt }\\
+68{\tt~~~}{\tt xdc~=~bft\_linear\_array(no\_elements,~width,~kerf);}\\
+69{\tt~~~}{\tt }\\
+70{\tt~~~}{\tt }\\
+71{\tt~~~}{\tt {\sl \%~Set~the~impulse~responses}}\\
+72{\tt~~~}{\tt xdc\_impulse(rcv,~impulse\_response);}\\
+73{\tt~~~}{\tt xdc\_impulse(xmt,~impulse\_response);}\\
+74{\tt~~~}{\tt }\\
+75{\tt~~~}{\tt xdc\_excitation(xmt,~excitation);}\\
+76{\tt~~~}{\tt }\\
+77{\tt~~~}{\tt }\\
+78{\tt~~~}{\tt }\\
+79{\tt~~~}{\tt {\sl \%~~Define~and~create~the~image}}\\
+80{\tt~~~}{\tt sector~=~30~*~pi~/~180;}\\
+81{\tt~~~}{\tt no\_lines~=~32;}\\
+82{\tt~~~}{\tt d\_theta~=~sector~/~(no\_lines-1);}\\
+83{\tt~~~}{\tt theta~=~-(no\_lines-1)~/~2~*~d\_theta;}\\
+84{\tt~~~}{\tt }\\
+85{\tt~~~}{\tt Rmax~=~max(sqrt(pht\_pos(:,1).\^~2~+~pht\_pos(:,2).\^~2~~+~pht\_pos(:,3).\^~2))~+~15/1000;}\\
+86{\tt~~~}{\tt }\\
+87{\tt~~~}{\tt no\_rf\_samples~=~ceil(2*Rmax/c~*~fs);}\\
+88{\tt~~~}{\tt rf\_line~=~zeros(no\_rf\_samples,~1);}\\
+89{\tt~~~}{\tt bf\_line~=~zeros(no\_rf\_samples,~1);}\\
+90{\tt~~~}{\tt }\\
+91{\tt~~~}{\tt env\_line~=~zeros(no\_rf\_samples,~no\_lines);}\\
+92{\tt~~~}{\tt env\_bf~=~~zeros(no\_rf\_samples,~no\_lines);}\\
+93{\tt~~~}{\tt }\\
+94{\tt~~~}{\tt }\\
+95{\tt~~~}{\tt xmt\_r~=~(max(focus\_r)~+~min(focus\_r)~)/2;}\\
+96{\tt~~~}{\tt }\\
+97{\tt~~~}{\tt for~i~=~1~:~no\_lines}\\
+98{\tt~~~}{\tt ~~rf\_line(:)~=~0;~~}\\
+99{\tt~~~}{\tt ~~disp(['Line~no~'~num2str(i)])}\\
+100{\tt~~}{\tt ~~}\\
+101{\tt~~}{\tt ~~focus~=~[sin(theta)*focus\_r,~zeros(length(focus\_r),1),~cos(theta)*focus\_r];}\\
+102{\tt~~}{\tt ~~xmt\_f~=~[sin(theta)*xmt\_r,~zeros(length(xmt\_r),1),~cos(theta)*xmt\_r];}\\
+103{\tt~~}{\tt ~~xdc\_center\_focus(xmt,[0~0~0])}\\
+104{\tt~~}{\tt ~~xdc\_center\_focus(rcv,[0~0~0])}\\
+105{\tt~~}{\tt ~~bft\_center\_focus([0~0~0]);}\\
+106{\tt~~}{\tt ~~}\\
+107{\tt~~}{\tt ~~xdc\_focus(xmt,~0,~xmt\_f);}\\
+108{\tt~~}{\tt ~~xdc\_focus(rcv,~T,~focus);}\\
+109{\tt~~}{\tt ~~bft\_focus(xdc,~T,~focus);}\\
+110{\tt~~}{\tt ~~}\\
+111{\tt~~}{\tt ~~{\sl \%~~Beamform~with~Field~II}}\\
+112{\tt~~}{\tt ~~[rf\_temp,~t(i)]~=~calc\_scat(xmt,rcv,~pht\_pos,~pht\_amp);}\\
+113{\tt~~}{\tt ~~}\\
+114{\tt~~}{\tt ~~{\sl \%~~Beamform~with~BFT}}\\
+115{\tt~~}{\tt ~~xdc\_focus\_times(rcv,~0,~zeros(1,no\_elements));}\\
+116{\tt~~}{\tt ~~[rf\_data,~start\_t]~=~calc\_scat\_multi(xmt,rcv,~pht\_pos,~pht\_amp);}\\
+117{\tt~~}{\tt ~~rf\_data~=~[zeros(300,no\_elements);~rf\_data;~zeros(300,no\_elements)];}\\
+118{\tt~~}{\tt }\\
+119{\tt~~}{\tt ~~start\_t~=~start\_t~-~300~~/~fs;}\\
+120{\tt~~}{\tt ~~bf\_temp~=~bft\_beamform(start\_t,~rf\_data);}\\
+121{\tt~~}{\tt ~~}\\
+122{\tt~~}{\tt ~~start\_sample~=~t(i)*fs;~no\_temp\_samples~=~length(rf\_temp);}\\
+123{\tt~~}{\tt ~~}\\
+124{\tt~~}{\tt ~~rf\_line(start\_sample:start\_sample+no\_temp\_samples-1)~=~rf\_temp(1:no\_temp\_samples);}\\
+125{\tt~~}{\tt ~~env\_line(:,i)~=~abs(hilbert(rf\_line(:)));}\\
+126{\tt~~}{\tt }\\
+127{\tt~~}{\tt ~~start\_sample~=~floor(start\_t*fs);~no\_temp\_samples~=~length(bf\_temp);}\\
+128{\tt~~}{\tt ~~bf\_line(start\_sample:start\_sample+no\_temp\_samples-1)~=~bf\_temp(1:no\_temp\_samples);}\\
+129{\tt~~}{\tt ~~env\_bf(:,i)~=~abs(hilbert(bf\_line(:)));}\\
+130{\tt~~}{\tt ~~theta~=~theta~+~d\_theta;}\\
+131{\tt~~}{\tt }\\
+132{\tt~~}{\tt end}\\
+133{\tt~~}{\tt }\\
+134{\tt~~}{\tt {\sl \%~~Release~the~allocated~memory}}\\
+135{\tt~~}{\tt }\\
+136{\tt~~}{\tt field\_end}\\
+137{\tt~~}{\tt bft\_end}\\
+138{\tt~~}{\tt }\\
+139{\tt~~}{\tt env\_line~=~env\_line~/~max(max(abs(env\_line)));}\\
+140{\tt~~}{\tt env\_bf~=~env\_bf~/~max(max(abs(env\_bf)));}\\
+141{\tt~~}{\tt }\\
+142{\tt~~}{\tt figure;}\\
+143{\tt~~}{\tt subplot(1,2,1)}\\
+144{\tt~~}{\tt imagesc([-sector/2~sector/2]*180/pi,[0~Rmax]*1000,20*log10(env\_line~+~0.001))}\\
+145{\tt~~}{\tt axis('image')}\\
+146{\tt~~}{\tt xlabel('Angle~[deg]');}\\
+147{\tt~~}{\tt ylabel('Axial~distance~[mm]')}\\
+148{\tt~~}{\tt title('Beamformed~by~Field~II~');}\\
+149{\tt~~}{\tt }\\
+150{\tt~~}{\tt subplot(1,2,2)}\\
+151{\tt~~}{\tt imagesc([-sector/2~sector/2]*180/pi,[0~Rmax]*1000,20*log10(env\_bf~+~0.001));}\\
+152{\tt~~}{\tt title('Beamformed~by~BFT');}\\
+153{\tt~~}{\tt xlabel('Angle~[deg]');}\\
+154{\tt~~}{\tt ylabel('Axial~distance~[mm]')}\\
+155{\tt~~}{\tt axis('image')}\\
+156{\tt~~}{\tt }\\
+157{\tt~~}{\tt colorbar}\\
+158{\tt~~}{\tt colormap(gray)}\\
+159{\tt~~}{\tt }\\
+160{\tt~~}{\tt clc}\\
+161{\tt~~}{\tt disp(['~'~10~10~10~10~]);}\\
+162{\tt~~}{\tt disp([9~'*****************************************************']);}\\
+163{\tt~~}{\tt disp([9~'*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*']);}\\
+164{\tt~~}{\tt disp([9~'*~The~image~beamformed~by~Field~II~is~in~"env\_line"~*']);}\\
+165{\tt~~}{\tt disp([9~'*~The~image~beamformed~by~BFT~is~in~"env\_bf"~~~~~~~~*']);}\\
+166{\tt~~}{\tt disp([9~'*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*'])}\\
+167{\tt~~}{\tt disp([9~'*****************************************************']);}\\
+168{\tt~~}{\tt disp(['~'~10~10~]);}\\
+169{\tt~~}{\tt }\\
+170{\tt~~}{\tt }\\
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\headline{Dynamic focusing}
+%%tth:\vspace{2cm}
+%%tth:\begin{html}<hr>\end{html} 
+%%tth:\subsection*{Dynamic focusing}
+%%tth:\begin{html}<hr>\end{html}
+\funlnk{dynamic_focusing}
+
+{\footnotesize\noindent
+1{\tt~~~~}{\tt {\sl \%PHASED\_DYN\_IMAGE~Create~a~phased-array~B-mode~image,~using~the~}}\\
+2{\tt~~~~}{\tt {\sl \%~~~~commands~for~setting~a~dynamic~focusing}}\\
+3{\tt~~~~}{\tt }\\
+4{\tt~~~~}{\tt {\sl \%VERSION~1.0,~29~Feb~2000,~Svetoslav~Nikolov}}\\
+5{\tt~~~~}{\tt }\\
+6{\tt~~~~}{\tt f0~=~4e6;~~~~~~~~~~~~~~{\sl \%~~Central~frequency~~~~~~~~~~~~~~~~~~~~~~~~[Hz]}}\\
+7{\tt~~~~}{\tt fs~=~100e6;~~~~~~~~~~~~{\sl \%~~Sampling~frequency~~~~~~~~~~~~~~~~~~~~~~~[Hz]}}\\
+8{\tt~~~~}{\tt c~=~1540;~~~~~~~~~~~~~~{\sl \%~~Speed~of~sound~~~~~~~~~~~~~~~~~~~~~~~~~~~[m/s]}}\\
+9{\tt~~~~}{\tt B~=~.35;~~~~~~~~~~~~~~~{\sl \%~~Relative~bandwith~~~~~~~~~~~~~~~~~~~~~~~~[fraction]}}\\
+10{\tt~~~}{\tt no\_elements~=~64;~~~~~~{\sl \%~~Number~of~elements~in~the~transducer~~~~~}}\\
+11{\tt~~~}{\tt }\\
+12{\tt~~~}{\tt lambda~=~c~/~f0;~~~~~~~{\sl \%~Wavelength~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m]}}\\
+13{\tt~~~}{\tt pitch~=~lambda~/~2;~~~~{\sl \%~Pitch~-~center-to-center~~~~~~~~~~~~~~~~~~[m]}}\\
+14{\tt~~~}{\tt width~=~.95*pitch;~~~~~{\sl \%~Width~of~the~element~~~~~~~~~~~~~~~~~~~~~~[m]}}\\
+15{\tt~~~}{\tt kerf~=~pitch~-~width;~~{\sl \%~Inter-element~spacing~~~~~~~~~~~~~~~~~~~~~[m]}}\\
+16{\tt~~~}{\tt height~=~10/1000;~~~~~~{\sl \%~Size~in~the~Y~direction~~~~~~~~~~~~~~~~~~~[m]}}\\
+17{\tt~~~}{\tt ~}\\
+18{\tt~~~}{\tt ~}\\
+19{\tt~~~}{\tt {\sl \%~~Define~the~impulse~response~of~the~transducer}}\\
+20{\tt~~~}{\tt impulse\_response~=~sin(2*pi*f0*(0:1/fs:2/f0));}\\
+21{\tt~~~}{\tt impulse\_response~=~impulse\_response.*hanning(length(impulse\_response))';}\\
+22{\tt~~~}{\tt excitation~=~impulse\_response;}\\
+23{\tt~~~}{\tt }\\
+24{\tt~~~}{\tt {\sl \%~~Define~the~phantom}}\\
+25{\tt~~~}{\tt }\\
+26{\tt~~~}{\tt pht\_pos~=~[0~0~20;}\\
+27{\tt~~~}{\tt ~~~~~~~~~~~0~0~30;}\\
+28{\tt~~~}{\tt ~~~~~~~~~~~0~0~40;}\\
+29{\tt~~~}{\tt ~~~~~~~~~~~0~0~50;}\\
+30{\tt~~~}{\tt ~~~~~~~~~~~0~0~60;}\\
+31{\tt~~~}{\tt ~~~~~~~~~~~0~0~70;}\\
+32{\tt~~~}{\tt ~~~~~~~~~~~0~0~80;]~/~1000;~~~~~~~~~{\sl \%~~The~position~of~the~phantom}}\\
+33{\tt~~~}{\tt pht\_amp~=~20*ones(7,1);~~~~~~{\sl \%~~The~amplitude~of~the~back-scatter}}\\
+34{\tt~~~}{\tt }\\
+35{\tt~~~}{\tt {\sl \%~~Define~the~focus~}}\\
+36{\tt~~~}{\tt focus\_r~=~[20;30;40;50;60;70;80;90]~/~1000;}\\
+37{\tt~~~}{\tt T~=~(focus\_r-5/1000)/c~*2;}\\
+38{\tt~~~}{\tt }\\
+39{\tt~~~}{\tt {\sl \%~~Initialize~the~program}}\\
+40{\tt~~~}{\tt field\_init(0);}\\
+41{\tt~~~}{\tt bft\_init;}\\
+42{\tt~~~}{\tt }\\
+43{\tt~~~}{\tt {\sl \%~~Set~some~paramters}}\\
+44{\tt~~~}{\tt set\_field('c',~c);}\\
+45{\tt~~~}{\tt bft\_param('c',~c);}\\
+46{\tt~~~}{\tt }\\
+47{\tt~~~}{\tt set\_field('fs',~fs);}\\
+48{\tt~~~}{\tt bft\_param('fs',~fs);}\\
+49{\tt~~~}{\tt }\\
+50{\tt~~~}{\tt }\\
+51{\tt~~~}{\tt {\sl \%~Create~some~apertures.}}\\
+52{\tt~~~}{\tt }\\
+53{\tt~~~}{\tt xmt~=~xdc\_linear\_array(no\_elements,width,height,kerf,1,1,[0~0~0]);}\\
+54{\tt~~~}{\tt rcv~=~xdc\_linear\_array(no\_elements,width,height,kerf,1,1,[0~0~0]);}\\
+55{\tt~~~}{\tt }\\
+56{\tt~~~}{\tt xdc~=~bft\_linear\_array(no\_elements,~width,~kerf);}\\
+57{\tt~~~}{\tt }\\
+58{\tt~~~}{\tt }\\
+59{\tt~~~}{\tt {\sl \%~Set~the~impulse~responses}}\\
+60{\tt~~~}{\tt xdc\_impulse(rcv,~impulse\_response);}\\
+61{\tt~~~}{\tt xdc\_impulse(xmt,~impulse\_response);}\\
+62{\tt~~~}{\tt }\\
+63{\tt~~~}{\tt xdc\_excitation(xmt,~excitation);}\\
+64{\tt~~~}{\tt }\\
+65{\tt~~~}{\tt }\\
+66{\tt~~~}{\tt {\sl \%~Set~the~apodization}}\\
+67{\tt~~~}{\tt }\\
+68{\tt~~~}{\tt xdc\_apodization(xmt,~0,~ones(1,no\_elements))}\\
+69{\tt~~~}{\tt xdc\_apodization(rcv,~0,~ones(1,no\_elements))}\\
+70{\tt~~~}{\tt bft\_apodization(xdc,~0~,~ones(1,no\_elements))}\\
+71{\tt~~~}{\tt }\\
+72{\tt~~~}{\tt {\sl \%~~Define~and~create~the~image}}\\
+73{\tt~~~}{\tt sector~=~30~*~pi~/~180;}\\
+74{\tt~~~}{\tt no\_lines~=~32;}\\
+75{\tt~~~}{\tt d\_theta~=~sector~/~(no\_lines-1);}\\
+76{\tt~~~}{\tt theta~=~-(no\_lines-1)~/~2~*~d\_theta;}\\
+77{\tt~~~}{\tt }\\
+78{\tt~~~}{\tt Rmax~=~max(sqrt(pht\_pos(:,1).\^~2~+~pht\_pos(:,2).\^~2~~+~pht\_pos(:,3).\^~2))~+~15/1000;}\\
+79{\tt~~~}{\tt }\\
+80{\tt~~~}{\tt no\_rf\_samples~=~ceil(2*Rmax/c~*~fs);}\\
+81{\tt~~~}{\tt rf\_line~=~zeros(no\_rf\_samples,~1);}\\
+82{\tt~~~}{\tt bf\_line~=~zeros(no\_rf\_samples,~1);}\\
+83{\tt~~~}{\tt }\\
+84{\tt~~~}{\tt env\_line~=~zeros(no\_rf\_samples,~no\_lines);}\\
+85{\tt~~~}{\tt env\_bf~=~~zeros(no\_rf\_samples,~no\_lines);}\\
+86{\tt~~~}{\tt }\\
+87{\tt~~~}{\tt }\\
+88{\tt~~~}{\tt xmt\_r~=~(max(focus\_r)~+~min(focus\_r)~)/2;}\\
+89{\tt~~~}{\tt bf~=~cell(no\_lines,1);}\\
+90{\tt~~~}{\tt for~i~=~1~:~no\_lines}\\
+91{\tt~~~}{\tt ~~rf\_line(:)~=~0;~~}\\
+92{\tt~~~}{\tt ~~theta}\\
+93{\tt~~~}{\tt ~~}\\
+94{\tt~~~}{\tt ~~xmt\_f~=~[sin(theta)*xmt\_r,~zeros(length(xmt\_r),1),~cos(theta)*xmt\_r];}\\
+95{\tt~~~}{\tt ~~xdc\_center\_focus(xmt,[0~0~0])}\\
+96{\tt~~~}{\tt ~~xdc\_center\_focus(rcv,[0~0~0])}\\
+97{\tt~~~}{\tt ~~bft\_center\_focus([0~0~0]);}\\
+98{\tt~~~}{\tt ~~}\\
+99{\tt~~~}{\tt ~~xdc\_focus(xmt,~0,~xmt\_f);}\\
+100{\tt~~}{\tt ~~xdc\_dynamic\_focus(rcv,~0,~theta,~0);}\\
+101{\tt~~}{\tt ~~}\\
+102{\tt~~}{\tt ~~{\sl \%~~Beamform~with~Field~II}}\\
+103{\tt~~}{\tt ~~[rf\_temp,~t(i)]~=~calc\_scat(xmt,rcv,~pht\_pos,~pht\_amp);}\\
+104{\tt~~}{\tt ~~}\\
+105{\tt~~}{\tt ~~{\sl \%~~Beamform~with~BFT}}\\
+106{\tt~~}{\tt ~~bft\_dynamic\_focus(xdc,~theta,~0)}\\
+107{\tt~~}{\tt ~~xdc\_focus\_times(rcv,~0,~zeros(1,no\_elements));}\\
+108{\tt~~}{\tt ~~[rf\_data,~start\_t]~=~calc\_scat\_multi(xmt,rcv,~pht\_pos,~pht\_amp);}\\
+109{\tt~~}{\tt ~~}\\
+110{\tt~~}{\tt ~~rf\_data~=~[zeros(300,no\_elements);~rf\_data;~zeros(300,no\_elements)];}\\
+111{\tt~~}{\tt }\\
+112{\tt~~}{\tt ~~start\_t~=~start\_t~-~300~~/~fs;}\\
+113{\tt~~}{\tt ~~bf\_temp~=~bft\_beamform(start\_t,~rf\_data);}\\
+114{\tt~~}{\tt ~~}\\
+115{\tt~~}{\tt ~~start\_sample~=~t(i)*fs;~no\_temp\_samples~=~length(rf\_temp);}\\
+116{\tt~~}{\tt ~~}\\
+117{\tt~~}{\tt ~~rf\_line(start\_sample:start\_sample+no\_temp\_samples-1)~=~rf\_temp(1:no\_temp\_samples);}\\
+118{\tt~~}{\tt ~~env\_line(:,i)~=~abs(hilbert(rf\_line(:)));}\\
+119{\tt~~}{\tt }\\
+120{\tt~~}{\tt ~~start\_sample~=~floor(start\_t*fs);~no\_temp\_samples~=~length(bf\_temp);}\\
+121{\tt~~}{\tt ~~bf{i}~=~bf\_temp;}\\
+122{\tt~~}{\tt ~~}\\
+123{\tt~~}{\tt ~~bf\_line(start\_sample:start\_sample+no\_temp\_samples-1)~=~bf\_temp(1:no\_temp\_samples);}\\
+124{\tt~~}{\tt ~~env\_bf(:,i)~=~abs(hilbert(bf\_line(:)));}\\
+125{\tt~~}{\tt ~~theta~=~theta~+~d\_theta;}\\
+126{\tt~~}{\tt }\\
+127{\tt~~}{\tt end}\\
+128{\tt~~}{\tt }\\
+129{\tt~~}{\tt {\sl \%~~Release~the~allocated~memory}}\\
+130{\tt~~}{\tt }\\
+131{\tt~~}{\tt field\_end}\\
+132{\tt~~}{\tt bft\_end}\\
+133{\tt~~}{\tt env\_line~=~env\_line~/~max(max(abs(env\_line)));}\\
+134{\tt~~}{\tt env\_bf~=~env\_bf~/~max(max(abs(env\_bf)));}\\
+135{\tt~~}{\tt }\\
+136{\tt~~}{\tt figure;}\\
+137{\tt~~}{\tt subplot(1,2,1)}\\
+138{\tt~~}{\tt imagesc([-sector/2~sector/2]*180/pi,[0~Rmax]*1000,20*log10(env\_line~+~0.001))}\\
+139{\tt~~}{\tt axis('image')}\\
+140{\tt~~}{\tt xlabel('Angle~[deg]');}\\
+141{\tt~~}{\tt ylabel('Axial~distance~[mm]')}\\
+142{\tt~~}{\tt title('Beamformed~by~Field~II~');}\\
+143{\tt~~}{\tt }\\
+144{\tt~~}{\tt subplot(1,2,2)}\\
+145{\tt~~}{\tt imagesc([-sector/2~sector/2]*180/pi,[0~Rmax]*1000,20*log10(env\_bf~+~0.001));}\\
+146{\tt~~}{\tt title('Beamformed~by~BFT');}\\
+147{\tt~~}{\tt xlabel('Angle~[deg]');}\\
+148{\tt~~}{\tt ylabel('Axial~distance~[mm]')}\\
+149{\tt~~}{\tt axis('image')}\\
+150{\tt~~}{\tt }\\
+151{\tt~~}{\tt colorbar}\\
+152{\tt~~}{\tt colormap(gray)}\\
+153{\tt~~}{\tt }\\
+154{\tt~~}{\tt clc}\\
+155{\tt~~}{\tt disp(['~'~10~10~10~10~]);}\\
+156{\tt~~}{\tt disp([9~'*****************************************************']);}\\
+157{\tt~~}{\tt disp([9~'*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*']);}\\
+158{\tt~~}{\tt disp([9~'*~The~image~beamformed~by~Field~II~is~in~"env\_line"~*']);}\\
+159{\tt~~}{\tt disp([9~'*~The~image~beamformed~by~BFT~is~in~"env\_bf"~~~~~~~~*']);}\\
+160{\tt~~}{\tt disp([9~'*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*'])}\\
+161{\tt~~}{\tt disp([9~'*****************************************************']);}\\
+162{\tt~~}{\tt disp(['~'~10~10~]);}\\
+163{\tt~~}{\tt }\\
+164{\tt~~}{\tt }\\
+}
+
+\headline{Synthetic Aperture Focusing}
+%%tth:\vspace{2cm}
+%%tth:\begin{html}<hr>\end{html} 
+%%tth:\subsection*{Synthetic Aperture Focusing}
+%%tth:\begin{html}<hr>\end{html}
+\funlnk{sar_focusing}
+
+{\footnotesize\noindent
+1{\tt~~~~}{\tt {\sl \%SYNTHETIC~Synthetic~aperture~beamforming~with~BFT}}\\
+2{\tt~~~~}{\tt {\sl \%~}}\\
+3{\tt~~~~}{\tt }\\
+4{\tt~~~~}{\tt }\\
+5{\tt~~~~}{\tt f0~=~4e6;~~~~~~~~~~~~~~{\sl \%~~Central~frequency}}\\
+6{\tt~~~~}{\tt fs~=~100e6;~~~~~~~~~~~~{\sl \%~~Sampling~frequency}}\\
+7{\tt~~~~}{\tt c~=~1540;~~~~~~~~~~~~~~{\sl \%~~Speed~of~sound}}\\
+8{\tt~~~~}{\tt no\_elements~=~64;~~~~~~{\sl \%~~Number~of~elements~in~the~transducer}}\\
+9{\tt~~~~}{\tt }\\
+10{\tt~~~}{\tt lambda~=~c~/~f0;~~~~~~~{\sl \%~Wavelength}}\\
+11{\tt~~~}{\tt pitch~=~lambda~/~2;~~~~{\sl \%~Pitch~-~center-to-center}}\\
+12{\tt~~~}{\tt width~=~.95*pitch;~~~~~{\sl \%~Width~of~the~element}}\\
+13{\tt~~~}{\tt kerf~=~pitch~-~width;~~{\sl \%~Inter-element~spacing}}\\
+14{\tt~~~}{\tt height~=~10/1000;~~~~~~{\sl \%~Size~in~the~Y~direction}}\\
+15{\tt~~~}{\tt ~}\\
+16{\tt~~~}{\tt ~}\\
+17{\tt~~~}{\tt {\sl \%~~Define~the~impulse~response~of~the~transducer}}\\
+18{\tt~~~}{\tt impulse\_response~=~sin(3*pi*f0*(0:1/fs:2/f0));}\\
+19{\tt~~~}{\tt impulse\_response~=~impulse\_response.*hanning(length(impulse\_response))';}\\
+20{\tt~~~}{\tt excitation~=~sin(2*pi*f0*(0:1/fs:3/f0));}\\
+21{\tt~~~}{\tt }\\
+22{\tt~~~}{\tt {\sl \%~~Define~the~phantom}}\\
+23{\tt~~~}{\tt }\\
+24{\tt~~~}{\tt pht\_pos~=~[0~0~40]~/~1000;~~~{\sl \%~~The~position~of~the~phantom}}\\
+25{\tt~~~}{\tt }\\
+26{\tt~~~}{\tt [m~n]~=~size(pht\_pos);}\\
+27{\tt~~~}{\tt pht\_amp~=~20*ones(m,1);~~~~~~{\sl \%~~The~amplitude~of~the~back-scatter}}\\
+28{\tt~~~}{\tt }\\
+29{\tt~~~}{\tt }\\
+30{\tt~~~}{\tt {\sl \%~~Define~the~focus~}}\\
+31{\tt~~~}{\tt }\\
+32{\tt~~~}{\tt focus\_r~=~[1:max(sqrt(pht\_pos(:,1).\^~2~+~pht\_pos(:,2).\^~2~+~pht\_pos(:,3).\^~2))*1000]'~/~1000;}\\
+33{\tt~~~}{\tt T~=~(focus\_r-.5/1000)/c~*2;}\\
+34{\tt~~~}{\tt }\\
+35{\tt~~~}{\tt }\\
+36{\tt~~~}{\tt }\\
+37{\tt~~~}{\tt {\sl \%~~Initialize~the~program}}\\
+38{\tt~~~}{\tt field\_init(0);}\\
+39{\tt~~~}{\tt bft\_init;}\\
+40{\tt~~~}{\tt }\\
+41{\tt~~~}{\tt {\sl \%~~Set~some~paramters}}\\
+42{\tt~~~}{\tt set\_field('c',~c);}\\
+43{\tt~~~}{\tt bft\_param('c',~c);}\\
+44{\tt~~~}{\tt }\\
+45{\tt~~~}{\tt set\_field('fs',~fs);}\\
+46{\tt~~~}{\tt bft\_param('fs',~fs);}\\
+47{\tt~~~}{\tt }\\
+48{\tt~~~}{\tt }\\
+49{\tt~~~}{\tt {\sl \%~Create~some~apertures.}}\\
+50{\tt~~~}{\tt }\\
+51{\tt~~~}{\tt xmt~=~xdc\_linear\_array(no\_elements,width,height,kerf,1,1,[0~0~0]);}\\
+52{\tt~~~}{\tt rcv~=~xdc\_linear\_array(no\_elements,width,height,kerf,1,1,[0~0~0]);}\\
+53{\tt~~~}{\tt }\\
+54{\tt~~~}{\tt xdc~=~bft\_linear\_array(no\_elements,~width,~kerf);}\\
+55{\tt~~~}{\tt }\\
+56{\tt~~~}{\tt }\\
+57{\tt~~~}{\tt {\sl \%~Set~the~impulse~responses}}\\
+58{\tt~~~}{\tt xdc\_impulse(rcv,~impulse\_response);}\\
+59{\tt~~~}{\tt xdc\_impulse(xmt,~impulse\_response);}\\
+60{\tt~~~}{\tt }\\
+61{\tt~~~}{\tt xdc\_excitation(xmt,~excitation);}\\
+62{\tt~~~}{\tt }\\
+63{\tt~~~}{\tt }\\
+64{\tt~~~}{\tt {\sl \%~~Define~and~create~the~image}}\\
+65{\tt~~~}{\tt sector~=~60~*~pi~/~180;}\\
+66{\tt~~~}{\tt no\_lines~=~64;}\\
+67{\tt~~~}{\tt d\_theta~=~sector~/~(no\_lines-1);}\\
+68{\tt~~~}{\tt theta~=~-(no\_lines-1)~/~2~*~d\_theta;}\\
+69{\tt~~~}{\tt }\\
+70{\tt~~~}{\tt {\sl \%~~Set~the~delays~for~one~whole~image}}\\
+71{\tt~~~}{\tt {\sl \%}}\\
+72{\tt~~~}{\tt bft\_no\_lines(no\_lines);}\\
+73{\tt~~~}{\tt for~i~=~1~:~no\_lines}\\
+74{\tt~~~}{\tt ~~bft\_apodization(xdc,0,hanning(no\_elements)',i);}\\
+75{\tt~~~}{\tt {\sl \%~~bft\_sum\_apodization(xdc,0,ones(1,no\_elements),i);}}\\
+76{\tt~~~}{\tt ~~focus~=~[sin(theta)*focus\_r,~zeros(length(focus\_r),1),~cos(theta)*focus\_r];}\\
+77{\tt~~~}{\tt ~~bft\_center\_focus([0~0~0],i);}\\
+78{\tt~~~}{\tt ~~bft\_focus(xdc,~T,~focus,i);}\\
+79{\tt~~~}{\tt ~~theta~=~theta~+~d\_theta;}\\
+80{\tt~~~}{\tt end}\\
+81{\tt~~~}{\tt }\\
+82{\tt~~~}{\tt }\\
+83{\tt~~~}{\tt {\sl \%}}\\
+84{\tt~~~}{\tt {\sl \%~~Allocate~memory~for~the~image}}\\
+85{\tt~~~}{\tt {\sl \%}}\\
+86{\tt~~~}{\tt Rmax~=~max(sqrt(pht\_pos(:,1).\^~2~+~pht\_pos(:,2).\^~2~~+~pht\_pos(:,3).\^~2))~+~10/1000;}\\
+87{\tt~~~}{\tt Rmin~=~min(sqrt(pht\_pos(:,1).\^~2~+~pht\_pos(:,2).\^~2~~+~pht\_pos(:,3).\^~2))~-~10/1000;}\\
+88{\tt~~~}{\tt if~(Rmin~<~0)~Rmin~=~0;~end;}\\
+89{\tt~~~}{\tt Tmin~=~2*Rmin~/~c;~Tmax~=~2*Rmax~/~c;}\\
+90{\tt~~~}{\tt Smin~=~floor(Tmin~*~fs);~Smax~=~ceil(Tmax~*~fs);}\\
+91{\tt~~~}{\tt }\\
+92{\tt~~~}{\tt no\_rf\_samples~=~Smax~-~Smin~+~1;}\\
+93{\tt~~~}{\tt }\\
+94{\tt~~~}{\tt bf\_image~=~zeros(no\_rf\_samples,~no\_lines);}\\
+95{\tt~~~}{\tt }\\
+96{\tt~~~}{\tt {\sl \%}}\\
+97{\tt~~~}{\tt {\sl \%~Make~one~low-resolution~image~at~a~time~and~sum~them}}\\
+98{\tt~~~}{\tt {\sl \%}}\\
+99{\tt~~~}{\tt }\\
+100{\tt~~}{\tt xdc\_focus\_times(xmt,0,zeros(1,no\_elements));~}\\
+101{\tt~~}{\tt xdc\_focus\_times(rcv,0,zeros(1,no\_elements));}\\
+102{\tt~~}{\tt for~emission\_no~=~1:no\_elements}\\
+103{\tt~~}{\tt ~~disp(['emission~no:~'~num2str(emission\_no)]);~~}\\
+104{\tt~~}{\tt ~~xdc\_apodization(xmt,0,[zeros(1,emission\_no-1)~1~zeros(1,~no\_elements~-~emission\_no)]);}\\
+105{\tt~~}{\tt }\\
+106{\tt~~}{\tt ~~[scat,~start\_time]~=~calc\_scat\_multi~(xmt,~rcv,~pht\_pos,~pht\_amp);}\\
+107{\tt~~}{\tt }\\
+108{\tt~~}{\tt ~~start\_sample~=~floor(start\_time~*~fs~+~0.5);}\\
+109{\tt~~}{\tt ~~end\_sample~=~start\_sample~+~max(size(scat))-1;}\\
+110{\tt~~}{\tt ~~}\\
+111{\tt~~}{\tt ~~scat~=~[zeros(start\_sample~-~Smin,~no\_elements);~scat;~zeros(Smax~-~end\_sample,no\_elements)];}\\
+112{\tt~~}{\tt ~}\\
+113{\tt~~}{\tt ~~start\_time~=~Tmin;}\\
+114{\tt~~}{\tt ~~beamformed~=~bft\_beamform(start\_time,scat);}\\
+115{\tt~~}{\tt ~~bf\_image~=~bft\_add\_image(bf\_image,~beamformed,~emission\_no,~start\_time);}\\
+116{\tt~~}{\tt end}\\
+117{\tt~~}{\tt }\\
+118{\tt~~}{\tt }\\
+119{\tt~~}{\tt }\\
+120{\tt~~}{\tt {\sl \%~~Release~the~allocated~memory}}\\
+121{\tt~~}{\tt }\\
+122{\tt~~}{\tt field\_end}\\
+123{\tt~~}{\tt bft\_end}\\
+124{\tt~~}{\tt }\\
+125{\tt~~}{\tt }\\
+126{\tt~~}{\tt }\\
+127{\tt~~}{\tt {\sl \%}}\\
+128{\tt~~}{\tt {\sl \%~~Dispplay~the~image}}\\
+129{\tt~~}{\tt {\sl \%}}\\
+130{\tt~~}{\tt }\\
+131{\tt~~}{\tt bf\_image~=~abs(hilbert(bf\_image));~~~~~~~~~~~~~~~~~~{\sl \%~Envelope~detection}}\\
+132{\tt~~}{\tt bf\_image~=~bf\_image~/~max(max(bf\_image));}\\
+133{\tt~~}{\tt }\\
+134{\tt~~}{\tt figure;}\\
+135{\tt~~}{\tt imagesc([-sector/2~sector/2]*180/pi,[Rmin~Rmax]*1000,20*log10(bf\_image~+~0.001))}\\
+136{\tt~~}{\tt axis('image')}\\
+137{\tt~~}{\tt xlabel('Angle~[deg]');}\\
+138{\tt~~}{\tt ylabel('Axial~distance~[mm]')}\\
+139{\tt~~}{\tt title('Beamformed~by~BFT~');}\\
+140{\tt~~}{\tt clc}\\
+141{\tt~~}{\tt disp(['~'~10~10~10~10~]);}\\
+142{\tt~~}{\tt disp([9~'*****************************************************']);}\\
+143{\tt~~}{\tt disp([9~'*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*']);}\\
+144{\tt~~}{\tt disp([9~'*~The~image~beamformed~by~BFT~is~in~"bf\_image"~~~~~~*']);}\\
+145{\tt~~}{\tt disp([9~'*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*'])}\\
+146{\tt~~}{\tt disp([9~'*****************************************************']);}\\
+147{\tt~~}{\tt disp(['~'~10~10~]);}\\
+148{\tt~~}{\tt }\\
+}
+
+
+\end{document}
