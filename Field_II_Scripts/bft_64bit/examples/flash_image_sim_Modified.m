@@ -3,13 +3,12 @@
 
 %VERSION 1.0, 29 Feb 2000, Svetoslav Nikolov
 
-%path('/home/tjh/git/zemp_lab/Matlab/bft',path);
+path('C:\Users\User\Dropbox\Grad_School\Summer Codes\GitCodes\Field_II_Scripts\bft_64bit',path);
 %path('/home/tjh/git/fieldII',path);
 
 f0 = 5e6;              %  Central frequency                        [Hz]
 fs = 100e6;            %  Sampling frequency                       [Hz]
 c = 1540;              %  Speed of sound                           [m/s]
-B = .6;               %  Relative bandwith                        [fraction]
 no_elements = 128;      %  Number of elements in the transducer     
 
 lambda = c / f0;       % Wavelength                                [m]
@@ -26,12 +25,12 @@ excitation = impulse_response;
 
 %  Define the phantom
 
-pht_pos = [0 0 30] / 1000;         %  The position of the phantom
-pht_amp = [1];      %  The amplitude of the back-scatter
+pht_pos = [0 0 30; 0 0 20; 0 0 40;] / 1000;         %  The position of the phantom
+pht_amp = [1; 1; 1];      %  The amplitude of the back-scatter
 
 % Focus everywhere
-focus_r = [1:max(sqrt(pht_pos(:,1).^2 + pht_pos(:,2).^2 + pht_pos(:,3).^2))*1000]' / 1000;
-T = (focus_r-.5/1000)/c *2;
+%focus_r = [1:max(sqrt(pht_pos(:,1).^2 + pht_pos(:,2).^2 + pht_pos(:,3).^2))*1000]' / 1000;
+%T = (focus_r-.5/1000)/c *2;
 
 %  Initialize the program
 field_init(0);
@@ -70,14 +69,14 @@ image_width = 40/1000;
 d_x_line = image_width*no_elements / (no_lines-1);
 x_line = -(no_lines-1) / 2 * d_x_line;
 
-xmt_r = (max(focus_r) + min(focus_r) )/2;
-bf = cell(no_lines,1);
+%xmt_r = (max(focus_r) + min(focus_r) )/2;
+%bf = cell(no_lines,1);
 
-xmt_f = [0,xmt_r,0];
+%xmt_f = [0,xmt_r,0];
 xdc_center_focus(xmt,[0 0 0])
 xdc_center_focus(rcv,[0 0 0])
   
-xdc_focus(xmt, 0, xmt_f);
+xdc_focus(xmt, 0, [0, 0, 30/1000]);
 xdc_dynamic_focus(rcv, 0, 0, 0);
   
 
@@ -111,14 +110,14 @@ bft_end
 env_bf = env_bf / max(max(abs(env_bf)));
 
 figure;
-imagesc((1:no_lines)*d_x_line,(1:size(env_bf,1))/fs*c/2,20*log10(env_bf+0.001));
+imagesc((1:no_lines)*d_x_line,(1:size(env_bf,1))/fs*c/2,20*log10(env_bf+eps));
 title('Beamformed by BFT');
 xlabel('Lateral distance [mm]');
 ylabel('Axial distance [mm]')
 axis('image')
 
 colorbar
-colormap(gray); brighten(-0.8)
+colormap(gray); %brighten(-0.8)
 
 disp([' ' 10 10 10 10 ]);
 disp([9 '*****************************************************']);

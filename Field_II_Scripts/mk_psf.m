@@ -6,6 +6,7 @@ max_sample = max([max(times)*fs 2*0.121/c*fs]);
 [n, m] = size(image_data);
 n = n + (max_sample-min_sample);
 
+psf = 0;
 for i = 1:no_lines
     ps = [zeros(round(times(i)*fs-min_sample), 1); image_data(:, i)];
     psf(1:max(size(ps)),i) = ps;
