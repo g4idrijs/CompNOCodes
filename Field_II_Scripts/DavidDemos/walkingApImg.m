@@ -1,9 +1,12 @@
 % Returns the data in the no_lines line, currently, summed but not
 % beamformed (I think)
 
+% NEEDS EDITING
+
 function sumDataCurr = walkingApImg(transCode,lenSendExcite,emit_aperture,N_elements,width,...
     element_height,kerf,Rfocus,no_sub_x,no_sub_y,rx_focus,impulse_response,...
     N_active_tx, N_active_rx, tx_focus,no_lines)
+
 
 excitation = repmat(transCode,1,lenSendExcite/numel(transCode))';
 excitation = excitation(:)';
@@ -83,12 +86,12 @@ for i = 1:no_lines % Get image data along each line
     % and sums image data from each part of aperture
     % Use calc_scat_multi to avoid beamforming / summing
     
- [sumDataCurr t1] = calc_scat(emit_aperture, receive_aperture, phantom_positions, phantom_amplitudes);
+% [sumDataCurr t1] = calc_scat(emit_aperture, receive_aperture, phantom_positions, phantom_amplitudes);
 %     plot(v)
 %     title('Calc\_scat')    
     
     % Each column is the reponse of an element in the receive aperature
-%     [v t1] = calc_scat_multi(emit_aperture, receive_aperture, phantom_positions, phantom_amplitudes);
+    [v t1] = calc_scat_multi(emit_aperture, receive_aperture, phantom_positions, phantom_amplitudes);
     
     % Debug - show the raw data collected by some element
 %     currEl = 63;
@@ -97,7 +100,7 @@ for i = 1:no_lines % Get image data along each line
 %     plot(currData);
 %     
     % Debug - sum the responses (add columns together)
-%     sumDataCurr = sum(v,2);
+    sumDataCurr = sum(v,2);
 %     figure
 %     plot(sumDataCurr);  
 %     title('Calc\_scat\_multi')    

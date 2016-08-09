@@ -31,7 +31,7 @@ Rfocus          = 30/1000;        % Elevation focal radius
 rx_focus        = [0 0 30]/1000;  % Receive focus [m]
 no_sub_x        = 1;              % Number of x subdivisions of element
 no_sub_y        = 15;             % Number of y subdivisions of element
-N_elements      = 192;            % Number of physical elements
+%N_elements      = 192;            % Number of physical elements
 N_active_tx     = 64;             % Number of active tx elements
 rx_fnum         = 2.1;            % Receive f-number
 
@@ -45,63 +45,97 @@ N_active_rx     = round(rx_ap/(width+kerf));
 %% Start the Field II program, 
 field_init(0);
 
-%% Set sampling frequency and use triangles for the aperture
+%% Set sampling frequency
 set_sampling(fs);
+% Using triangles means exact solutions are used (I believe - FAQ)
 set_field('use_triangles', 0);
 
-%% Set emission aperture 
-emit_aperture = xdc_focused_array(N_elements, width, element_height, ...
-kerf, Rfocus, no_sub_x, no_sub_y, tx_focus);
+%% Set emit aperture 
+% emit_aperture = xdc_focused_array(N_elements, width, element_height, ...
+% kerf, Rfocus, no_sub_x, no_sub_y, tx_focus); % Focussed array
 
-%% Set impulse response and excitation of the emit aperture
-% NEED TO PUT OUR CODES IN HERE
+emit_aperture = xdc_linear_array(N_elements, width, element_height, ...
+kerf, no_sub_x, no_sub_y, tx_focus); % Linear array
 
-% Emitted ultrasound field at some POINT(?) if we input an impulse
-% function into the transducer.
-% Shouldn't this change as a function of position?
+%% Set emit aperature impulse response
+% Set impulse response... 
 
-% Set impulse response to an impulse function
-% impulse_response = sin(2*pi*f0*(0: 1/fs :number_cycles/f0));
-lenSendExcite = 30; %length(2*pi*f0*(0: 1/fs :number_cycles/f0));
-impulse_response = zeros(1,lenSendExcite);
-impulse_response(1) = 1;
-%figure; plot(0:length(impulse_response)-1,impulse_response, 'o');
+% ...to be a sine wave
+% tVect = linspace(0,2*pi,30);
+% impulse_response = sin(tVect);
+
+% ...to be an impulse function (so codes are sent un-modulated: simple)
+impulse_response = [1, zeros(1,29)];
+
+% Plot impulse response (what does length correspond to?)
+% figure; plot(0:length(impulse_response)-1,impulse_response, 'o');
+
+% Feed the produced response to the aperature
 xdc_impulse(emit_aperture, impulse_response);
 
-% What we input to the aperture
-% https://www.mathworks.com/matlabcentral/answers/46898-repeat-element-of-a-vector-n-times-without-loop
-codeA1 = [0.0522411047763500,-0.0463065222031407,-0.159079283718754,-0.0693107676478534,0.0326691538381036,-0.366967215994592,-0.0386693020035286,-0.0143369692611974,0.140207954406141,-0.00676366072602007]';
-codeA2 = [0.0109838703772579,-0.230561048945342,0.0882281042602866,0.0366598057588537,-0.000730468678358921,0.0788491864122134,-0.150228859791945,-0.110127580451643,-0.0196758712765472,0.0321803341860585]';
+%% Set receive aperture
+N_elements = 1;
+receive_aperture = xdc_linear_array(N_elements, width, element_height, ...
+kerf, no_sub_x, no_sub_y, rx_focus);
 
+%% Set receive aperature impulse response (using transmit impulse response)
+xdc_impulse(receive_aperture, impulse_response);
 
+%% Load the computer phantom
+% rz_point_phantom(dz, z_start, Npoints)
+[phantom_positions, phantom_amplitudes] = rz_point_phantom(5/1000, 30/1000, 5);
 
-curr_line = 1; % Line to get data on
-codeA1Line = walkingApImg(codeA1,lenSendExcite,emit_aperture,N_elements,width,...
-    element_height,kerf,Rfocus,no_sub_x,no_sub_y,rx_focus,impulse_response,...
-    N_active_tx, N_active_rx, tx_focus, curr_line);
-subplot(2,2,1)
-plot(codeA1Line)
-title('Code A1')
+%% Set focus (at a single point)
+xFocus = 0; % Image lined up with the center of the imaging array
 
-codeA2Line = walkingApImg(codeA2,lenSendExcite,emit_aperture,N_elements,width,...
-    element_height,kerf,Rfocus,no_sub_x,no_sub_y,rx_focus,impulse_response,...
-    N_active_tx, N_active_rx, tx_focus, curr_line);
-subplot(2,2,2)
-plot(codeA2Line)
-title('Code A2')
+% Set up emit aperature focus
+xdc_center_focus(emit_aperture, [xFocus 0 0]);     
+xdc_focus(emit_aperture, 0, [xFocus 0 tx_focus(3)]);
+% Set up transmit aperature focus
+xdc_center_focus(receive_aperture, [xFocus 0 0]); 
+xdc_focus(receive_aperture, 0, [xFocus 0 rx_focus(3)])
 
-subplot(2,2,3)
-plot(codeA1Line)
-hold on
-plot(codeA2Line)
-legend('Code 1','Code 2')
-title('Code A1 and A2 Overlaid')
+% We send and receive on the one element
+apo_vector_tx = 1;
+apo_vector_rx = 1;
+xdc_apodization(emit_aperture, 0, apo_vector_tx);
+xdc_apodization(receive_aperture, 0, apo_vector_rx);
 
-subplot(2,2,4)
-plot(codeA1Line + codeA2Line)
-title('Sum of responses')
+%% Specify codes
+codeA1 = [ones(1,15), -1*ones(1,15)];
+codeA2 = [ones(1,15), ones(1,15)];
+codes = [codeA1; codeA2];
 
+%% Image with each code
+rfMat = [];
+ccfMat = [];
+figure
+for i = 1:size(codes,1)           
+    %% Set current emit aperature excitation    
+    currCode = codes(i,:);
+    xdc_excitation(emit_aperture, currCode);
 
+    % Calculate received voltage
+    % This may be time adjusted - not sure
+    [rf_data, t1] = calc_scat_multi(emit_aperture, receive_aperture, phantom_positions, phantom_amplitudes);
+    rfMat(i,:) = rf_data;
+    
+    % Plot RF data
+    subplot(3,2,1+2*(i-1))
+    plot(rf_data)
+    title(sprintf('RF %i',i))
+    
+    % Calculate cross correlation with code
+    % Should cross correlate with response to code
+    subplot(3,2,2+2*(i-1))
 
+    ccfMat(i,:) = xcorr(rf_data,currCode);
+    plot(ccfMat(i,:));
+    title(sprintf('CCF %i',i)) 
+end
+%% Sum results of cross correlation with each code
+subplot(3,2,6)
+plot(sum(ccfMat))
+title('Sum of CCF')
 
 
