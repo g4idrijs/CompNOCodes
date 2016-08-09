@@ -1,8 +1,6 @@
-%% Image a simple phantom
-% We want to use our codes as the impulse response
-% and we want to avoid using the beamforming
+% Use complementary codes to image a simple phantom.
 
-% Edited by David Egolf.
+% Modified by David Egolf.
 close all
 
 %% Original Info
@@ -35,13 +33,6 @@ no_sub_y        = 15;             % Number of y subdivisions of element
 N_active_tx     = 64;             % Number of active tx elements
 rx_fnum         = 2.1;            % Receive f-number
 
-%% Set number of active receive elements for constant receive F-number
-% F-number = imaging depth / aperture size
-% Aperture size = N_active*sizeEachTransducer
-imgDepth = rx_focus(3);
-rx_ap           = imgDepth/rx_fnum;
-N_active_rx     = round(rx_ap/(width+kerf)); 
-
 %% Start the Field II program, 
 field_init(0);
 
@@ -51,11 +42,8 @@ set_sampling(fs);
 set_field('use_triangles', 0);
 
 %% Set emit aperture 
-% emit_aperture = xdc_focused_array(N_elements, width, element_height, ...
-% kerf, Rfocus, no_sub_x, no_sub_y, tx_focus); % Focussed array
-
 emit_aperture = xdc_linear_array(N_elements, width, element_height, ...
-kerf, no_sub_x, no_sub_y, tx_focus); % Linear array
+kerf, no_sub_x, no_sub_y, tx_focus);
 
 %% Set emit aperature impulse response
 % Set impulse response... 
