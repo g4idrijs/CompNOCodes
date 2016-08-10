@@ -44,7 +44,7 @@ kerf, Rfocus, no_sub_x, no_sub_y, tx_focus);
 
 % Set the impulse response and excitation of the emit aperture
 impulse_response = sin(2*pi*f0*(0:1/fs:number_cycles/f0));
-figure; plot(impulse_response);
+%figure; plot(impulse_response);
 xdc_impulse(emit_aperture, impulse_response);
 
 excitation = sin(2*pi*f0*(0:1/fs:number_cycles/f0));
@@ -90,7 +90,7 @@ for i = 1:no_lines
     N_pre_rx = round(x/(width+kerf) + N_elements/2 - N_active_rx/2);
     N_post_rx = N_elements - N_pre_rx - N_active_rx;
     apo_vector_rx = [zeros(1, N_pre_rx) apo_rx zeros(1, N_post_rx)];
-    
+       
     xdc_apodization(emit_aperture, 0, apo_vector_tx);
     xdc_apodization(receive_aperture, 0, apo_vector_rx);
     
@@ -111,4 +111,4 @@ end
 
 mk_psf;
 figure;
-imagesc(lateral, disttxrx, log(eps+abs(hilbert(psf)))); colormap(gray);
+imagesc(lateral, disttxrx, log(eps+abs(hilbert(psf)))); %colormap(gray);
