@@ -63,7 +63,7 @@ xdc_impulse(receive_aperture, impulse_response);
 
 % Do linear array imaging
 no_lines = 251; % Number of lines in image (odd)
-image_width = 10/1000;  % size of image sector
+image_width = 28/1000;  % size of image sector
 d_x = image_width/(no_lines-1); % Increment for image
 
 % Make the different simulations
@@ -109,6 +109,7 @@ for i = 1:no_lines
     x = x + d_x;
 end
 
+% imagesc(log(eps+image_data))
 mk_psf;
 figure;
 imagesc(lateral, disttxrx, log(eps+abs(hilbert(psf)))); %colormap(gray);
