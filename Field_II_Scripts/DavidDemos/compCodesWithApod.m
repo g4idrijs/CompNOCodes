@@ -1,4 +1,8 @@
 % Use complementary codes to image a simple phantom.
+% Weird sidelobes
+% -Likely caused by using calc_scat
+% --We probably need to be doing our own beamforming
+% --Why would beamforming before cross correlating mess up things?
 
 % Modified by David Egolf.
 % close all
@@ -57,7 +61,7 @@ emit_aperture = xdc_focused_array(N_elements, width, element_height, ...
 % impulse_response = sin(tVect);
 
 % ...to be an impulse function (so codes are sent un-modulated: simple)
-impulse_response = [1, zeros(1,31)];
+impulse_response = [ones(1,32)]; 
 
 % Plot impulse response (what does length correspond to?)
 % figure; plot(0:length(impulse_response)-1,impulse_response, 'o');
@@ -156,13 +160,14 @@ for j = 1:numel(xFocusSpots)
     %% Specify codes
     codeA1 = [ones(1,8), ones(1,8), ones(1,8), -ones(1,8)]; % 1 1 1 -1 
     codeA2 = [ones(1,8), ones(1,8), -ones(1,8), ones(1,8)]; %  1 1 -1 1
+%     codeA1 = [1]; codeA2 = [1];
     codes = [codeA1; codeA2];
 
     %% Image with each code   
     ccfMat = []; % Store cross correlation data
     
     for i = 1:size(codes,1)           
-        %% Set current emit aperature excitation    
+        %% Set current emit aperture excitation    
         currCode = codes(i,:);
         xdc_excitation(emit_aperture, currCode);      
         
@@ -170,8 +175,7 @@ for j = 1:numel(xFocusSpots)
         xdc_dynamic_focus(receive_aperture, 0, 0, 0);
         
         % Calculate received voltage
-        % I think this time adjusts and sums the responses
-        % from each transducer
+        % This beamforms the data (time adjusts, weights, and sums)
         [rf_data, t1] = calc_scat(emit_aperture, receive_aperture, phantom_positions, phantom_amplitudes);
                 
         % Calculate cross correlation with currrent code
@@ -205,4 +209,9 @@ imgData = cell2mat(lineMat)';
 
 % Plot the data
 figure
-imagesc(log(eps + imgData))
+toPlot = imgData/max(max(imgData));
+toPlot = 20*log10(abs(toPlot) + eps);
+imagesc(toPlot)
+colormap(gray);
+colorbar
+caxis([-40 0]);

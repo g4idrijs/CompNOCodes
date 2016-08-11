@@ -9,6 +9,10 @@
 
 % VERSION 1.0, 29 Feb. 2000, Svetoslav Nikolov
 
+addpath('C:\Users\User\Dropbox\Grad_School\Summer Codes\GitCodes\Field_II_Scripts')
+addpath('C:\Users\User\Dropbox\Grad_School\Summer Codes\GitCodes\Field_II_Scripts\Field_II')
+addpath('C:\Users\User\Dropbox\Grad_School\Summer Codes\GitCodes\Field_II_Scripts\bft_64bit')
+
 f0 = 4e6;              %  Central frequency                       [Hz]
 fs = 100e6;            %  Sampling frequency                      [Hz]
 c = 1540;              %  Speed of sound                          [m/s]

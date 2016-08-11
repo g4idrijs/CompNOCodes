@@ -42,7 +42,7 @@ set_sampling(fs);
 set_field('use_triangles', 0);
 
 %% Set emit aperture 
-N_elements = 3;
+N_elements = 13;
 emit_aperture = xdc_linear_array(N_elements, width, element_height, ...
 kerf, no_sub_x, no_sub_y, tx_focus);
 

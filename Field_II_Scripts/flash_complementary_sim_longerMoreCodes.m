@@ -1,5 +1,7 @@
+% Trying out codes generated (length 100, 10 pairs)
+
 % FLASH_COMPLEMENTARY_SIM 
-% Simulate a flash image with complemenatry codes at many focal zones
+% Simulate a flash image with complementary codes at many focal zones
 % VERSION 1.0, August 10, 2016
 %
 % This version uses BFT to beamform images
@@ -9,9 +11,16 @@
 % Define codes used for excitation
 codes = cell(0);
 
-codes{1}.code = [1 1 1 -1]; %[ones(1, 8), ones(1, 8), ones(1, 8), -ones(1, 8)];
-codes{1}.ccode = [1 1 -1 1]; %[ones(1, 8), ones(1, 8), -ones(1, 8), ones(1, 8)];
-codes{1}.focus = [0 0 55/1000]; %[0 0 55/1000];
+
+codes{1}.code = [ones(1, 8), ones(1, 8), ones(1, 8), -ones(1, 8)];
+codes{1}.ccode = [ones(1, 8), ones(1, 8), -ones(1, 8), ones(1, 8)];
+
+% tempDat = load('bestPairsSQP41.mat');
+% x = tempDat.('x');
+% codes{1}.code = x(1,:); 
+% codes{1}.ccode = x(2,:);
+
+codes{1}.focus = [0 0 55/1000]; 
 
 no_lines = 257;
 
@@ -35,14 +44,15 @@ impulse_response = sin(2*pi*f0*(0:1/fs:1/f0));
 impulse_response = impulse_response.*hanning(length(impulse_response))';
 
 %  Define the phantom
-pht_pos = [0 0 20;
-           0 0 30;
-           0 0 40;
-           0 0 50;
-           0 0 60;
-           0 0 70;
-           0 0 80;] / 1000;         %  The position of the phantom
-pht_amp = 20*ones(7,1);      %  The amplitude of the back-scatter
+pht_pos = [0 0 50/1000]; pht_amp = 20;
+% pht_pos = [0 0 20;
+%            0 0 30;
+%            0 0 40;
+%            0 0 50;
+%            0 0 60;
+%            0 0 70;
+%            0 0 80;] / 1000;         %  The position of the phantom
+% pht_amp = 20*ones(7,1);      %  The amplitude of the back-scatter
 
 % Calculate minimum and maximum samples and times for phantom
 Rmax = max(sqrt(pht_pos(:,1).^2 + pht_pos(:,2).^2  + pht_pos(:,3).^2)) + 5/1000;
@@ -145,8 +155,8 @@ for i = 1:2*length(codes)
     end
     xdc_focus(xmt, 0, focus);
     xdc_excitation(xmt, code);
-    [rf_data, start_time] = calc_scat_multi(xmt, rcv, pht_pos, pht_amp);
-
+    [rf_data, start_time] = calc_scat_multi(xmt, rcv, pht_pos, pht_amp); 
+    
     start_sample = floor(start_time * fs)+1;
     end_sample = start_sample + size(rf_data, 1) - 1;
 
@@ -162,6 +172,8 @@ for i = 1:2*length(codes)
 
     rf_data_m(1:size(rf_data, 1), :, col) = rf_data_m(1:size(rf_data, 1), :, col) + rf_data;
 end
+
+% Add noise here (one for each transmit)
 
 %% Decode images
 % For each code, cross-correlate rf_data_sum with each code and add the
@@ -195,7 +207,32 @@ bf_temp = bft_beamform(Tmin, rf_data_decoded);
 env_bf = abs(hilbert(bf_temp));
 env_bf = env_bf / max(max(env_bf));
 
-% Plot image
+%% Calculate signal to noise ratio
+% Signal / sd(noise)
+
+%% Calculate full width half maximum resolution
+% (Needs generalization to work with a several point phantom)
+% Find the index of the maximum signal
+[maxVal,maxLocLin] = max(env_bf(:));
+[maxLocZ, maxLocX] = ind2sub(size(env_bf),maxLocLin);
+
+% Axial (z direction)
+zIntVect = env_bf(:,maxLocX);
+fwhmIndicesZ = fullWidthHM(zIntVect); % FWHM in indices
+lenPerIndexZ = (Rmax - Rmin)/numel(zIntVect);
+fwhmLengthZ = lenPerIndexZ*fwhmIndicesZ; % Convert to length
+disp('Axial full width half maximum: (mm)')
+disp(fwhmLengthZ*1000)
+
+% Lateral (x direction)
+xIntVect = env_bf(maxLocZ,:);
+fwhmIndicesX = fullWidthHM(xIntVect); % FWHM in indices
+lenPerIndexX = (no_lines*d_x_line)/numel(xIntVect);
+fwhmLengthX = lenPerIndexX*fwhmIndicesX; % Convert to length
+disp('Lateral full width half maximum: (mm)')
+disp(fwhmLengthX*1000)
+
+%% Plot image
 figure;
 imagesc([-1/2 1/2]*no_lines*d_x_line*1000, [Rmin Rmax]*1000, 20*log10(env_bf+eps));
 title('Beamformed Image');
