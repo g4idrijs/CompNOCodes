@@ -1,26 +1,30 @@
-% Trying out codes generated (length 100, 10 pairs)
-
 % FLASH_COMPLEMENTARY_SIM 
 % Simulate a flash image with complementary codes at many focal zones
 % VERSION 1.0, August 10, 2016
 %
 % This version uses BFT to beamform images
+% 
+% Version 2 adds calcuation of axial and lateral full width half maximum
+% as well as signal to noise ratio
 
 %% Simulation properties
+
+% Add white Gaussian noise
+useNoise = 1;
 
 % Define codes used for excitation
 codes = cell(0);
 
-
 codes{1}.code = [ones(1, 8), ones(1, 8), ones(1, 8), -ones(1, 8)];
 codes{1}.ccode = [ones(1, 8), ones(1, 8), -ones(1, 8), ones(1, 8)];
+
 
 % tempDat = load('bestPairsSQP41.mat');
 % x = tempDat.('x');
 % codes{1}.code = x(1,:); 
 % codes{1}.ccode = x(2,:);
 
-codes{1}.focus = [0 0 55/1000]; 
+codes{1}.focus = [0 0 50/1000]; 
 
 no_lines = 257;
 
@@ -36,7 +40,7 @@ width = .95*pitch;     % Width of the element                      [m]
 kerf = pitch - width;  % Inter-element spacing                     [m]
 height = 10/1000;      % Size in the Y direction                   [m]
 
-rx_fnum         =0; % 2.1;   % Receive f-number - Set to 0 to turn off
+rx_fnum         = 2.1; % 2.1;   % Receive f-number - Set to 0 to turn off
                        % constant F-number reconstruction
 
 %  Define the impulse response of the transducer
@@ -45,19 +49,20 @@ impulse_response = impulse_response.*hanning(length(impulse_response))';
 
 %  Define the phantom
 pht_pos = [0 0 50/1000]; pht_amp = 20;
-% pht_pos = [0 0 20;
-%            0 0 30;
-%            0 0 40;
-%            0 0 50;
-%            0 0 60;
-%            0 0 70;
-%            0 0 80;] / 1000;         %  The position of the phantom
-% pht_amp = 20*ones(7,1);      %  The amplitude of the back-scatter
+%  pht_pos = [0 0 20;
+%             0 0 30;
+%             0 0 40;
+%             0 0 50;
+%             0 0 60;
+%             0 0 70;
+%             0 0 80;] / 1000;         %  The position of the phantom
+%pht_amp = 20*ones(7,1);      %  The amplitude of the back-scatter
 
-% Calculate minimum and maximum samples and times for phantom
+% % Calculate minimum and maximum samples and times for phantom
 Rmax = max(sqrt(pht_pos(:,1).^2 + pht_pos(:,2).^2  + pht_pos(:,3).^2)) + 5/1000;
 Rmin = min(sqrt(pht_pos(:,1).^2 + pht_pos(:,2).^2  + pht_pos(:,3).^2)) - 5/1000;
 if (Rmin < 0) Rmin = 0; end;
+
 Tmin = 2*Rmin / c; Tmax = 2*Rmax / c;
 Smin = floor(Tmin * fs); Smax = ceil(Tmax * fs);
 max_code_length = max(cellfun(@(x) max(length(x.code), length(x.ccode)), codes));
@@ -173,7 +178,13 @@ for i = 1:2*length(codes)
     rf_data_m(1:size(rf_data, 1), :, col) = rf_data_m(1:size(rf_data, 1), :, col) + rf_data;
 end
 
-% Add noise here (one for each transmit)
+% Add noise
+if(useNoise == 1)
+    % Add white gaussian noise (prior to beamforming)     
+    noisePowerdBW =  -4.45e2; % Use -inf to turn off noise
+    rf_data_m(:,:,1)  = rf_data_m(:,:,1) + wgn(size(rf_data_m,1), size(rf_data_m,2),noisePowerdBW);
+    rf_data_m(:,:,2)  = rf_data_m(:,:,2) + wgn(size(rf_data_m,1), size(rf_data_m,2),noisePowerdBW);
+end
 
 %% Decode images
 % For each code, cross-correlate rf_data_sum with each code and add the
@@ -203,12 +214,21 @@ bf_temp = bft_beamform(Tmin, rf_data_decoded);
 %bf_temp = bft_beamform(Tmin, rf_data_nc_decoded);
 %bf_temp = bf_temp + bft_beamform(Tmin, rf_data_c_decoded);
 
+%% Calculate signal to noise ratio
+if(useNoise == 1)
+    % Signal / sd(noise)
+    % std(noise) =  about 6e-21 with Gaussian white noise at -4.45e2 dBW.
+    % (see the findNoise script)
+    maxSig = max(max(bf_temp));
+    stdNoise = 6e-21;
+    sigToNoise = maxSig/stdNoise;
+    disp('Signal to noise ratio:');
+    disp(sigToNoise);
+end
+
 % Perform envelope detection and normalize
 env_bf = abs(hilbert(bf_temp));
 env_bf = env_bf / max(max(env_bf));
-
-%% Calculate signal to noise ratio
-% Signal / sd(noise)
 
 %% Calculate full width half maximum resolution
 % (Needs generalization to work with a several point phantom)
