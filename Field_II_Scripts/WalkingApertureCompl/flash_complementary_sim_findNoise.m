@@ -45,14 +45,6 @@ impulse_response = impulse_response.*hanning(length(impulse_response))';
 
 %  Define the phantom (outside of region we collect data for)
 pht_pos = [0 0 5000/1000]; pht_amp = 20;
-% pht_pos = [0 0 20;
-%            0 0 30;
-%            0 0 40;
-%            0 0 50;
-%            0 0 60;
-%            0 0 70;
-%            0 0 80;] / 1000;         %  The position of the phantom
-% pht_amp = 20*ones(7,1);      %  The amplitude of the back-scatter
 
 % % Calculate minimum and maximum samples and times for phantom
 % Rmax = max(sqrt(pht_pos(:,1).^2 + pht_pos(:,2).^2  + pht_pos(:,3).^2)) + 5/1000;
@@ -210,7 +202,10 @@ bf_temp = bft_beamform(Tmin, rf_data_decoded);
 %bf_temp = bft_beamform(Tmin, rf_data_nc_decoded);
 %bf_temp = bf_temp + bft_beamform(Tmin, rf_data_c_decoded);
 
-stdNoise = std(bf_temp(:))
+% Calculate standard deviation of noise and display
+stdNoise = std(bf_temp(:));
+disp('Standard deviation of noise:')
+disp(stdNoise)
 
 % Perform envelope detection and normalize
 env_bf = abs(hilbert(bf_temp));

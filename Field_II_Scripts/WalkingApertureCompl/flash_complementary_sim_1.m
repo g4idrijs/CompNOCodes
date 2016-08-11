@@ -1,23 +1,23 @@
 % FLASH_COMPLEMENTARY_SIM 
 % Simulate a flash image with complementary codes at many focal zones
-% VERSION 1.0, August 10, 2016
+% VERSION 1.0, August 10, 2016 (Tarek)
 %
 % This version uses BFT to beamform images
 % 
-% Version 2 adds calcuation of axial and lateral full width half maximum
+% Version 1.1, August 11, 2016 (David)
+% Adds calcuation of axial and lateral full width half maximum
 % as well as signal to noise ratio
 
-%% Simulation properties
+%% Simulation properties (initial setup) 
+clear
 
 % Add white Gaussian noise
 useNoise = 1;
 
 % Define codes used for excitation
 codes = cell(0);
-
 codes{1}.code = [ones(1, 8), ones(1, 8), ones(1, 8), -ones(1, 8)];
 codes{1}.ccode = [ones(1, 8), ones(1, 8), -ones(1, 8), ones(1, 8)];
-
 
 % tempDat = load('bestPairsSQP41.mat');
 % x = tempDat.('x');
@@ -40,25 +40,18 @@ width = .95*pitch;     % Width of the element                      [m]
 kerf = pitch - width;  % Inter-element spacing                     [m]
 height = 10/1000;      % Size in the Y direction                   [m]
 
-rx_fnum         = 2.1; % 2.1;   % Receive f-number - Set to 0 to turn off
-                       % constant F-number reconstruction
+rx_fnum         = 0; % 2.1;   % Receive f-number - Set to 0 to turn off
+                       % constants F-number reconstruction
 
 %  Define the impulse response of the transducer
 impulse_response = sin(2*pi*f0*(0:1/fs:1/f0));
 impulse_response = impulse_response.*hanning(length(impulse_response))';
 
 %  Define the phantom
-pht_pos = [0 0 50/1000]; pht_amp = 20;
-%  pht_pos = [0 0 20;
-%             0 0 30;
-%             0 0 40;
-%             0 0 50;
-%             0 0 60;
-%             0 0 70;
-%             0 0 80;] / 1000;         %  The position of the phantom
-%pht_amp = 20*ones(7,1);      %  The amplitude of the back-scatter
+pht_pos = [0 0 50/1000]; % Position
+pht_amp = 20; % Strength of scattering
 
-% % Calculate minimum and maximum samples and times for phantom
+% Calculate minimum and maximum samples and times for phantom
 Rmax = max(sqrt(pht_pos(:,1).^2 + pht_pos(:,2).^2  + pht_pos(:,3).^2)) + 5/1000;
 Rmin = min(sqrt(pht_pos(:,1).^2 + pht_pos(:,2).^2  + pht_pos(:,3).^2)) - 5/1000;
 if (Rmin < 0) Rmin = 0; end;
@@ -88,33 +81,42 @@ bft_no_lines(no_lines);
 xmt = xdc_linear_array(no_elements,width,height,kerf,1,1,[0 0 0]);
 rcv = xdc_linear_array(no_elements,width,height,kerf,1,1,[0 0 0]);
 
+% Create beamforming array
 xdc = bft_linear_array(no_elements, width, kerf);
 
 % Set the impulse responses
 xdc_impulse(rcv, impulse_response);
 xdc_impulse(xmt, impulse_response);
 
-% Set the apodization
+%% Set the apodization
 xdc_apodization(xmt, 0, ones(1,no_elements))
 xdc_apodization(rcv, 0, ones(1,no_elements))
 
-
 %% Simulate transmit and receive
 
-% Define receive focusing - dynamic focusing on all lines
+% Set a center reference point for focusing
 xdc_center_focus(xmt,[0 0 0])
 xdc_center_focus(rcv,[0 0 0])
+
+% Don't receive focus
 xdc_focus_times(rcv, 0, zeros(1,no_elements));
 
-d_x_line = width*no_elements / (no_lines-1);
-x_line = -(no_lines-1) / 2 * d_x_line;
-z_points = linspace(Rmin, Rmax, 100);
+% Set up the properties of each line we beamform along
+d_x_line = width*no_elements / (no_lines-1); % Line width
+x_line = -(no_lines-1) / 2 * d_x_line; % Position of leftmost line
+z_points = linspace(Rmin, Rmax, 100); % For constant F number
 no_points = length(z_points);
 T = z_points/c*2;
+
+% Set up beamforming
 for i = 1 : no_lines
-    % Focus everywhere in the line
-    bft_center_focus([x_line 0 0], i);
-    bft_dynamic_focus(xdc, 0, 0, i); 
+   % Set reference point for dynamic focusing for this line
+   % Dynamic focusing focuses everywhere in this line
+    bft_center_focus([x_line 0 0], i); 
+    
+    % Set angle of dynamic focus line for this line
+    % We set it to point straight at the focus
+    bft_dynamic_focus(xdc, 0, 0, i);  
     
     % Constant F-Num reconstruction
     if (rx_fnum == 0)
@@ -139,7 +141,6 @@ for i = 1 : no_lines
     x_line = x_line + d_x_line;
 end
 
-
 %% Simulate imaging with each code
 % rf_data generated from imaging with each code and its associated focus
 % zone is added together to simulate imaging with all codes. This is then 
@@ -148,16 +149,19 @@ end
 % Rf data matrix holds non-complementary and complementary simulated
 % RF data.
 rf_data_m = zeros(no_rf_samples_c, no_elements, 2);
-for i = 1:2*length(codes)
-    if (i > length(codes))
+for i = 1:2*length(codes) % Go through both first code and second code for each pair
+        
+    % Extract code and focus information for current code
+    if (i > length(codes)) % Working with second code "ccode"
         code = codes{i-length(codes)}.ccode;
         focus = codes{i-length(codes)}.focus;
-        col = 2;
+        col = 2; % Where to store results
     else
-        code = codes{i}.code;
+        code = codes{i}.code; % Working with first code "code"
         focus = codes{i}.focus;
-        col = 1;
-    end
+        col = 1; % Where to store results
+    end        
+    
     xdc_focus(xmt, 0, focus);
     xdc_excitation(xmt, code);
     [rf_data, start_time] = calc_scat_multi(xmt, rcv, pht_pos, pht_amp); 
@@ -218,6 +222,9 @@ bf_temp = bft_beamform(Tmin, rf_data_decoded);
 if(useNoise == 1)
     % Signal / sd(noise)
     % std(noise) =  about 6e-21 with Gaussian white noise at -4.45e2 dBW.
+    % and with the following codes:
+    %     codes{1}.code = [ones(1, 8), ones(1, 8), ones(1, 8), -ones(1, 8)];
+    %     codes{1}.ccode = [ones(1, 8), ones(1, 8), -ones(1, 8), ones(1, 8)];
     % (see the findNoise script)
     maxSig = max(max(bf_temp));
     stdNoise = 6e-21;
