@@ -1,4 +1,4 @@
-% FLASH_COMPLEMENTARY_SIM 
+% walkAp_compl_sim
 % Simulate a flash image with complementary codes at many focal zones
 % VERSION 1.0, August 10, 2016 (Tarek)
 %
@@ -8,25 +8,42 @@
 % Adds calcuation of axial and lateral full width half maximum
 % as well as signal to noise ratio
 %
-% Currently trying to add walking aperture
-% --Turning off constant f-number for the moment, for simplicity
+% Currently no support for:
+% -Constant f number
+% -Signal to noise ratio
+% Currently working on looping over aperatures instead of codes
+
 %% Initial setup (ex. transducer, phantom, image range properties) 
 clear
 
 % Add white Gaussian noise
-useNoise = 1;
+useNoise = 0;
 
 % Define codes used for excitation
+% along with point for transmit focusing (center of focus domain)
 codes = cell(0);
 codes{1}.code = [ones(1, 8), ones(1, 8), ones(1, 8), -ones(1, 8)];
 codes{1}.ccode = [ones(1, 8), ones(1, 8), -ones(1, 8), ones(1, 8)];
+codes{1}.focus = [-10/1000 0 50/1000]; 
+
+codes{2}.code = [ones(1, 8), ones(1, 8), ones(1, 8), -ones(1, 8)];
+codes{2}.ccode = [ones(1, 8), ones(1, 8), -ones(1, 8), ones(1, 8)];
+codes{2}.focus = [0/1000 0 50/1000]; 
+
+codes{3}.code = [ones(1, 8), ones(1, 8), ones(1, 8), -ones(1, 8)];
+codes{3}.ccode = [ones(1, 8), ones(1, 8), -ones(1, 8), ones(1, 8)];
+codes{3}.focus = [10/1000 0 50/1000]; 
+
+% codes{3}.code = [ones(1, 8), ones(1, 8), ones(1, 8), -ones(1, 8)];
+% codes{3}.ccode = [ones(1, 8), ones(1, 8), -ones(1, 8), ones(1, 8)];
+% codes{3}.focus = [10/1000 0 50/1000]; 
+
+
 
 % tempDat = load('bestPairsSQP41.mat');
 % x = tempDat.('x');
 % codes{1}.code = x(1,:); 
 % codes{1}.ccode = x(2,:);
-
-codes{1}.focus = [0 0 50/1000]; 
 
 % Transducer properties
 f0 = 5e6;              %  Central frequency                        [Hz]
@@ -46,7 +63,7 @@ height = 10/1000;      % Size in the Y direction                   [m]
                        % constants F-number reconstruction
 
 %  Define the impulse response of the transducer
-impulse_response = sin(2*pi*f0*(0:1/fs:1/f0));
+impulse_response = sin(2*pi*f0*(0:1/fs:1/f0)); 
 impulse_response = impulse_response.*hanning(length(impulse_response))';
 
 %  Define the phantom
@@ -66,7 +83,7 @@ Smin_c = Smin; Smax_c = Smax + max_code_length + 1000;
 no_rf_samples = Smax - Smin + 1;
 no_rf_samples_c = Smax_c - Smin_c + 1;
 
-%  Initialize Field II and BFT
+%  Initialize Field II and beamforming toolbox (BFT)
 field_init(-1);
 bft_init;
 
@@ -90,27 +107,156 @@ xdc_impulse(xmt, impulse_response);
 
 %% Imaging preparation (ex. line setup)
 
-% Don't receive focus
+% Don't receive focus (will do that using beam forming toolbox)
 xdc_focus_times(rcv, 0, zeros(1,no_elements));
 
-% Set up the properties of each line we beamform along
-no_lines = 257; % Number of lines to image along
+% One focus region per complementary pair
+no_CodePairs = length(codes);
+no_FocusDomains = no_CodePairs; 
 
-d_x_line = width*no_elements / (no_lines-1); % Line width
-x_line = -(no_lines-1) / 2 * d_x_line; % Current position of line
-x_start = x_line; % Position of leftmost line 
-z_points = linspace(Rmin, Rmax, 100); % For constant F number
-no_points = length(z_points);
-T = z_points/c*2;
+% Each focus domain has a number of lines associated with it
+no_linesPerDomain = 100;
+no_lines = no_linesPerDomain*no_FocusDomains; % Total number of lines
 
-%% New imaging loop
-% We transmit the first code in each pair, then the second in each pair
+% Calculate line widths assuming constant focus domain spacing
+% This also assumes the codes are listed in order of focus region
+widthFocusDomain = no_active_rx*width; %10/1000; %abs(codes{2}.focus(1)  - codes{1}.focus(1));
+d_x_line = widthFocusDomain/no_linesPerDomain;
+
+ %% Imaging loop
+
+% We have to process each transmit separately
+firstCodeCorr = zeros(no_rf_samples, no_elements,no_FocusDomains); % Correlate with codes on first transmit
+secCodeCorr = zeros(no_rf_samples, no_elements,no_FocusDomains);  % Correlate with codes on second transmit
+for currTransmit = 1:2
+    % Get RF data from each focus domain   
+    % Each column has data from one transducer element
+    RFTransRunTot = zeros(no_rf_samples_c,no_elements);  
+    for currFocDomain = 1:no_FocusDomains
+        % Set transmit focus at center of focus domain
+        transFocus = codes{currFocDomain}.focus;
+        xFocus = transFocus(1);     
+
+        % Set apodization centered around center of focus domain
+        % (for transmit - we are forced to receive on all since all
+        % code pairs are fired at the same time)
+        [apo_vector_tx,apo_vector_rx] = getApodization(xFocus,no_active_tx,no_active_rx,width, kerf, no_elements);
+        xdc_apodization(xmt, 0, apo_vector_tx);
+        xdc_apodization(rcv, 0, ones(1,no_elements));
+
+        % Get the current complementary code pair
+        currCodes = codes{currFocDomain};
+
+        % Set transmit focus at center of focus domain
+        xdc_center_focus(xmt,[xFocus, 0, 0]) % Still not clear on this line..
+        xdc_focus(xmt, 0, currCodes.focus);
+
+        % Get RF scattering data by firing...    
+        % ...first code in pair
+        if(currTransmit == 1)
+            xdc_excitation(xmt, currCodes.code);
+            [codeRF, start_timeCode] = calc_scat_multi(xmt, rcv, pht_pos, pht_amp); 
+        else
+            %...second code in pair
+            xdc_excitation(xmt, currCodes.ccode);
+            [codeRF, start_timeCode] = calc_scat_multi(xmt, rcv, pht_pos, pht_amp); 
+        end
+        
+        % Align received RF data in time
+        codeRF = alignRF( codeRF, start_timeCode,fs,Smin_c,Smax_c,no_rf_samples_c,no_elements);           
+
+        % Add new RF data to already received RF data (for this transmit)
+        RFTransRunTot = RFTransRunTot + codeRF;
+    end
+     
+    % We have collected the data for one transmit
+    % Decode to get desired data for each focus domain
+    for currFocDomain = 1:no_FocusDomains
+        % Get current code to cross correlate with for this focus domain
+        if (currTransmit == 1)
+            currFocDomCode = codes{currFocDomain}.code;
+        else
+            currFocDomCode = codes{currFocDomain}.ccode;   
+        end 
+        % Cross correlate
+        currFocDomDec = conv2(RFTransRunTot, rot90(conj(currFocDomCode'), 2), 'valid');
+        currFocDomDec = currFocDomDec(1:no_rf_samples, :);
+        
+        % Store results
+        if (currTransmit == 1)
+            firstCodeCorr(:,:,currFocDomain) = currFocDomDec;
+        else
+            secCodeCorr(:,:,currFocDomain) = currFocDomDec;            
+        end
+    end      
+end
+ 
+% Sum the results of cross correlating with the different codes
+% Each matrix in 3D dimension is the decoded data for a focus domain
+% (has signal received by each transducer - the signal is that relevant
+% to that focus domain)
+sumDec =  firstCodeCorr + secCodeCorr;
+
+% Beamform each focus domain
+bfImag = zeros(no_rf_samples,no_lines); % Just store one line per focus domain for now
+lineCount = 1;
+for currFocDomain = 1:no_FocusDomains
+    % Pick the center receive focus location for this focus domain
+    % Beamform along the several lines in the focus domain
+    centFocus = codes{currFocDomain}.focus;
+    xCentFocus = centFocus(1);
+    
+    % Set focusing for beamforming
+    
+    % Set beamforming apodization
+    [apo_vector_tx,apo_vector_rx] = getApodization(xFocus,no_active_tx,no_active_rx,width, kerf, no_elements);
+    bft_apodization(xdc, 0, apo_vector_rx); 
+    
+    % Starting x position of receive focus
+    currX = xCentFocus - widthFocusDomain/2;
+    
+    for currLine = 1:no_linesPerDomain
+        % Set current receive focus        
+        bft_center_focus([currX 0 0]); % Set up start of line for dynamic focus       
+        bft_dynamic_focus(xdc, 0, 0);  % Set direction of dynamic focus
+        %bft_focus(xdc, 0, [currX 0 0])
+        
+        % Beamform and store resulting line
+        currLineBf = bft_beamform(Tmin, sumDec(:,:,currFocDomain));     
+        bfImag(:,lineCount) = currLineBf;
+        
+        % Move receive focus
+        currX = currX + d_x_line;
+        
+        % Keep track which line we are on
+        lineCount = lineCount + 1;
+    end
+end
+
+% Normalize and do envelope detection
+env_bf = abs(hilbert(bfImag));
+env_bf = env_bf / max(max(env_bf));
+
+% Plot image
+figure;
+imagesc([-1/2 1/2]*no_lines*d_x_line*1000, [Rmin Rmax]*1000, 20*log10(env_bf+eps));
+title('Beamformed Image');
+xlabel('Lateral distance [mm]');
+ylabel('Axial distance [mm]')
+axis('image')
+
+colorbar
+colormap(gray);
+caxis([-55 0]);
+ 
+%% ALL BELOW HERE IS OLD
+%% We transmit the first code in each pair, then the second in each pair
 no_Transmits = 2;
 transmitResults = cell(2,1);
 transmitResults{1} = zeros(no_rf_samples,no_lines);
 transmitResults{2} = zeros(no_rf_samples,no_lines);
 
-for currTransmit = 1:1
+for currTransmit = 1:no_Transmits
     % For each transmit, we image and beamform each line
     for currLine = 1:no_lines
         % Calculate and set apodization for this line
@@ -123,8 +269,7 @@ for currTransmit = 1:1
         xdc_center_focus(xmt,[xFocus, 0, 0])
         
         % For each line, we fire each relevant and store the results
-        % Currently all codes in this transmit are fired for each line
-        no_CodePairs = length(codes);
+        % Currently all codes in this transmit are fired for each line       
         RF_runningTot = 0; % Add the results from each code to this total
         for currCode = 1:no_CodePairs  
             % Get current code, and set as transducer excitation
@@ -167,7 +312,7 @@ for currTransmit = 1:1
         end
         
         % Beamform this line
-        bft_center_focus([xFocus 0 0]); % Set up start of line for dynamic focus
+        bft_center_focus([xFocus 0 0]); % Set up start of line for dynamic focus       
         bft_dynamic_focus(xdc, 0, 0);  % Set direction of dynamic focus
         bft_apodization(xdc, 0, apo_vector_rx); % Beamforming apodization
         currLineBf = bft_beamform(Tmin, currLineDec); % Beamform

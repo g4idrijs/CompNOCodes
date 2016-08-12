@@ -12,7 +12,7 @@
 clear
 
 % Add white Gaussian noise
-useNoise = 1;
+useNoise = 0;
 
 % Define codes used for excitation
 codes = cell(0);
