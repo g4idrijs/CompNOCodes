@@ -111,5 +111,8 @@ end
 
 % imagesc(log(eps+image_data))
 mk_psf;
+psf = abs(hilbert(psf));
+psf = psf/max(max(psf));
 figure;
-imagesc(lateral, disttxrx, log(eps+abs(hilbert(psf)))); %colormap(gray);
+imagesc(lateral, disttxrx, 20*log10(eps+psf));
+colormap(gray); colorbar; caxis([-55 0]);

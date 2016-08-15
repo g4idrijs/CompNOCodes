@@ -44,7 +44,7 @@ height = 10/1000;      % Size in the Y direction                   [m]
                        % constants F-number reconstruction
 
 %  Define the impulse response of the transducer
-impulse_response = [1]; % sin(2*pi*f0*(0:1/fs:1/f0));
+impulse_response = sin(2*pi*f0*(0:1/fs:1/f0));
 impulse_response = impulse_response.*hanning(length(impulse_response))';
 
 %  Define the phantom
@@ -108,7 +108,7 @@ transmitResults = cell(2,1);
 transmitResults{1} = zeros(no_rf_samples,no_lines);
 transmitResults{2} = zeros(no_rf_samples,no_lines);
 
-for currTransmit = 1:no_Transmits
+for currTransmit = 1:1 %no_Transmits
     % For each transmit, we image and beamform each line
     for currLine = 1:no_lines
         % Calculate and set apodization for this line

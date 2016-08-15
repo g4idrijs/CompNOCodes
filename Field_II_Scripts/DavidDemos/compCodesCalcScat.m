@@ -114,13 +114,15 @@ for i = 1:size(codes,1)
     % Plot RF data
     subplot(3,2,1+2*(i-1));
     plot(rf_data);
-    title(sprintf('RF All Trand Code %i',i))
+    title(sprintf('RF Code %i',i))
     
     % Calculate cross correlation with code    
     subplot(3,2,2+2*(i-1));
     ccfMat(i,:) = xcorr(rf_data,currCode);
     plot(ccfMat(i,:));
-    title(sprintf('CCF All Trand Code %i',i)) 
+    title(sprintf('ACF Code %i',i)) 
+    xlabel('Time')
+    ylabel('Magnitude')
     
     
 end
@@ -128,6 +130,7 @@ end
 i = i + 1;
 subplot(3,2,2+2*(i-1))
 plot(sum(ccfMat))
-title('CCF Sum')
-
+title('ACF Sum')
+xlabel('Time')
+ylabel('Magnitude')
 
