@@ -24,15 +24,15 @@ useNoise = 0;
 codes = cell(0);
 codes{1}.code = [ones(1, 8), ones(1, 8), ones(1, 8), -ones(1, 8)];
 codes{1}.ccode = [ones(1, 8), ones(1, 8), -ones(1, 8), ones(1, 8)];
-codes{1}.focus = [-10/1000 0 50/1000]; 
+codes{1}.focus = [0/1000 0 50/1000]; 
 
-codes{2}.code = [ones(1, 8), ones(1, 8), ones(1, 8), -ones(1, 8)];
-codes{2}.ccode = [ones(1, 8), ones(1, 8), -ones(1, 8), ones(1, 8)];
-codes{2}.focus = [0/1000 0 50/1000]; 
-
-codes{3}.code = [ones(1, 8), ones(1, 8), ones(1, 8), -ones(1, 8)];
-codes{3}.ccode = [ones(1, 8), ones(1, 8), -ones(1, 8), ones(1, 8)];
-codes{3}.focus = [10/1000 0 50/1000]; 
+% codes{2}.code = [ones(1, 8), ones(1, 8), ones(1, 8), -ones(1, 8)];
+% codes{2}.ccode = [ones(1, 8), ones(1, 8), -ones(1, 8), ones(1, 8)];
+% codes{2}.focus = [0/1000 0 50/1000]; 
+% 
+% codes{3}.code = [ones(1, 8), ones(1, 8), ones(1, 8), -ones(1, 8)];
+% codes{3}.ccode = [ones(1, 8), ones(1, 8), -ones(1, 8), ones(1, 8)];
+% codes{3}.focus = [10/1000 0 50/1000]; 
 
 % codes{3}.code = [ones(1, 8), ones(1, 8), ones(1, 8), -ones(1, 8)];
 % codes{3}.ccode = [ones(1, 8), ones(1, 8), -ones(1, 8), ones(1, 8)];
