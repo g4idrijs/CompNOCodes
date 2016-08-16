@@ -8,22 +8,49 @@
 %   -Beamform the data from this transmit
 %   -Do the same for the second transmit, and then add the two results
 
-%% Initial setup (ex. transducer, phantom, image range properties) 
 clear
 
-% Define codes used for excitation
+%% Define codes used for excitation
 codes = cell(0);
-firstCode = [ones(1, 8), ones(1, 8), ones(1, 8), -ones(1, 8)];
-secCode = [ones(1, 8), ones(1, 8), -ones(1, 8), ones(1, 8)];
 
-transFocSpacing = 6e-3;
-currCodeInd = 1;
-for i = -1:1
-    codes{currCodeInd}.code = firstCode;
-    codes{currCodeInd}.ccode = secCode;
-    codes{currCodeInd}.focus = [transFocSpacing*i 0 50/1000]; % A transmit focus location (x,y,z)
-    currCodeInd = currCodeInd + 1;
+% Use all same code pairs or not
+% (using all the same code pair results in lots of interference)
+useAllSamePairs = 0;
+
+% Load codes (have nice cross correlation properties)
+tempLoad = load('C:\Users\User\Dropbox\Grad_School\Summer Codes\OvernightPairGeneration\CompPairs_From_Nonlinear_Optimizer\compPairs_len_10_simMain.mat');
+allCodes = tempLoad.('pairsSoFar');
+
+% Used if we choose to make all the code pairs the same
+firstCode =    allCodes(1,:); %[ones(1, 8), ones(1, 8), ones(1, 8), -ones(1, 8)];
+secCode =   allCodes(2,:); %[ones(1, 8), ones(1, 8), -ones(1, 8), ones(1, 8)]; %
+
+% Evenly space transmit focus locations in x
+% numTransFocLocs = 5; % Set odd for symmetry in transmit focusing
+% transFocSpacing = 6e-3; % (m)
+% transFocStart = -(numTransFocLocs-1)/2*transFocSpacing;
+
+% Set the transmit focus locations
+transFocLocs = [0/1000 0 50/1000    
+%                 6/1000 0 50/1000
+%                 -6/1000 0 50/1000
+                ];
+numTransFocLocs = size(transFocLocs,1);
+            
+for i = 1:numTransFocLocs
+    if(useAllSamePairs == 0)
+        codes{i}.code = allCodes(i*2-1,:);
+        codes{i}.ccode = allCodes(i*2,:);    
+    elseif(useAllSamePairs == 1)
+        codes{i}.code = firstCode;
+        codes{i}.ccode = secCode;
+    end
+    
+    %codes{currCodeInd}.focus = [transFocStart+transFocSpacing*(i-1) 0 50/1000]; % A transmit focus location (x,y,z)
+    codes{i}.focus = transFocLocs(i,:);
 end
+
+%% Initial setup (ex. transducer, phantom, image range properties) 
 
 % Store all the transmit focus locations 
 transFocLocs = zeros(length(codes),3);
@@ -51,8 +78,10 @@ impulse_response = sin(2*pi*f0*(0:1/fs:1/f0));
 impulse_response = impulse_response.*hanning(length(impulse_response))';
 
 %  Define the phantom
-pht_pos = [0 0 50/1000]; % Position
-pht_amp = 20; % Strength of scattering
+% pht_pos = [10/1000 0 50/1000
+%            -10/1000 0 50/1000]; % Position
+pht_pos = transFocLocs;
+pht_amp = 20*ones(size(pht_pos,1),1); %[20; 20]; % Strength of scattering
 
 % Calculate minimum and maximum samples and times for phantom
 Rmax = max(sqrt(pht_pos(:,1).^2 + pht_pos(:,2).^2  + pht_pos(:,3).^2)) + 5/1000;
@@ -89,7 +118,7 @@ xdc = bft_linear_array(no_elements, width, kerf);
 xdc_impulse(rcv, impulse_response);
 xdc_impulse(xmt, impulse_response);
 
-%% Imaging preparation (ex. sliding aperture setup, beamforming lines)
+%% Imaging preparation (ex. sliding aperture setup, receive focus, beamforming lines)
 
 % Don't receive focus (will use beamforming toolbox)
 xdc_focus_times(rcv, 0, zeros(1,no_elements));
@@ -104,7 +133,7 @@ no_elSlide = round((wSlide + kerf) / (width + kerf)); % Number of elements in sl
 no_active_tx = no_elSlide;
 no_active_rx = no_elSlide;
 
-% Set the points at which we will receive focus
+% Set receive focus points
 % Each row is a point in the form (x,y,z)
 zDepth = 50e-3; % (m)
 xFocusVals = -15e-3:1e-4:15e-3; % (m)
@@ -112,7 +141,8 @@ reFocus = zeros(numel(xFocusVals), 3);
 reFocus(:,3) = zDepth;
 reFocus(:,1) = xFocusVals;
 
-no_lines = size(reFocus,1);
+% Set number of beamforming lines
+no_lines = size(reFocus,1); 
 
 %% Imaging
 % The two transmits happen one after the other
@@ -121,8 +151,7 @@ firstCodeCorr = zeros(no_rf_samples, no_elements, no_CodePairs);
 secCodeCorr = zeros(no_rf_samples, no_elements, no_CodePairs);  
 
 %  Index of starting element of rightmost aperture
-startLastAp = no_elements-(no_elSlide -1);
-
+startLastAp = no_elements-no_elSlide;
 
 % Store what apertures fired at what transmit focus points
 % Row = which transmit focus point
@@ -151,10 +180,9 @@ for currTransmit = 1:2
             error('Too many places to focus!')            
         elseif(numel(transFoc) == 3) % There is one place to transmit focus            
 
-            % Set transmit apodization centered around focus point
-            % (We only fire one sub-aperture at a time)
-            xFocus = transFoc(1);
-            [apo_vector_tx,apo_vector_rx] = getApodization(xFocus,no_active_tx,no_active_rx,width, kerf, no_elements);
+            % Set transmit apodization for current aperture            
+            apo_vector_tx = [zeros(1,elStartFocus) ones(1,no_elSlide) zeros(1,no_elements-(elStartFocus+no_elSlide))];
+            
             xdc_apodization(xmt, 0, apo_vector_tx);
             xdc_apodization(rcv, 0, ones(1,no_elements));
 
@@ -164,15 +192,16 @@ for currTransmit = 1:2
                     currCodes = codes{i};
                     
                     % Record the leftmost element used for this transmit focus point
+                    % Row = which transmit focus point
+                    % Column = which leftmost element was used
                     leftIndApForTF(i,elStartFocus) = 1;
-            
                     break;
                 end
             end            
 
             % Set transmit focus
             xMid = (xStart + xEnd)/2;
-            xdc_center_focus(xmt,[xMid, 0, 0]) % Middle of aperture
+            xdc_center_focus(xmt,[xMid, 0, 0]) % Middle of current aperture
             xdc_focus(xmt, 0, currCodes.focus);
 
             % Get RF scattering data by firing...    
@@ -256,7 +285,7 @@ env_bf = env_bf / max(max(env_bf));
 % Plot image
 figure;
 imagesc([min(reFocus(:,1)) max(reFocus(:,1))]*1000, [Rmin Rmax]*1000, 20*log10(env_bf+eps));
-title('Beamformed Image');
+title('Beamformed Image: Different Pairs');
 xlabel('Lateral distance [mm]');
 ylabel('Axial distance [mm]')
 axis('image')
@@ -264,3 +293,6 @@ axis('image')
 colorbar
 colormap(gray);
 caxis([-55 0]);
+
+field_end
+bft_end
