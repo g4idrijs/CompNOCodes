@@ -1,6 +1,7 @@
-function [beam, maxDelay] = focusBeam(excitation, focus, xElements, fs, c)
+function [beam, maxDelay] = focusBeam(excitation, focus, xElements, fs, c, maxDelay)
     delays = (focus(3)-sqrt((xElements-focus(1)).^2+focus(3)^2))./c * fs;
     delays = delays-min(delays);
+    delays = delays+(maxDelay-max(delays));
     maxDelay = max(delays)/fs;
     %delays = delays-min(delays);
     %delays = delays-max(delays);
