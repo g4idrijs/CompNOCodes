@@ -11,15 +11,24 @@
 
 % Define codes used for excitation
 codes = cell(0);
-codes{1}.code = pairsSoFar(9, :);
-codes{1}.ccode = pairsSoFar(10, :);
-codes{1}.focus = [0 0 20]/1000;
-codes{2}.code = pairsSoFar(7, :);
-codes{2}.ccode = pairsSoFar(8, :);
-codes{2}.focus = [0 0 30]/1000;
-codes{3}.code = pairsSoFar(3, :);
-codes{3}.ccode = pairsSoFar(4, :);
-codes{3}.focus = [0 0 40]/1000;
+codesToUse = [3     7    13    15    53    55    63    95   119];%   125   167   181];
+focalPoints = [-4 0 40;
+           -3 0 40;
+           -2 0 40;
+           -1 0 40;
+           0 0 40;
+           1 0 40;
+           2 0 40;
+           3 0 40;
+           4 0 40;
+           ] / 1000;   
+
+for i = 1:length(codesToUse)
+    codes{i}.code = pairsSoFar(codesToUse(i), :);
+    codes{i}.ccode = pairsSoFar(codesToUse(i)+1, :);
+    codes{i}.focus = focalPoints(i, :);
+end
+
 no_lines = 257;
 
 % Transducer properties
@@ -47,11 +56,19 @@ pht_pos = [0 0 20;
            0 0 30;
            0 0 40;
            0 0 50;
-           0 0 60;
-           0 0 70;
+           3 0 20;
+           3 0 30;
+           3 0 40;
+           3 0 50;
+           -3 0 20;
+           -3 0 30;
+           -3 0 40;
+           -3 0 50;
            %0 0 80;
            ] / 1000;         %  The position of the phantom
-pht_amp = 20*ones(6,1);      %  The amplitude of the back-scatter
+pht_pos = focalPoints;
+pht_pos(end+1, :) = [0 0 50]/1000;
+pht_amp = 20*ones(size(pht_pos, 1),1);      %  The amplitude of the back-scatter
 
 % Calculate minimum and maximum samples and times for phantom
 Rmax = max(sqrt(pht_pos(:,1).^2 + pht_pos(:,2).^2  + pht_pos(:,3).^2)) + 5/1000;
@@ -145,22 +162,36 @@ end
 % Rf data matrix holds non-complementary and complementary simulated
 % RF data.
     
-    rf_data_m = zeros(no_rf_samples_c, no_elements, 2);
-    xmt_info = xdc_get(xmt, 'rect');
-    xElements = xmt_info(8, :);
+rf_data_m = zeros(no_rf_samples_c, no_elements, 2);
+xmt_info = xdc_get(xmt, 'rect');
+xElements = xmt_info(8, :);
+
+no_active_tx = 100;
+
+% Build up the beam for each pair
+beam = zeros(1500, no_elements, 2);
+forceMaxDelay = 500;
+maxDelays = zeros(1, length(codes));
+for i = 1:length(codes)
+    focus = codes{i}.focus;
+    % Find the apodization for this x focal zone
+    N_pre_tx = round(focus(1)/(width+kerf) + no_elements/2 - no_active_tx/2);
+    N_post_tx = no_elements - N_pre_tx - no_active_tx;
+    apo_vector_tx = [zeros(1, N_pre_tx) ones(1, no_active_tx) zeros(1, N_post_tx)];
+    tmp = find(apo_vector_tx);
+    apoStart = tmp(1);
+    apoEnd = tmp(end);
     
-    % Build up the beam for each pair
-    beam = zeros(1000, no_elements, 2);
-    maxDelays = zeros(1, length(codes));
-    for i = 1:length(codes)
-        [tmpBeam, maxDelay] = focusBeam(codes{i}.code, codes{i}.focus, xElements, fs, c);
-        beam(1:size(tmpBeam, 1), :, 1) = beam(1:size(tmpBeam, 1), :, 1) + tmpBeam;
-        maxDelays(i) = maxDelay;
-        
-        [tmpBeam, maxDelay] = focusBeam(codes{i}.ccode, codes{i}.focus, xElements, fs, c);
-        beam(1:size(tmpBeam, 1), :, 2) = beam(1:size(tmpBeam, 1), :, 2) + tmpBeam;
-    end
-    beam = beam(1:ceil(max(maxDelays)*fs+10), :, :);
+    focus(1) = 0;
+    xEle = xElements(no_elements/2-no_active_tx/2+1:no_elements/2+no_active_tx/2);
+    [tmpBeam, maxDelay] = focusBeam(codes{i}.code, focus, xEle, fs, c, forceMaxDelay);
+    beam(1:size(tmpBeam, 1), apoStart:apoEnd, 1) = beam(1:size(tmpBeam, 1), apoStart:apoEnd, 1) + tmpBeam;
+    maxDelays(i) = maxDelay;
+
+    [tmpBeam, maxDelay] = focusBeam(codes{i}.ccode, focus, xEle, fs, c, forceMaxDelay);
+    beam(1:size(tmpBeam, 1), apoStart:apoEnd, 2) = beam(1:size(tmpBeam, 1), apoStart:apoEnd, 2) + tmpBeam;
+end
+beam = beam(1:ceil(max(maxDelays)*fs+10), :, :);
     
     xdc_focus_times(xmt, 0, zeros(1, no_elements));
     xdc_focus_times(rcv, 0, zeros(1, no_elements));
@@ -169,9 +200,6 @@ end
     [rf_data, start_time] = calc_scat_multi(xmt, rcv, pht_pos, pht_amp);
     rf_data = alignRF(rf_data,start_time,fs,Smin_c,Smax_c,no_rf_samples_c,no_elements);
     rf_data_m(:, :, 1) = rf_data;
-    
-    xdc_focus_times(xmt, 0, zeros(1, no_elements));
-    xdc_focus_times(rcv, 0, zeros(1, no_elements));
     
     ele_waveform(xmt, (1:no_elements)', beam(:, :, 2)');
     [rf_data, start_time] = calc_scat_multi(xmt, rcv, pht_pos, pht_amp);
@@ -186,17 +214,10 @@ end
 % For each code, cross-correlate rf_data_sum with each code and add the
 % result to rf_data_decoded
 rf_data_decoded = zeros(no_rf_samples, no_elements, 2);
-bf_temp = zeros(no_rf_samples, no_lines);
+bf_image = zeros(no_rf_samples, no_lines);
 for i = 1:length(codes)
     %temp_decoded = xcorr2(rf_data_m(:, :, 1), codes{i}.code');
     %temp_decoded = temp_decoded(length(codes{i}.code):end, :);
-    x = maxDelays(i)*fs;
-    d = 0;
-    if (i > 1)
-        %d = -ceil(diff(maxDelays)*fs);
-        %d = diff(maxDelays);
-        x = x-(maxDelays(i)-maxDelays(1))*fs
-    end
     temp_decoded = conv2(rf_data_m(:, :, 1), rot90(conj(codes{i}.code'), 2), 'valid');
     temp_decoded = interp1(1:size(temp_decoded, 1), temp_decoded, 1+x:no_rf_samples+x);
     rf_data_decoded(:, :, 1) = rf_data_decoded(:, :, 1) + temp_decoded(1:no_rf_samples, :);
@@ -207,9 +228,11 @@ for i = 1:length(codes)
     temp_decoded = interp1(1:size(temp_decoded, 1), temp_decoded, 1+x:no_rf_samples+x);
     rf_data_decoded(:, :, 2) = rf_data_decoded(:, :, 2) + temp_decoded(1:no_rf_samples, :);
     
-    bf_temp2 = bft_beamform(Tmin, sum(rf_data_decoded, 3));
+    bf_temp = bft_beamform(Tmin-maxDelays(i), sum(rf_data_decoded, 3));
+    %bf_temp = abs(hilbert(bf_temp));
+    bf_image = bf_image + bf_temp;
     %bf_temp2 = bf_temp2(d+1:end, :);
-    bf_temp(1:size(bf_temp2, 1), :) = bf_temp(1:size(bf_temp2, 1), :) + bf_temp2;
+    %bf_temp(1:size(bf_temp2, 1), :) = bf_temp(1:size(bf_temp2, 1), :) + bf_temp2;
 end
 
 % Can either add decoded data for non-complementary and complementary then
@@ -222,12 +245,12 @@ end
 %bf_temp = bf_temp + bft_beamform(Tmin, rf_data_c_decoded);
 
 % Perform envelope detection and normalize
-env_bf = abs(hilbert(bf_temp));
+env_bf = abs(hilbert(bf_image));
 env_bf = env_bf / max(max(env_bf));
 
 % Plot image
 figure;
-imagesc([-1/2 1/2]*no_lines*d_x_line*1000, [Rmin Rmax]*1000, 20*log10(env_bf+eps));
+imagesc([-1/2 1/2]*no_lines*d_x_line*1000, ([Rmin Rmax]-maxDelays(1)*c/2)*1000, 20*log10(env_bf+eps));
 title('Beamformed Image');
 xlabel('Lateral distance [mm]');
 ylabel('Axial distance [mm]')
