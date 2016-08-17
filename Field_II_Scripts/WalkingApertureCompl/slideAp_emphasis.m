@@ -31,9 +31,9 @@ secCode =   allCodes(2,:); %[ones(1, 8), ones(1, 8), -ones(1, 8), ones(1, 8)]; %
 % transFocStart = -(numTransFocLocs-1)/2*transFocSpacing;
 
 % Set the transmit focus locations
-transFocLocs = [0/1000 0 50/1000    
-%                 6/1000 0 50/1000
-%                 -6/1000 0 50/1000
+transFocLocs = [0/1000 0 40/1000    
+                 6/1000 0 40/1000
+                 -6/1000 0 40/1000
                 ];
 numTransFocLocs = size(transFocLocs,1);
             
@@ -140,6 +140,7 @@ xFocusVals = -15e-3:1e-4:15e-3; % (m)
 reFocus = zeros(numel(xFocusVals), 3);
 reFocus(:,3) = zDepth;
 reFocus(:,1) = xFocusVals;
+
 
 % Set number of beamforming lines
 no_lines = size(reFocus,1); 
@@ -281,10 +282,10 @@ end
 % Normalize and do envelope detection
 env_bf = abs(hilbert(bfImag));
 env_bf = env_bf / max(max(env_bf));
-
+toPlot = 20*log10(env_bf+eps);
 % Plot image
 figure;
-imagesc([min(reFocus(:,1)) max(reFocus(:,1))]*1000, [Rmin Rmax]*1000, 20*log10(env_bf+eps));
+imagesc([min(reFocus(:,1)) max(reFocus(:,1))]*1000, [Rmin Rmax]*1000, toPlot);
 title('Beamformed Image: Different Pairs');
 xlabel('Lateral distance [mm]');
 ylabel('Axial distance [mm]')
@@ -296,3 +297,4 @@ caxis([-55 0]);
 
 field_end
 bft_end
+
