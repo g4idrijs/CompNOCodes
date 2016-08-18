@@ -1,0 +1,8 @@
+% Given two focal regions deltaF apart at depth L
+% and codes of length N, sampling frequency fs, and speed of sound c
+% calculates:
+% time lag between return of two codes to a single transducer
+% divided by the time it takes for a whole code to return
+% (what fraction of a code length are the codes offset in time)
+
+sqrt(L^2 + deltaF^2
