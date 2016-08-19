@@ -1,0 +1,13 @@
+As we bring a second point close to our focus point of interest:
+-The reflection from the other point arrives closer in time
+(top is sooner - smaller time values)
+-It arrives sooner at a lot of transducers (on the other side)
+-It arrives later on the same side
+
+Restrict receive aperture to same side for the moment
+Try and get good image using just one aperture for just
+one point phantom.
+
+Want to try and have two point scatterers, and eliminate effect
+of second one when focusing on only one
+(delete data that arrives later)

@@ -5,7 +5,8 @@ function rf_data = alignRF(rf_data,start_time,fs,Smin_c,Smax_c,no_rf_samples_c,n
 
     start_sample = floor(start_time * fs)+1;
     end_sample = start_sample + size(rf_data, 1) - 1;
-
+    
+    
     if (start_sample < Smin_c)
       rf_data = rf_data(Smin_c-start_sample+1:end, :);
       start_sample = Smin_c;

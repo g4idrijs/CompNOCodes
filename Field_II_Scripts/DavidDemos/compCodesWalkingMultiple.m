@@ -9,6 +9,9 @@
 
 %% Simulation properties
 
+tempLoad = load('C:\Users\User\Dropbox\Grad_School\Summer Codes\OvernightPairGeneration\CompPairs_From_Nonlinear_Optimizer\compPairs_len_10_simMain.mat');
+pairsSoFar = tempLoad.('pairsSoFar');
+
 % Define codes used for excitation
 codes = cell(0);
 %codesToUse = [3     7    13    15    53    55    63    95   119];%   125   167   181];

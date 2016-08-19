@@ -1,0 +1,6 @@
+I don't think we can use zero correlation windows to our advantage too much
+-Due to there being scatterers at multiple z depths, we should get alignment of the codes
+	in all alignments.
+
+However, it would still be very interesting to see to what extent the codes interact
+(how much energy at each time - is there a surge in energy when the focus beam comes along?)

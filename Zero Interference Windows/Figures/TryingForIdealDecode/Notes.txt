@@ -1,0 +1,2 @@
+Used delta impulse
+Should be no interference from other point in phantom
