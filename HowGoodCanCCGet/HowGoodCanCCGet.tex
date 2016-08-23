@@ -5,7 +5,7 @@
 
 \usepackage{fancyhdr}
 \pagestyle{fancy}
-\lhead{Can't Linearly Solve Sum of Autocorrelation Equations}
+\lhead{Analyzing CCF Interference}
 \rhead{\thepage}
 \renewcommand{\headrulewidth}{0.4pt}
 \renewcommand{\footrulewidth}{0.4pt}
@@ -18,6 +18,8 @@
 \usepackage{amsmath} % For math formatting
 \usepackage{graphicx}
 \usepackage{hyperref} 
+\usepackage{tcolorbox}
+\usepackage{commath}
 \usepackage{xcolor}
 \hypersetup{
     colorlinks,
@@ -35,16 +37,113 @@
 }
 
 
-\title{\LARGE How Good Can we make Cross Correlation Interference Using Complementary Pairs?}
+\title{Reducing Cross Correlation Interference\\ with Complementary Pairs}
 \author{David Egolf}
 \date{August 22, 2016}
 % Where the document starts
 \begin{document}
 \maketitle
-
-\section*{Our Goals}
-
-
+\section*{Our Requirements and Goals}
+We want to fire $N$ code pairs $\{P_1,P_2,...,P_N\}$, in two transmit events. Each code pair $P_i$ has two sequences: $\{P_{i,1},P_{i,2}\}$. The length of each of these sequences, for all code pairs, is $L$.
+\subsection*{Pairs Must be Complementary}
+Each code pair is required to be ``complementary" - it must satisfy:
+\begin{align*}
+CCF(P_{i,1},P_{i,1})[n] + CCF(P_{i,2},P_{i,2})[n] = k_i\delta[n]
+\end{align*}
+where $\delta[n]$ is the discrete delta function and $CCF$ is the cross correlation function. For our purposes, the cross correlation function of two sequences $f$ and $g$ of length $L$ is:
+\begin{align*}
+CCF(f,g)[n] = \sum_{m=-\infty}^{\infty}f[m]g[m+n]
+\end{align*}
+where the sequences are zero for all values of $m$ unless specified otherwise.
+\subsection*{We Desire Good Cross-correlation Properties}
+With each pair $P_i$, we associate a transmit region $T_i$ and a receive region $R_i$. When decoding RF scatter data at receive region $R_i$ to produce $D_i$, we do it this way:
+\begin{align*}
+D_i = D_{i,1} + D_{i,2} \\
+D_{i,1} = CCF(P_{i,1},RF_{i,1})\\
+D_{i,2} = CCF(P_{i,2},RF_{i,2})\\
+\end{align*}
+where $RF_{i,1}$ is the raw RF data received at receive region $R_i$ after the first set of codes $\{P_{1,1},P_{2,1},...,P_{N,1}\}$ have been transmitted, and $RF_{i,2}$ is the raw RF data received at receive region $R_i$ after the second set of codes $\{P_{1,2},P_{2,2},...,P_{N,2}\}$ have been transmitted.
+\\\\
+We assume for the moment that the data received at $R_i$ on the $j_{th}$ transmit is the sum of the transmitted data, with delays:
+\begin{align*}
+ RF_{i,j} = W_{i,1}(P_{1,j})+W_{i,2}(P_{2,j})+...+W_{i,N}(P_{N,j})
+\end{align*}
+where $W_{i,j}$ is a ``wait" function, which delays a function by some delay $\Delta_{i,j}$ (where $i$ is the associated receive region, and $j$ is the associated code).
+\begin{align*}
+W_{i,j}(f[n]) = f[n-\Delta_{i,j}]
+\end{align*}
+This function adds in the delay in arrival at region $R_i$ of codes from code pair $P_j$.
+\clearpage
+So, the decoded data is:
+\begin{align*}
+D_i &= CCF(P_{i,1},RF_{i,1}) + CCF(P_{i,2},RF_{i,2}) \\
+&= CCF\left(P_{i,1}, \sum_{m=1}^N W_{i,m}(P_{m,1})\right) + CCF\left(P_{i,2}, \sum_{m=1}^N W_{i,m}(P_{m,2})\right)
+\end{align*}
+To break this down further, we can realize that the cross correlation function distributes over a sum in the second argument:
+\begin{align*}
+CCF \left(f,\sum_{i = 1}^N g_i\right) &= \sum_{m=1}^{L-n}f[m](g_1[m+n] + g_2[m+n] +...+ g_N[m+n]) \\
+&= \sum_{m=1}^{L-n}f[m]g_1[m+n] + f[m]g_2[m+n] +...+ f[m]g_N[m+n])\\
+&= \sum_{m=1}^{L-n}f[m]g_1[m+n] +...+ \sum_{m=1}^{L-n}f[m]g_N[m+n]\\
+&= CCF(f,g_1) + CCF(f,g_2)+...+CCF(f,g_N)\\
+\implies
+CCF \left(f,\sum_{i = 1}^N g_i\right) &= \sum_{i=1}^N CCF(f,g_i)
+\end{align*}
+Therefore, the decoded data is:
+\begin{align*}
+D_i &= CCF\left(P_{i,1}, \sum_{m=1}^N W_{i,m}(P_{m,1})\right) + CCF\left(P_{i,2}, \sum_{m=1}^N W_{i,m}(P_{m,2})\right) \\
+&= \sum_{m=1}^N CCF(P_{i,1}, W_{i,m}(P_{m,1})) + \sum_{m=1}^N CCF(P_{i,2}, W_{i,m}(P_{m,2})) \\
+&=  \sum_{m=1}^N CCF(P_{i,1}, W_{i,m}(P_{m,1})) + CCF(P_{i,2}, W_{i,m}(P_{m,2}))
+\end{align*}
+Now we want use the fact that each pair is complementary:
+\begin{align*}
+D_i &= CCF(P_{i,1},W_{i,i}(P_{i,1})) + CCF(P_{i,2},W_{i,i}(P_{i,2})) +  \sum_{m=\{1,...,N\}, m \neq i} CCF(P_{i,1}, W_{i,m}(P_{m,1})) + CCF(P_{i,2}, W_{i,m}(P_{m,2}))
+\end{align*}
+We need another property of the $CCF$ function:
+\begin{align*}
+CCF(f[k],g[k-a])[n]&= \sum_{m=-\infty}^{\infty} f[m]g[(m-a)+n] \\
+&= \sum_{m=-\infty}^{\infty} f[m]g[m+(n-a)] \\
+&= CCF(f[k], g[k])[n-a]
+\end{align*}
+Applying this property and complementarity to the first two pairs yields: 
+\begin{align*}
+CCF(P_{i,1},W_{i,i}(P_{i,1})) + CCF(P_{i,2},W_{i,i}(P_{i,2})) &= CCF(P_{i,1}[n],P_{i,1}[n - \Delta_{i,i}]) +  CCF(P_{i,2}[n],P_{i,2}[n - \Delta_{i,i}]) \\
+&= CCF(P_{i,1},P_{i,1})[n-\Delta_{i,i}] + 
+CCF(P_{i,2},P_{i,2})[n-\Delta_{i,i}] \\
+&=\left(CCF(P_{i,1},P_{i,1})+ 
+CCF(P_{i,2},P_{i,2}\right))[n-\Delta_{i,i}]\\
+&=\delta[n-\Delta_{i,i}]
+\end{align*}
+The decoded data is therefore:
+\begin{align*}
+D_i &= k\delta[n-\Delta_{i,i}] +  \sum_{m=\{1,...,N\}, m \neq i} CCF(P_{i,1}, W_{i,m}(P_{m,1})) + CCF(P_{i,2}, W_{i,m}(P_{m,2}))
+\end{align*}
+\clearpage
+We want $D_i$ to be as much like $\Delta_{i,i}$ as possible. Therefore:
+\begin{align*}
+\text{our rough goal is to make this small: } \sum_{m=\{1,...,N\}, m \neq i} CCF(P_{i,1}, W_{i,m}(P_{m,1})) + CCF(P_{i,2}, W_{i,m}(P_{m,2}))
+\end{align*}
+The sum is a sequence, and so there are different things that we could minimize in this sequence. For the moment, let's minimize the maximum value over the sequence terms in the sum.
+\\\\
+\begin{tcolorbox}
+If we denote the $m_{th}$``side lobe term" as $SLT_{i,m}$:
+\begin{align*}
+SLT_{i,m}[n] = \left(CCF(P_{i,1}, W_{i,m}(P_{m,1})) + CCF(P_{i,2}, W_{i,m}(P_{m,2})\right)[n] \\
+\end{align*}
+And define the ``noise" $N_i$ for the $i_{th}$ receive region as follows:
+\begin{align*}
+N_i &= \max_{m,n}~\abs{SLT_{i,m}[n]}
+\end{align*}
+Then our goal is to minimize the worse case noise $N$:
+\begin{align*}
+N = \frac{\max_{i}N_i}{\min_i{\abs{k_i}}}
+\end{align*}
+If a set of pairs $P$ has a small noise $N(P)$, then it is said to have good cross correlation properties.
+\end{tcolorbox}
+Intuitively, we are making each term in the cross correlation interference sum small compared to the weakest signal that we can recover. We achieve this by making the largest term in the cross correlation interference sum as small as we can, while making the signal we receive from each complementary pair as large as we can.
+\section*{Relevant Info From Papers}
+In this section, we cite relevant results regarding how good we can make the cross correlation interference relative the signal strength - how small we can make $N$.
+\\\\
+Gran and Jensen: \textit{Spatial encoding with code division technique for ultrasound imaging}
 
 
 

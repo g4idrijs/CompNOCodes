@@ -83,9 +83,6 @@ bft_param('fs', fs);
 xmt = xdc_linear_array(no_elements,width,height,kerf,1,1,[0 0 0]);
 rcv = xdc_linear_array(no_elements,width,height,kerf,1,1,[0 0 0]);
 
-% Create beamforming array
-xdc = bft_linear_array(no_elements, width, kerf);
-
 % Set the impulse responses
 xdc_impulse(rcv, impulse_response);
 xdc_impulse(xmt, impulse_response);
@@ -104,6 +101,9 @@ wSlide = 5e-3; % width (m)
 no_elSlide = round((wSlide + kerf) / (width + kerf)); % Number of elements in sliding aperture
 no_active_tx = no_elSlide;
 no_active_rx = no_elSlide;
+
+% Create beamforming array
+xdc = bft_linear_array(no_elSlide, width, kerf);
 
 %% Imaging
 % The two transmits happen one after the other
@@ -155,9 +155,9 @@ for transFocInd = 1:no_lines % We image each line seperately
         
         % Align received RF data in time
         codeRF = alignRF_DavidMod(codeRF, start_timeCode,fs,Smin_c,Smax_c,no_rf_samples_c,no_elements);           
-        if size(codeRF, 1) > no_rf_samples_c %  Try just chopping off extra..
-          codeRF = codeRF(end:-1:(end-no_rf_samples_c), :);
-        end     
+%         if size(codeRF, 1) > no_rf_samples_c %  Try just chopping off extra..
+%           codeRF = codeRF(end:-1:(end-no_rf_samples_c), :);
+%         end     
         
         % Decode the received RF data
         % Get current code for decoding this code pair
@@ -191,12 +191,10 @@ for transFocInd = 1:no_lines % We image each line seperately
     end       
     % We have the decoded data for one aperture
     sumDecAp = runTotAp;    
-    %imagesc(sumDecAp)
     title('Decoded RF: One Aperture')
     decodedRunTot = 0.8*decodedRunTot + sumDecAp; % Plotting running total across all apertures
     imagesc(decodedRunTot);    
-    pause(0.1)    
-    
+    pause(eps)    
     
     % Beamform the data from this aperture
     
@@ -206,14 +204,17 @@ for transFocInd = 1:no_lines % We image each line seperately
     
     % Set beamforming apodization to be aperture directly below scatterer
     % (also used for transmit and receive)
-    bft_apodization(xdc, 0, apo_vector_rx);    
-        
+    % bft_apodization(xdc, 0, apo_vector_rx);    
+     bft_apodization(xdc, 0, ones(1,no_elSlide));
+     
     % Set current receive focus        
-    bft_center_focus([focusX 0 0]); % Set up start of line for dynamic focus       
+    bft_center_focus([0 0 0]); % Set up start of line for dynamic focus       
     bft_dynamic_focus(xdc, 0, 0);    % Set direction of dynamic focus  
     
     % Beamform and store resulting line        
-    currLineBf = bft_beamform(Tmin, sumDecAp);    
+    currApd = find(apo_vector_rx);
+    dataToBf = sumDecAp(:,currApd);
+    currLineBf = bft_beamform(Tmin,dataToBf);    
     bfLines(:,transFocInd) = currLineBf;
 end 
 
@@ -227,7 +228,7 @@ toPlot = 20*log10(env_bf+eps);
 % Plot current line
 figure
 imagesc([min(transFocLocs(:,1)) max(transFocLocs(:,1)) ]*1000, [Rmin Rmax]*1000, toPlot);
-title('Regular Time Adjust');
+title('Beamforming Array with Size of Sliding Aperture');
 xlabel('Lateral distance [mm]');
 ylabel('Axial distance [mm]')
 axis('image')
