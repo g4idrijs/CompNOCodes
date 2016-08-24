@@ -30,7 +30,7 @@ allCodes = [repelem([1 1 1 -1],1,1);
 
 % Set the transmit focus locations (each row is an (x,y,z) point)
 zTransDepth = 40e-3; % (m)
-xTransFocusVals = [-9e-3,-7e-3];%[-10e-3:1e-4:-6e-3]; %-10e-3:2e-4:-6e-3; %-6e-3:1e-4:6e-3; % (m)
+xTransFocusVals = [-10e-3:1e-4:-6e-3]; %-10e-3:2e-4:-6e-3; %-6e-3:1e-4:6e-3; % (m)
 transFocLocs = zeros(numel(xTransFocusVals), 3);
 transFocLocs(:,3) = zTransDepth;
 transFocLocs(:,1) = xTransFocusVals;
@@ -45,7 +45,7 @@ end
 
 %%  Define the phantom
 pht_pos = [ -8/1000 0 40/1000
-            %-8/1000 0 44/1000
+           % -9/1000 0 40/1000
                 ];
 pht_amp = 20*ones(size(pht_pos,1),1); % Strength of scattering
 
@@ -148,7 +148,7 @@ for transFocInd = 1:no_lines % We image each line seperately
         if(currTransmit == 1)
             xdc_excitation(xmt, currCodes.code);
             [codeRF, start_timeCode] = calc_scat_multi(xmt, rcv, pht_pos, pht_amp);             
-            
+          
         else
             %...second code in pair
             xdc_excitation(xmt, currCodes.ccode);
@@ -157,14 +157,12 @@ for transFocInd = 1:no_lines % We image each line seperately
         
         % Align received RF data in time
         if(currTransmit == 1)
-            printStuff = 1;
+            printStuff = 0;
             disp('==================')
         else
             printStuff = 0;
         end
-        
-        manualTrim = 2400; % Keep from this sample to the end
-        %a = alignRF_DavidMod(codeRF, start_timeCode,fs,Smin_c,Smax_c,no_rf_samples_c,no_elements,printStuff,manualTrim);           
+        %codeRF = alignRF_DavidMod(codeRF, start_timeCode,fs,Smin_c,Smax_c,no_rf_samples_c,no_elements,printStuff,100);           
         codeRF = alignRF(codeRF, start_timeCode,fs,Smin_c,Smax_c,no_rf_samples_c,no_elements);           
 
         % Decode the received RF data
@@ -200,11 +198,10 @@ for transFocInd = 1:no_lines % We image each line seperately
     % We have the decoded data for one aperture
     sumDecAp = runTotAp;    
     %imagesc(sumDecAp)
-    
-    decodedRunTot = 0.8*decodedRunTot + sumDecAp; % Plotting running total across all apertures
-    imagesc(decodedRunTot);  
-    title('Decoded RF: One Aperture')
-    pause(eps)    
+%     title('Decoded RF: One Aperture')
+%     decodedRunTot = 0.8*decodedRunTot + sumDecAp; % Plotting running total across all apertures
+%     imagesc(decodedRunTot);    
+%     pause(eps)    
     
     
     % Beamform the data from this aperture
@@ -222,10 +219,7 @@ for transFocInd = 1:no_lines % We image each line seperately
     bft_dynamic_focus(xdc, 0, 0);    % Set direction of dynamic focus  
     
     % Beamform and store resulting line
-    % Update Tmin to be correct!    
-    tFirstSample = manualTrim*(1/fs);
-    %currLineBf = bft_beamform(Tmin, sumDecAp);   
-    currLineBf = bft_beamform(tFirstSample, sumDecAp);   
+    currLineBf = bft_beamform(Tmin, sumDecAp);    
     bfLines(:,transFocInd) = currLineBf;
 end 
 
@@ -239,7 +233,7 @@ toPlot = 20*log10(env_bf+eps);
 % Plot current line
 figure
 imagesc([min(transFocLocs(:,1)) max(transFocLocs(:,1)) ]*1000, [Rmin Rmax]*1000, toPlot);
-title(sprintf('Regular Time Adjust'),'Interpreter','None');
+title(sprintf('Normal Time Adjust'),'Interpreter','None');
 xlabel('Lateral distance [mm]');
 ylabel('Axial distance [mm]')
 axis('image')
