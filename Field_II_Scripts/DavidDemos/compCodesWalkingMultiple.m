@@ -1,28 +1,27 @@
-% FLASH_COMPLEMENTARY_SIM 
-% Simulate a flash image with complemenatry codes at many focal zones
-% VERSION 1.0, August 10, 2016
-%
-% This version uses BFT to beamform images
+% Form three lines at once, each using a different pair of complementary
+% codes. Then, form the next three lines on the next pair of transmits.
+
+% Better point spread function than other methods we used
+% Some stiching issues, some skew issues.
 
 %path('/home/tjh/git/zemp_lab/Matlab/bft',path);
 %path('/home/tjh/git/fieldII',path);
 
 %% Simulation properties
 
+% Load codes used for excitation
 tempLoad = load('C:\Users\User\Dropbox\Grad_School\Summer Codes\OvernightPairGeneration\CompPairs_From_Nonlinear_Optimizer\compPairs_len_10_simMain.mat');
 pairsSoFar = tempLoad.('pairsSoFar');
 
-% Define codes used for excitation
+% Store codes
 codes = cell(0);
-%codesToUse = [3     7    13    15    53    55    63    95   119];%   125   167   181];
-codesToUse = [1 3 5];% 7 9 11 13 15 17];
-
+codesToUse = [1 3 5];
 for i = 1:length(codesToUse)
     codes{i}.code = pairsSoFar(codesToUse(i), :);
     codes{i}.ccode = pairsSoFar(codesToUse(i)+1, :);
 end
 
-no_lines = 255;
+no_lines = 255; % Total number of lines to beamform
 
 % Transducer properties
 f0 = 5e6;              %  Central frequency                        [Hz]
@@ -36,9 +35,9 @@ width = .95*pitch;     % Width of the element                      [m]
 kerf = pitch - width;  % Inter-element spacing                     [m]
 height = 10/1000;      % Size in the Y direction                   [m]
 
-rx_fnum         = 0;   % Receive f-number - Set to 0 to turn off
-                       % constant F-number reconstruction
-no_active = 192;        % Number of active elements on transmit and receive
+rx_fnum = 0;           % Receive f-number - Set to 0 to turn off
+                           % constant F-number reconstruction
+no_active = 192;       % Number of active elements on transmit and receive
 
 %  Define the impulse response of the transducer
 impulse_response = sin(2*pi*f0*(0:1/fs:1/f0));
@@ -57,22 +56,23 @@ pht_pos = [%0 0 20;
            %-3 0 30;
            -6 0 40;
            %-3 0 50;
-           ] / 1000;         %  The position of the phantom
-pht_pos = pht_pos;
+           ] / 1000; %  The position of the phantom
 pht_pos(end+1, :) = [0 0 50]/1000;
-pht_amp = 20*ones(size(pht_pos, 1),1);      %  The amplitude of the back-scatter
+pht_amp = 20*ones(size(pht_pos, 1),1); %  The amplitude of the back-scatter
 
-% Calculate minimum and maximum samples and times for phantom
+% Starting and ending distance to image
 Rmax = max(sqrt(pht_pos(:,1).^2 + pht_pos(:,2).^2  + pht_pos(:,3).^2)) + 5/1000;
 Rmin = min(sqrt(pht_pos(:,1).^2 + pht_pos(:,2).^2  + pht_pos(:,3).^2)) - 5/1000;
 if (Rmin < 0) Rmin = 0; end;
+% Starting and ending data collection time
 Tmin = 2*Rmin / c; Tmax = 2*Rmax / c;
+% Starting and ending data collection indices
 Smin = floor(Tmin * fs); Smax = ceil(Tmax * fs);
 max_code_length = max(cellfun(@(x) max(length(x.code), length(x.ccode)), codes));
 Smin_c = Smin; Smax_c = Smax + max_code_length + 1000;
 
-no_rf_samples = Smax - Smin + 1;
-no_rf_samples_c = Smax_c - Smin_c + 1;
+no_rf_samples = Smax - Smin + 1;        % Number of decoded RF samples
+no_rf_samples_c = Smax_c - Smin_c + 1;  % Number of RF samples
 
 %  Initialize Field II and BFT
 field_init(-1);
@@ -102,14 +102,14 @@ xdc_impulse(xmt, impulse_response);
 xdc_apodization(xmt, 0, ones(1,no_elements))
 xdc_apodization(rcv, 0, ones(1,no_elements))
 
-
-%% Simulate transmit and receive
-
-% Define receive focusing - dynamic focusing on all lines
+% Set center for transmit and receive focusing
 xdc_center_focus(xmt,[0 0 0])
 xdc_center_focus(rcv,[0 0 0])
-xdc_focus_times(rcv, 0, zeros(1,no_elements));
 
+% Turn off Field II receive focusing
+xdc_focus_times(rcv, 0, zeros(1,no_elements)); 
+
+% Define lines (width, starting position in x, points in z direction)
 d_x_line = width*no_active / (no_lines-1);
 x_line = -(no_lines-1) / 2 * d_x_line;
 z_points = linspace(Rmin, Rmax, 100);
@@ -118,19 +118,19 @@ T = z_points/c*2;
 x_lines = x_line+d_x_line*(0:no_lines-1);
 
 %% Simulate imaging with each code
-% rf_data generated from imaging with each code and its associated focus
-% zone is added together to simulate imaging with all codes. This is then 
-% repeated for complementary versions.
-
-% Rf data matrix holds non-complementary and complementary simulated
-% RF data.
+% For each set of lines, we image with each code and its complementary pair
     
+% Store raw RF data for each element
+% 3rd dimension is transmit event index
 rf_data_m = zeros(no_rf_samples_c, no_elements, 2);
+
+% Get x position of transducer elements
 xmt_info = xdc_get(xmt, 'rect');
 xElements = xmt_info(8, :);
 
+% Number of transducers used for each beam (?)
 no_active_tx = 64;
-no_focal_zones_x = 3;
+no_focal_zones_x = 3; 
 focal_spacing_x = 6/1000;
 bf_image = zeros(no_rf_samples, no_lines);
 

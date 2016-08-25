@@ -12,15 +12,18 @@
 % Define codes used for excitation
 codes = cell(0);
 codesToUse = [3     7    13    15    53    55    63    95   119];%   125   167   181];
-focalPoints = [-4 0 40;
-           -3 0 40;
-           -2 0 40;
-           -1 0 40;
+focalPoints = [0 0 20;
+           0 0 30;
            0 0 40;
-           1 0 40;
-           2 0 40;
+           %0 0 50;
+           3 0 20;
+           3 0 30;
            3 0 40;
-           4 0 40;
+           %3 0 50;
+           -3 0 20;
+           -3 0 30;
+           -3 0 40;
+           %-3 0 50;
            ] / 1000;   
 
 for i = 1:length(codesToUse)
@@ -166,7 +169,7 @@ rf_data_m = zeros(no_rf_samples_c, no_elements, 2);
 xmt_info = xdc_get(xmt, 'rect');
 xElements = xmt_info(8, :);
 
-no_active_tx = 100;
+no_active_tx = 64;
 
 % Build up the beam for each pair
 beam = zeros(1500, no_elements, 2);

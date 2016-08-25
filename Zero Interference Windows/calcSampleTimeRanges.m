@@ -1,5 +1,3 @@
-% Not convinced this is right..
-
 function [Rmax, Rmin, Tmin, Smin, max_code_length, Smin_c, Smax_c, no_rf_samples, no_rf_samples_c] =...
     calcSampleTimeRanges(pht_pos, codes,c,fs)
 
