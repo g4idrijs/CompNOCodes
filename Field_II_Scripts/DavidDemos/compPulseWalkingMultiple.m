@@ -6,61 +6,67 @@
 
 %path('/home/tjh/git/zemp_lab/Matlab/bft',path);
 %path('/home/tjh/git/fieldII',path);
-
+tempLoad = load(['../../Complementary Pairs/compPairs_len_10_simMain.mat']);
+codeSet = tempLoad.('pairsSoFar');
 %% Simulation properties
 
 % Define codes used for excitation
 codes = cell(0);
 %codesToUse = [3     7    13    15    53    55    63    95   119];%   125   167   181];
-codesToUse = [1 3 5];% 7 9 11 13 15 17];
+codesToUse = [1:2];% 7 9 11 13 15 17];
 
 for i = 1:length(codesToUse)
-    codes{i}.code = pairsSoFar(codesToUse(i), :);
-    codes{i}.ccode = pairsSoFar(codesToUse(i)+1, :);
+    codes{i}.code = codeSet(codesToUse(i), :);
+    codes{i}.ccode = codeSet(codesToUse(i)+1, :);
 end
 
-no_lines = 255;
+no_lines = 251;
 
 % Transducer properties
-f0 = 5e6;              %  Central frequency                        [Hz]
+f0 = 6.67e6;              %  Central frequency                        [Hz]
+number_cycles = 2;
 fs = 100e6;            %  Sampling frequency                       [Hz]
 c = 1540;              %  Speed of sound                           [m/s]
 no_elements = 192;     %  Number of elements in the transducer     
 
+width           = 0.2/1000;       % Width of element [m]
+height  = 5/1000;         % Height of element [m]
+kerf            = 0.02/1000;      % Kerf [m]
+
 lambda = c / f0;       % Wavelength                                [m]
-pitch = lambda / 2;    % Pitch - center-to-center                  [m]
-width = .95*pitch;     % Width of the element                      [m]
-kerf = pitch - width;  % Inter-element spacing                     [m]
-height = 10/1000;      % Size in the Y direction                   [m]
+%pitch = lambda / 2;    % Pitch - center-to-center                  [m]
+%width = .95*pitch;     % Width of the element                      [m]
+%kerf = pitch - width;  % Inter-element spacing                     [m]
+%height = 10/1000;      % Size in the Y direction                   [m]
 
 rx_fnum         = 0;   % Receive f-number - Set to 0 to turn off
                        % constant F-number reconstruction
 no_active = 192;        % Number of active elements on transmit and receive
 
 %  Define the impulse response of the transducer
-impulse_response = sin(2*pi*f0*(0:1/fs:1/f0));
-impulse_response = impulse_response.*hanning(length(impulse_response))';
-
-f0e = 10e6;
-excitation = sin(2*pi*f0e*(0:1/fs:1/f0e));
+impulse_response = sin(2*pi*f0*(0:1/fs:number_cycles/f0));
+%impulse_response = impulse_response.*hanning(length(impulse_response))';
+excitation = impulse_response;
+%excitation = sin(2*pi*f0*(0:1/fs:number_cycles/f0));
 
 %  Define the phantom
 pht_pos = [%0 0 20;
            %0 0 30;
-           0 0 40;
-           %0 0 50;
+           %0 0 30; 0 0 35; 0 0 40; 0 0 45; 0 0 50
+           -6 0 30; 0 0 30; 6 0 30;
+           -6 0 40; 0 0 40; 6 0 40;
            %3 0 20;
            %3 0 30;
-           6 0 40;
+           %6 0 40;
            %3 0 50;
            %-3 0 20;
            %-3 0 30;
-           -6 0 40;
+           %-6 0 40;
            %-3 0 50;
            ] / 1000;         %  The position of the phantom
 pht_pos = pht_pos;
-pht_pos(end+1, :) = [0 0 50]/1000;
-pht_amp = 20*ones(size(pht_pos, 1),1);      %  The amplitude of the back-scatter
+%pht_pos(end+1, :) = [0 0 40]/1000;
+pht_amp = ones(size(pht_pos, 1),1);      %  The amplitude of the back-scatter
 
 % Calculate minimum and maximum samples and times for phantom
 Rmax = max(sqrt(pht_pos(:,1).^2 + pht_pos(:,2).^2  + pht_pos(:,3).^2)) + 5/1000;
@@ -84,6 +90,8 @@ bft_param('c', c);
 
 set_field('fs', fs);
 bft_param('fs', fs);
+set_sampling(fs);
+set_field('use_triangles', 0);
 
 bft_no_lines(1);
 
@@ -130,29 +138,44 @@ xmt_info = xdc_get(xmt, 'rect');
 xElements = xmt_info(8, :);
 
 no_active_tx = 64;
+no_active_rx = 65;
 no_focal_zones_x = 3;
 focal_spacing_x = 6/1000;
 bf_image = zeros(no_rf_samples, no_lines);
 
-for lineStart = 45:99
-    disp(['Transmit ', num2str(lineStart-45+1)]);
+image_width = 28/1000;
+
+focalZoneSpacing_x = ceil(no_lines/length(codes));
+x = -image_width/2;
+x_lines = linspace(-image_width/2, image_width/2, no_lines);
+for lineNo = 1:focalZoneSpacing_x
+    disp(['Transmit ', num2str(lineNo)]);
     % Build up the beam for each pair
     beam = zeros(1500, no_elements, 2);
-    forceMaxDelay = 500;
+    forceMaxDelay = 200;
     maxDelays = zeros(1, length(codes));
     for i = 1:length(codes)
-        currentLine = lineStart+55*(i-1);
-        focus = [x_lines(currentLine) 0 40/1000];
+        currentLine = lineNo+focalZoneSpacing_x*(i-1);
+        if (currentLine > no_lines)
+            continue;
+        end
+        
         % Find the apodization for this x focal zone
         N_pre_tx = round(focus(1)/(width+kerf) + no_elements/2 - no_active_tx/2);
         N_post_tx = no_elements - N_pre_tx - no_active_tx;
         apo_vector_tx = [zeros(1, N_pre_tx) ones(1, no_active_tx) zeros(1, N_post_tx)];
+        
+        N_pre_rx = round(focus(1)/(width+kerf) + no_elements/2 - no_active_rx/2);
+        N_post_rx = no_elements - N_pre_rx - no_active_rx;
+        apo_vector_rx = [zeros(1, N_pre_rx) ones(1, no_active_rx) zeros(1, N_post_rx)];
+        
         tmp = find(apo_vector_tx);
         apoStart = tmp(1);
         apoEnd = tmp(end);
 
         codes{i}.lineNo = currentLine;
-        codes{i}.apod = apo_vector_tx;
+        codes{i}.apod_tx = apo_vector_tx;
+        codes{i}.apod_rx = apo_vector_rx;
         
         focus(1) = 0;
         xEle = xElements(no_elements/2-no_active_tx/2+1:no_elements/2+no_active_tx/2);
@@ -163,7 +186,7 @@ for lineStart = 45:99
         %[tmpBeam, maxDelay] = focusBeam(codes{i}.ccode, focus, xEle, fs, c, forceMaxDelay);
         %beam(1:size(tmpBeam, 1), apoStart:apoEnd, 2) = beam(1:size(tmpBeam, 1), apoStart:apoEnd, 2) + tmpBeam;
     end
-    beam = beam(1:ceil(max(maxDelays)*fs+10), :, :);
+    beam = beam(1:ceil(max(maxDelays)*fs+length(excitation)), :, :);
 
     xdc_focus_times(xmt, 0, zeros(1, no_elements));
     xdc_focus_times(rcv, 0, zeros(1, no_elements));
@@ -178,6 +201,7 @@ for lineStart = 45:99
 %     rf_data = alignRF(rf_data,start_time,fs,Smin_c,Smax_c,no_rf_samples_c,no_elements);
 %     rf_data_m(:, :, 2) = rf_data;
 
+    rx_fnum = 0;
     %% Decode images
     % For each code, cross-correlate rf_data_sum with each code and add the
     % result to rf_data_decoded
@@ -193,7 +217,8 @@ for lineStart = 45:99
         if (rx_fnum == 0)
             % Use all elements if fnum = 0
 
-            bft_apodization(xdc, 0, ones(1, no_elements));
+            %bft_apodization(xdc, 0, ones(1, no_elements));
+            bft_apodization(xdc, 0, codes{i}.apod_rx);
         else
             rx_ap           = z_points/rx_fnum;
             no_active_rx    = min(round(rx_ap/(width+kerf)), no_elements);
@@ -209,7 +234,7 @@ for lineStart = 45:99
 
             bft_apodization(xdc, T, apo_vector_rx);
         end
-        bf_temp = bft_beamform(Tmin-maxDelays(i), rf_data_m(1:no_rf_samples, :, 1));
+        bf_temp = bft_beamform(Tmin-maxDelay(1), rf_data_m(1:no_rf_samples, :, 1));
         bf_image(:, codes{i}.lineNo) = bf_temp;
     end
 end
@@ -233,7 +258,7 @@ env_bf = env_bf / max(max(env_bf));
 
 % Plot image
 figure;
-imagesc([-1/2 1/2]*no_lines*d_x_line*1000, ([Rmin Rmax]-maxDelays(1)*c/2)*1000, 20*log10(env_bf+eps));
+imagesc(x_lines*1000, ([Rmin Rmax]-maxDelays(1)*c/2)*1000, 20*log10(env_bf+eps));
 title('Beamformed Image');
 xlabel('Lateral distance [mm]');
 ylabel('Axial distance [mm]')
