@@ -13,7 +13,7 @@ codeSet = tempLoad.('pairsSoFar');
 % Define codes used for excitation
 codes = cell(0);
 %codesToUse = [3     7    13    15    53    55    63    95   119];%   125   167   181];
-codesToUse = [1:2];% 7 9 11 13 15 17];
+codesToUse = [1];% 7 9 11 13 15 17];
 
 for i = 1:length(codesToUse)
     codes{i}.code = codeSet(codesToUse(i), :);
@@ -52,9 +52,12 @@ excitation = impulse_response;
 %  Define the phantom
 pht_pos = [%0 0 20;
            %0 0 30;
-           %0 0 30; 0 0 35; 0 0 40; 0 0 45; 0 0 50
-           -6 0 30; 0 0 30; 6 0 30;
-           -6 0 40; 0 0 40; 6 0 40;
+           0 0 30; 0 0 35; 0 0 40; 0 0 45; 0 0 50;           
+           -6 0 30; -6 0 35; -6 0 40; -6 0 45; -6 0 50;
+           6 0 30; 6 0 35; 6 0 40; 6 0 45; 6 0 50;
+
+           %-6 0 30; 0 0 30; 6 0 30;
+           %-6 0 40; 0 0 40; 6 0 40;
            %3 0 20;
            %3 0 30;
            %6 0 40;
@@ -69,16 +72,8 @@ pht_pos = pht_pos;
 pht_amp = ones(size(pht_pos, 1),1);      %  The amplitude of the back-scatter
 
 % Calculate minimum and maximum samples and times for phantom
-Rmax = max(sqrt(pht_pos(:,1).^2 + pht_pos(:,2).^2  + pht_pos(:,3).^2)) + 5/1000;
-Rmin = min(sqrt(pht_pos(:,1).^2 + pht_pos(:,2).^2  + pht_pos(:,3).^2)) - 5/1000;
-if (Rmin < 0) Rmin = 0; end;
-Tmin = 2*Rmin / c; Tmax = 2*Rmax / c;
-Smin = floor(Tmin * fs); Smax = ceil(Tmax * fs);
-max_code_length = max(cellfun(@(x) max(length(x.code), length(x.ccode)), codes));
-Smin_c = Smin; Smax_c = Smax + max_code_length + 1000;
-
-no_rf_samples = Smax - Smin + 1;
-no_rf_samples_c = Smax_c - Smin_c + 1;
+ [Rmax, Rmin, Tmin, Smin, max_code_length, Smin_c, Smax_c, no_rf_samples, no_rf_samples_c] =...
+    calcSampleTimeRanges(pht_pos, codes, c, fs);
 
 %  Initialize Field II and BFT
 field_init(-1);
@@ -152,7 +147,7 @@ for lineNo = 1:focalZoneSpacing_x
     disp(['Transmit ', num2str(lineNo)]);
     % Build up the beam for each pair
     beam = zeros(1500, no_elements, 2);
-    forceMaxDelay = 200;
+    forceMaxDelay = 55;
     maxDelays = zeros(1, length(codes));
     for i = 1:length(codes)
         currentLine = lineNo+focalZoneSpacing_x*(i-1);
@@ -160,6 +155,7 @@ for lineNo = 1:focalZoneSpacing_x
             continue;
         end
         
+        focus = [x_lines(currentLine) 0 30/1000];
         % Find the apodization for this x focal zone
         N_pre_tx = round(focus(1)/(width+kerf) + no_elements/2 - no_active_tx/2);
         N_post_tx = no_elements - N_pre_tx - no_active_tx;
@@ -179,14 +175,13 @@ for lineNo = 1:focalZoneSpacing_x
         
         focus(1) = 0;
         xEle = xElements(no_elements/2-no_active_tx/2+1:no_elements/2+no_active_tx/2);
-        [tmpBeam, maxDelay] = focusBeam(excitation, focus, xEle, fs, c, forceMaxDelay);
+        tmpBeam = focusBeam(excitation, focus, xEle, fs, c, forceMaxDelay);
         beam(1:size(tmpBeam, 1), apoStart:apoEnd, 1) = beam(1:size(tmpBeam, 1), apoStart:apoEnd, 1) + tmpBeam;
-        maxDelays(i) = maxDelay;
 
         %[tmpBeam, maxDelay] = focusBeam(codes{i}.ccode, focus, xEle, fs, c, forceMaxDelay);
         %beam(1:size(tmpBeam, 1), apoStart:apoEnd, 2) = beam(1:size(tmpBeam, 1), apoStart:apoEnd, 2) + tmpBeam;
     end
-    beam = beam(1:ceil(max(maxDelays)*fs+length(excitation)), :, :);
+    beam = beam(1:forceMaxDelay+length(excitation), :, :);
 
     xdc_focus_times(xmt, 0, zeros(1, no_elements));
     xdc_focus_times(rcv, 0, zeros(1, no_elements));
@@ -217,8 +212,8 @@ for lineNo = 1:focalZoneSpacing_x
         if (rx_fnum == 0)
             % Use all elements if fnum = 0
 
-            %bft_apodization(xdc, 0, ones(1, no_elements));
-            bft_apodization(xdc, 0, codes{i}.apod_rx);
+            bft_apodization(xdc, 0, ones(1, no_elements));
+            %bft_apodization(xdc, 0, codes{i}.apod_rx);
         else
             rx_ap           = z_points/rx_fnum;
             no_active_rx    = min(round(rx_ap/(width+kerf)), no_elements);
@@ -234,7 +229,7 @@ for lineNo = 1:focalZoneSpacing_x
 
             bft_apodization(xdc, T, apo_vector_rx);
         end
-        bf_temp = bft_beamform(Tmin-maxDelay(1), rf_data_m(1:no_rf_samples, :, 1));
+        bf_temp = bft_beamform(Tmin-forceMaxDelay/fs, rf_data_m(1:no_rf_samples, :, 1));
         bf_image(:, codes{i}.lineNo) = bf_temp;
     end
 end
@@ -256,9 +251,9 @@ bft_end
 env_bf = abs(hilbert(bf_image));
 env_bf = env_bf / max(max(env_bf));
 
-% Plot image
+%% Plot image
 figure;
-imagesc(x_lines*1000, ([Rmin Rmax]-maxDelays(1)*c/2)*1000, 20*log10(env_bf+eps));
+imagesc(x_lines*1000, ([Rmin Rmax]-forceMaxDelay/fs*c/2)*1000, 20*log10(env_bf+eps));
 title('Beamformed Image');
 xlabel('Lateral distance [mm]');
 ylabel('Axial distance [mm]')
