@@ -1,10 +1,12 @@
 % compCodesWalkingMultiple.m
 
-% Uses Field II and BFT to simulate a walking aperture of parallel focal
-% zones in both X and Z directions using complementary codes.
-% Number of parallel zones in X direction determine how many lines will be 
-% simultaneously walked, and number of parallel zones in Z direction 
-% determine how many focal zones in the Z direction.
+% Authors: Tarek, David
+
+% Description Uses Field II and BFT to simulate a walking aperture of 
+% parallel focal zones in both X and Z directions using complementary 
+% codes. Number of parallel zones in X direction determine how many lines 
+% will be simultaneously walked, and number of parallel zones in Z 
+% direction determine how many parallel focal zones in the Z direction.
 
 %% Simulation properties
 
@@ -21,8 +23,8 @@ codesToUse = [1:2:numCodesX*numCodesZ*2-1]; % Which codes to use from code set
 focalPoints_z = linspace(30, 50, numCodesZ)/1000;
 for i = 1:length(codesToUse)/length(focalPoints_z)
     for j = 1:length(focalPoints_z)
-        codes{i}.code{j} = codeSet(codesToUse(i), :); % 1st pair code
-        codes{i}.ccode{j} = codeSet(codesToUse(i)+1, :); % 2nd pair code
+        codes{i}.code{j} = codeSet(codesToUse(1+(i-1)*numCodesZ+(j-1)), :); % 1st pair code
+        codes{i}.ccode{j} = codeSet(codesToUse(1+(i-1)*numCodesZ+(j-1))+1, :); % 2nd pair code
         codes{i}.focusZ(j) = focalPoints_z(j);
     end
 end
@@ -46,13 +48,15 @@ rx_fnum_constant = 0;   % F-number for constant f-num reconstruction.
                         % reconstrution is done and rx_fnum will be used
                         % instead to determine number of active elements
                         % to use on receive.
-rx_fnum = 0;            % Receive f-number for calculating number of 
+rx_fnum = 0;          % Receive f-number for calculating number of 
                         % active elements for receive sub-aperture. Value
                         % of 0 means all elements will be used for
                         % reconstruction. Need to also set rx_focus to 
                         % calculate appropriate aperture.
 rx_focus = [0 0 0.030]; % Receive focus for calculaing number of active
                         % elements for receive sub-aperture [m]
+                        
+rxApodFunc = @(x) hanning(x); % Function to use for receive apodization
 
 image_width = 28/1000;  % Image width to simulate [m]
 
@@ -119,6 +123,7 @@ no_active_rx = round(rx_ap/(width+kerf));
 % Define set of z points and time points that will be used for constant
 % f-number reconstruction
 z_points = linspace(Rmin, Rmax, 100);
+no_points = length(z_points);
 T = z_points/c*2;
 
 %% Simulate imaging
@@ -240,19 +245,25 @@ for lineNo = 1:focalZoneSpacing_x
         % Constant F-Num reconstruction
         if (~rx_fnum_constant)
             % Use apodization calculated during beam construction
-            bft_apodization(xdc, 0, codes{i}.apod_rx);
+            tmp = find(codes{i}.apod_rx);
+            apodStart = tmp(1);
+            apodEnd = tmp(end);
+            numEndZero = length(codes{i}.apod_rx) - apodEnd;
+            apod = [zeros(1,apodStart-1) rxApodFunc(apodEnd - apodStart + 1)' zeros(1,numEndZero)];
+            
+            bft_apodization(xdc, 0, apod);
         else
             % Use constant f-num reconstruction
             rx_ap_c           = z_points/rx_fnum_constant;
             no_active_rx_c    = min(round(rx_ap_c/(width+kerf)), no_elements);
 
-            mid_element = round(x_line/(width+kerf)+no_elements/2);
-            start_element = round(max(mid_element - no_active_rx_c/2 + 1, 1));
-            end_element = round(min(mid_element+no_active_rx_c/2, no_elements));
+            mid_elements = round(x_line/(width+kerf)+no_elements/2);
+            start_elements = round(max(mid_element - no_active_rx_c/2 + 1, 1));
+            end_elements = round(min(mid_element+no_active_rx_c/2, no_elements));
 
             apo_vector_rx = zeros(no_points, no_elements);
             for j = 1:no_points
-                apo_vector_rx(j, start_element(j):end_element(j)) = 1;
+                apo_vector_rx(j, start_elements(j):end_elements(j)) = rxApodFunc(end_elements(j)-start_elements(j)+1);
             end
 
             bft_apodization(xdc, T, apo_vector_rx);
