@@ -17,7 +17,7 @@ function beam = focusBeam(excitation, focus, xElements, fs, c, maxDelay)
     if min(delays) < 0
         error(...
         ['@maxDelay is not big enough to hold beam. Need to grow by ', ...
-            num2str(ceil(-min(delays)))]);
+            num2str(ceil(-min(delays))), ' samples.']);
     end
     
     % Calculate length of beam required to store results with delays

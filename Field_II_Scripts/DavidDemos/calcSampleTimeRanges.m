@@ -12,7 +12,7 @@ Tmin = 2*Rmin / c; Tmax = 2*Rmax / c;
 % Minimum and maximum samples to take
 % (if we started collecting at time t = 0)
 Smin = floor(Tmin * fs); Smax = ceil(Tmax * fs);
-max_code_length = max(cellfun(@(x) max(length(x.code), length(x.ccode)), codes));
+max_code_length = max(cellfun(@(x) max([cellfun('length', x.code) cellfun('length', x.ccode)]), codes));
 
 % we have to collect a few more sampls to get the code as it comes back
 Smin_c = Smin; Smax_c = Smax + max_code_length + 1000;

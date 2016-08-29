@@ -1,14 +1,10 @@
 % compCodesWalkingMultiple.m
 
-% This program simulates point spread functions due to pulse-echo B-mode 
-% imaging using a Siemens Antares ultrasound system.
-
-% By Roger Zemp. Updated 9 Mar 2011.
-% Form three lines at once, each using a different pair of complementary
-% codes. Then, form the next three lines on the next pair of transmits.
-
-% Better point spread function than other methods we used
-% Some stiching issues, some skew issues.
+% Uses Field II and BFT to simulate a walking aperture of parallel focal
+% zones in both X and Z directions using complementary codes.
+% Number of parallel zones in X direction determine how many lines will be 
+% simultaneously walked, and number of parallel zones in Z direction 
+% determine how many focal zones in the Z direction.
 
 %% Simulation properties
 
@@ -17,12 +13,18 @@ tempLoad = load(['../../Complementary Pairs/compPairs_len_10_simMain.mat']);
 codeSet = tempLoad.('pairsSoFar');
 
 % Store codes in a cell array for later use
+numCodesX = 3; % Number of parallel focal zones in X
+numCodesZ = 5; % Number of parallel focal zones in Z
+
 codes = cell(0);
-codesToUse = [1]; % Which codes to use from code set
-for i = 1:length(codesToUse)
-    codes{i}.code = codeSet(codesToUse(i), :); % 1st pair code
-    codes{i}.ccode = codeSet(codesToUse(i)+1, :); % 2nd pair code
-    codes{i}.focusZ = 30/1000;
+codesToUse = [1:2:numCodesX*numCodesZ*2-1]; % Which codes to use from code set
+focalPoints_z = linspace(30, 50, numCodesZ)/1000;
+for i = 1:length(codesToUse)/length(focalPoints_z)
+    for j = 1:length(focalPoints_z)
+        codes{i}.code{j} = codeSet(codesToUse(i), :); % 1st pair code
+        codes{i}.ccode{j} = codeSet(codesToUse(i)+1, :); % 2nd pair code
+        codes{i}.focusZ(j) = focalPoints_z(j);
+    end
 end
 
 % Transducer properties
@@ -33,20 +35,30 @@ c = 1540;               % Speed of sound                           [m/s]
 no_elements = 192;      % Number of elements in the transducer array 
 
 width = 0.2/1000;       % Width of element [m]
-height = 10/1000;       % Height of element [m]
+height = 5/1000;        % Height of element [m]
 kerf = 0.02/1000;       % Kerf [m] 
 
-no_lines = 251;         % Number of lines in image
-no_active_tx = 64;      % Number of active elements for a transmit 
+no_lines = 251;         % Number of lines in image (must be odd)
+no_active_tx = 192;     % Number of active elements for transmit 
                         % sub-aperture
-rx_fnum = 2.1;          % Receive f-number for calculating number of 
-                        % active elements for receive sub-aperture
+rx_fnum_constant = 0;   % F-number for constant f-num reconstruction.
+                        % If this is set to 0 then no constant f-num
+                        % reconstrution is done and rx_fnum will be used
+                        % instead to determine number of active elements
+                        % to use on receive.
+rx_fnum = 0;            % Receive f-number for calculating number of 
+                        % active elements for receive sub-aperture. Value
+                        % of 0 means all elements will be used for
+                        % reconstruction. Need to also set rx_focus to 
+                        % calculate appropriate aperture.
 rx_focus = [0 0 0.030]; % Receive focus for calculaing number of active
-                        % elements for receive sub-aperture
+                        % elements for receive sub-aperture [m]
 
 image_width = 28/1000;  % Image width to simulate [m]
 
-forceMaxDelay = 55;
+forceMaxDelay = 1300;   % Forces the maximum delay in manual focusing to 
+                        % this value. This is needed to align multiple 
+                        % focused beams in the Z direction. [samples]
 
 %  Define the impulse response of the transducer
 impulse_response = sin(2*pi*f0*(0:1/fs:number_cycles/f0));
@@ -60,7 +72,7 @@ pht_pos = [
            ] / 1000; %  The position of the phantom
 pht_amp = ones(size(pht_pos, 1),1); %  The amplitude of the back-scatter
 
-% Starting and ending distance to image
+% Calculate start and end distance, sample, and time for phantom
 [Rmax, Rmin, Tmin, Smin, max_code_length, ...
  Smin_c,Smax_c, no_rf_samples, no_rf_samples_c] = ...
 calcSampleTimeRanges(pht_pos, codes, c, fs);
@@ -104,11 +116,16 @@ xdc_focus_times(rcv, 0, zeros(1,no_elements));
 rx_ap = rx_focus(3)/rx_fnum;
 no_active_rx = round(rx_ap/(width+kerf));   
 
+% Define set of z points and time points that will be used for constant
+% f-number reconstruction
+z_points = linspace(Rmin, Rmax, 100);
+T = z_points/c*2;
+
 %% Simulate imaging
 % For each set of lines, we image with each code and its complementary pair
 
 % Store raw RF data for each element in rf_data_m
-% 3rd dimension is transmit event index
+% 3rd dimension is transmit event/code pair index
 rf_data_m = zeros(no_rf_samples_c, no_elements, 2);
 
 % Get x position of transducer elements directly from Field II
@@ -123,8 +140,12 @@ x_lines = linspace(-image_width/2, image_width/2, no_lines);
 
 % Stores beamformed image
 bf_image = zeros(no_rf_samples, no_lines);
+outputMsg = '';
 for lineNo = 1:focalZoneSpacing_x
-    disp(['Line set ', num2str(lineNo)]);
+    % Print current line number on same line
+    fprintf(repmat('\b', 1, length(outputMsg)));
+    outputMsg = sprintf('Line set %d/%d', lineNo, focalZoneSpacing_x);
+    fprintf(outputMsg);
     
     % Build up the beam for each pair of codes and sum the beams into one
     % 3rd dimension is transmit index for this line    
@@ -137,21 +158,28 @@ for lineNo = 1:focalZoneSpacing_x
         if (currentLine > no_lines) % Stop once beamformed all lines
             continue;
         end
+        xLine = x_lines(currentLine);
         
-        % Set transmit focus for current line
-        focus = [x_lines(currentLine) 0 codes{i}.focusZ];
+        % Calculate transmit apodization from no_active_tx
+        if no_active_tx == no_elements
+            apo_vector_tx = ones(1, no_elements);
+        else
+            N_pre_tx = round(xLine/(width+kerf) + no_elements/2 - no_active_tx/2);
+            N_post_tx = no_elements - N_pre_tx - no_active_tx;
+            apo_vector_tx = [zeros(1, N_pre_tx) ones(1, no_active_tx) zeros(1, N_post_tx)];
+        end
         
-        % Calculate transmit apodization        
-        N_pre_tx = round(focus(1)/(width+kerf) + no_elements/2 - no_active_tx/2);
-        N_post_tx = no_elements - N_pre_tx - no_active_tx;
-        apo_vector_tx = [zeros(1, N_pre_tx) ones(1, no_active_tx) zeros(1, N_post_tx)];
-        
-        % Calculate receive apodization
-        N_pre_rx = round(focus(1)/(width+kerf) + no_elements/2 - no_active_rx/2);
-        N_post_rx = no_elements - N_pre_rx - no_active_rx;
-        apo_vector_rx = [zeros(1, N_pre_rx) ones(1, no_active_rx) zeros(1, N_post_rx)];
-        
-        % Storing current line number and apodization
+        % Calculate receieve apodization from rx_fnum
+        if ~rx_fnum
+            % If rx_fnum = 0 then use all elements for receive apodization
+            apo_vector_rx = ones(1, no_elements);
+        else
+            % Calculate receive apodization for rx_fnum and rx_focus 
+            N_pre_rx = round(xLine/(width+kerf) + no_elements/2 - no_active_rx/2);
+            N_post_rx = no_elements - N_pre_rx - no_active_rx;
+            apo_vector_rx = [zeros(1, N_pre_rx) ones(1, no_active_rx) zeros(1, N_post_rx)];
+        end
+        % Store current line number and apodization into current code
         codes{i}.lineNo = currentLine;
         codes{i}.apod_tx = apo_vector_tx;
         codes{i}.apod_rx = apo_vector_rx;
@@ -160,15 +188,21 @@ for lineNo = 1:focalZoneSpacing_x
         tmp = find(apo_vector_tx);
         apoStart = tmp(1);
         apoEnd = tmp(end);
-        
+
         % Manually transmit focus @focus for each code in the pair
         xEle = xElements(apoStart:apoEnd); % Get x position of elements 
-                                           % in transmit apodization        
-        tmpBeam = focusBeam(codes{i}.code, focus, xEle, fs, c, forceMaxDelay);
-        beam(:, apoStart:apoEnd, 1) = beam(:, apoStart:apoEnd, 1) + tmpBeam;
+                                           % in transmit apodization
+            
+        for j = 1:length(codes{i}.code)
+            % Set transmit focus for current line
+            focus = [xLine 0 codes{i}.focusZ(j)];
+        
+            tmpBeam = focusBeam(codes{i}.code{j}, focus, xEle, fs, c, forceMaxDelay);
+            beam(:, apoStart:apoEnd, 1) = beam(:, apoStart:apoEnd, 1) + tmpBeam;
 
-        tmpBeam = focusBeam(codes{i}.ccode, focus, xEle, fs, c, forceMaxDelay);
-        beam(:, apoStart:apoEnd, 2) = beam(:, apoStart:apoEnd, 2) + tmpBeam;
+            tmpBeam = focusBeam(codes{i}.ccode{j}, focus, xEle, fs, c, forceMaxDelay);
+            beam(:, apoStart:apoEnd, 2) = beam(:, apoStart:apoEnd, 2) + tmpBeam;
+        end
     end
     
     % Don't tranmit or receive focus using Field II
@@ -176,44 +210,67 @@ for lineNo = 1:focalZoneSpacing_x
     xdc_focus_times(rcv, 0, zeros(1, no_elements));
     
     % Set transducer excitation and simulate with calc_scat_multi
-    % And align scatter data (force data to lie in a specified time window)
+    % Align scatter data (force data to lie in a specified time window)
     % The corresponding sample window is [Smin_c, Smax_c]
+    % Also need to shift rf_data by forceMaxDelay before or after aligning 
+    % to account for focusing delays.
     ele_waveform(xmt, (1:no_elements)', beam(:, :, 1)'); 
     [rf_data, start_time] = calc_scat_multi(xmt, rcv, pht_pos, pht_amp);
+    rf_data = [rf_data(1+forceMaxDelay:end, :); zeros(forceMaxDelay, size(rf_data, 2))];
     rf_data = alignRF(rf_data,start_time,fs,Smin_c,Smax_c,no_rf_samples_c,no_elements);
     rf_data_m(:, :, 1) = rf_data;
     
     % Repeat for second code in pair
     ele_waveform(xmt, (1:no_elements)', beam(:, :, 2)');
     [rf_data, start_time] = calc_scat_multi(xmt, rcv, pht_pos, pht_amp);
+    rf_data = [rf_data(1+forceMaxDelay:end, :); zeros(forceMaxDelay, size(rf_data, 2))];
     rf_data = alignRF(rf_data,start_time,fs,Smin_c,Smax_c,no_rf_samples_c,no_elements);
     rf_data_m(:, :, 2) = rf_data;
-
+    
     %% Decode each line in the current line set for this transmit event
 
     % Store RF data for a single code pair (3rd dimension is transmit)
     rf_data_decoded = zeros(no_rf_samples, no_elements, 2);
-    for i = 1:length(codes) % Loop through each code pair      
-        
-        % Decode with respect to first code in current pair
-        temp_decoded = conv2(rf_data_m(:, :, 1), rot90(conj(codes{i}.code'), 2), 'valid');
-        rf_data_decoded(:, :, 1) = temp_decoded(1:no_rf_samples, :);
-        
-        % Decode with respect to second code in current pair
-        temp_decoded = conv2(rf_data_m(:, :, 2), rot90(conj(codes{i}.ccode'), 2), 'valid');
-        rf_data_decoded(:, :, 2) = temp_decoded(1:no_rf_samples, :);
-        
-        % Beamform image for the current line
-        
+    for i = 1:length(codes) % Loop through each code pair
         % Set center focus for current line and enable dynamic focusing
         x_line = x_lines(codes{i}.lineNo);
         bft_center_focus([x_line 0 0]);       
         bft_dynamic_focus(xdc, 0, 0); 
+        
+        % Constant F-Num reconstruction
+        if (~rx_fnum_constant)
+            % Use apodization calculated during beam construction
+            bft_apodization(xdc, 0, codes{i}.apod_rx);
+        else
+            % Use constant f-num reconstruction
+            rx_ap_c           = z_points/rx_fnum_constant;
+            no_active_rx_c    = min(round(rx_ap_c/(width+kerf)), no_elements);
 
-        bft_apodization(xdc, 0, ones(1, no_elements));
-        %bft_apodization(xdc, 0, codes{i}.apod_rx);
-        bf_temp = bft_beamform(Tmin-forceMaxDelay/fs, sum(rf_data_decoded, 3));
-        bf_image(:, codes{i}.lineNo) = bf_temp;
+            mid_element = round(x_line/(width+kerf)+no_elements/2);
+            start_element = round(max(mid_element - no_active_rx_c/2 + 1, 1));
+            end_element = round(min(mid_element+no_active_rx_c/2, no_elements));
+
+            apo_vector_rx = zeros(no_points, no_elements);
+            for j = 1:no_points
+                apo_vector_rx(j, start_element(j):end_element(j)) = 1;
+            end
+
+            bft_apodization(xdc, T, apo_vector_rx);
+        end
+        
+        for j = 1:length(codes{i}.code)
+            % Decode with respect to first code in current pair
+            temp_decoded = conv2(rf_data_m(:, :, 1), rot90(conj(codes{i}.code{j}'), 2), 'valid');
+            rf_data_decoded(:, :, 1) = temp_decoded(1:no_rf_samples, :);
+
+            % Decode with respect to second code in current pair
+            temp_decoded = conv2(rf_data_m(:, :, 2), rot90(conj(codes{i}.ccode{j}'), 2), 'valid');
+            rf_data_decoded(:, :, 2) = temp_decoded(1:no_rf_samples, :);
+
+            % Beamform image for the current line
+            bf_temp = bft_beamform(Tmin, sum(rf_data_decoded, 3));
+            bf_image(:, codes{i}.lineNo) = bf_image(:, codes{i}.lineNo) + bf_temp;
+        end
     end
 end
 
@@ -227,7 +284,7 @@ env_bf = env_bf / max(max(env_bf));
 
 %% Plot image
 figure;
-imagesc(x_lines*1000, ([Rmin Rmax]-(forceMaxDelay/fs*c/2))*1000, 20*log10(env_bf+eps));
+imagesc(x_lines*1000, [Rmin Rmax]*1000, 20*log10(env_bf+eps));
 title('Beamformed Image');
 xlabel('Lateral distance [mm]');
 ylabel('Axial distance [mm]')
