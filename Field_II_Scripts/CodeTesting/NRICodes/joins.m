@@ -1,8 +1,9 @@
 function joins = joins( intVect )
 % Find the join lengths of a vector
-% This is also the sum of continguous interval lengths
-% [2,3] -> 2,3,5 join lengths
-% [2,3,5] -> (2,3,5),[(5,8),(10)]
+% That is, all the lengths between nonzero entries
+% This is NOT quite the sum of continguous interval lengths
+
+% The input is the set of zero interval lengths
 
 % Plan: go through each element
 % At each element, start a cumulative sum that goes to the end of the
@@ -11,7 +12,9 @@ joins = zeros(1,1000); % Preallocating
 i = 1;
 for startEl = 1:length(intVect)
     for endEl = startEl:length(intVect)
-        joins(i) = sum(intVect(startEl:endEl));
+        % Don't forget to add in the length of the nonzero elements 
+        intervalsToSum = intVect(startEl:endEl);
+        joins(i) = sum(intervalsToSum) + numel(intervalsToSum);
         i = i+1;
     end
 end

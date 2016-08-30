@@ -5,7 +5,7 @@
 clear
 
 % Construct an NRI code
-zeroIntervals = [1 2 3];
+zeroIntervals = [2,3,4] ;
 v = constructNRI(zeroIntervals); % Is a vector of 1's and 0's
 disp(v)
 
