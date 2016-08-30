@@ -3,7 +3,7 @@
 
 resultMat = [];
 
-NMax = 13;
+NMax = 6;
 Nrange = 2:NMax;
 for N = Nrange
     nRow = [];

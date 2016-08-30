@@ -1,6 +1,6 @@
 % Goal is to generate kind of random codes that
 % have good cross correlation properties
-clear 
+
 merit = 0;
 meritThresh = 4;
 

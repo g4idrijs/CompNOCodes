@@ -1,6 +1,8 @@
 % Use Dr. Zemp's method to generate complementary pairs
 % We randomly pick some elements, and then solve for the rest
 
+% Won't work for N > 5 (see Latex document)
+
 % CURRENTLY ONLY DESIGNED FOR N = -1 mod 3
 
 %% Generating equations and storing as index pairs
@@ -9,7 +11,7 @@
 
 % Since each equation is a 2D matrix, we store sets of equations
 % as a cell, where each cell is a 2D matrix
-N = 3; % The length of the codes
+N = 5; % The length of the codes
 eqnCellArray = cell(1,N-1);
 
 % The j_th equation is given by: (for j = 1..N-1)
