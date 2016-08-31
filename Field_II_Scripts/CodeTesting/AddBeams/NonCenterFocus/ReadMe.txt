@@ -1,0 +1,1 @@
+Focus was at 50 mm in z, not in the center.

@@ -11,16 +11,16 @@
 %% Simulation properties
 
 % Load codes used for excitation
-tempLoad = load(['../../Complementary Pairs/compPairs_len_10_simMain.mat']);
+tempLoad = load(['../../../Complementary Pairs/compPairs_len_10_simMain.mat']);
 codeSet = tempLoad.('pairsSoFar');
 
 % Store codes in a cell array for later use
-numCodesX = 3; % Number of parallel focal zones in X
-numCodesZ = 5; % Number of parallel focal zones in Z
+numCodesX = 100; % Number of parallel focal zones in X
+numCodesZ = 1; % Number of parallel focal zones in Z
 
 codes = cell(0);
 codesToUse = [1:2:numCodesX*numCodesZ*2-1]; % Which codes to use from code set
-focalPoints_z = linspace(30, 50, numCodesZ)/1000;
+focalPoints_z = 40/1000;% linspace(30, 50, numCodesZ)/1000;
 for i = 1:numCodesX
     for j = 1:numCodesZ
         codes{i}.code{j} = codeSet(codesToUse(1+(i-1)*numCodesZ+(j-1)), :); % 1st pair code
@@ -41,7 +41,7 @@ height = 5/1000;        % Height of element [m]
 kerf = 0.02/1000;       % Kerf [m] 
 
 no_lines = 251;         % Number of lines in image (must be odd)
-no_active_tx = 192;     % Number of active elements for transmit 
+no_active_tx = 64;     % Number of active elements for transmit 
                         % sub-aperture
 rx_fnum_constant = 0;   % F-number for constant f-num reconstruction.
                         % If this is set to 0 then no constant f-num
@@ -53,14 +53,14 @@ rx_fnum = 0;          % Receive f-number for calculating number of
                         % of 0 means all elements will be used for
                         % reconstruction. Need to also set rx_focus to 
                         % calculate appropriate aperture.
-rx_focus = [0 0 0.030]; % Receive focus for calculaing number of active
+rx_focus = [0 0 40/1000]; % Receive focus for calculaing number of active
                         % elements for receive sub-aperture [m]
                         
 rxApodFunc = @(x) hanning(x); % Function to use for receive apodization
 
 image_width = 28/1000;  % Image width to simulate [m]
 
-forceMaxDelay = 1300;   % Forces the maximum delay in manual focusing to 
+forceMaxDelay = 300;   % Forces the maximum delay in manual focusing to 
                         % this value. This is needed to align multiple 
                         % focused beams in the Z direction. [samples]
 
@@ -161,6 +161,7 @@ for lineNo = 1:focalZoneSpacing_x
         % Get index of current line
         currentLine = lineNo + focalZoneSpacing_x*(i-1);
         if (currentLine > no_lines) % Stop once beamformed all lines
+            codes{i}.lineNo = 0;
             continue;
         end
         xLine = x_lines(currentLine);
@@ -169,9 +170,18 @@ for lineNo = 1:focalZoneSpacing_x
         if no_active_tx == no_elements
             apo_vector_tx = ones(1, no_elements);
         else
+            no_active_tx_tmp = no_active_tx;
             N_pre_tx = round(xLine/(width+kerf) + no_elements/2 - no_active_tx/2);
-            N_post_tx = no_elements - N_pre_tx - no_active_tx;
-            apo_vector_tx = [zeros(1, N_pre_tx) ones(1, no_active_tx) zeros(1, N_post_tx)];
+            if (N_pre_tx < 0)
+                no_active_tx_tmp = no_active_tx_tmp + N_pre_tx;
+                N_pre_tx = 0;
+            end
+            N_post_tx = no_elements - N_pre_tx - no_active_tx_tmp;
+            if (N_post_tx < 0)
+                no_active_tx_tmp = no_active_tx_tmp + N_post_tx;
+                N_post_tx = 0;
+            end
+            apo_vector_tx = [zeros(1, N_pre_tx) ones(1, no_active_tx_tmp) zeros(1, N_post_tx)];
         end
         
         % Calculate receieve apodization from rx_fnum
@@ -237,6 +247,9 @@ for lineNo = 1:focalZoneSpacing_x
     % Store RF data for a single code pair (3rd dimension is transmit)
     rf_data_decoded = zeros(no_rf_samples, no_elements, 2);
     for i = 1:length(codes) % Loop through each code pair
+        if (codes{i}.lineNo < 1)
+            continue;
+        end
         % Set center focus for current line and enable dynamic focusing
         x_line = x_lines(codes{i}.lineNo);
         bft_center_focus([x_line 0 0]);       
