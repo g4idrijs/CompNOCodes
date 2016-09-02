@@ -26,7 +26,7 @@ codesToUse = [1:2:numCodesX*numCodesZ*2-1]; % Which codes to use from code set
 if(numCodesZ == 1)
    focalPoints_z = 40/1000; 
 else
-   linspace(30, 50, numCodesZ)/1000;
+   focalPoints_z = linspace(30, 50, numCodesZ)/1000;
 end
  
 
@@ -50,7 +50,7 @@ width = 0.2/1000;       % Width of element [m]
 height = 5/1000;        % Height of element [m]
 kerf = 0.02/1000;       % Kerf [m] 
 
-no_lines = 251;         % Number of lines in image (must be odd)
+no_lines = 256;         % Number of lines in image (must be odd)
 no_active_tx = 32;     % Number of active elements for transmit 
                         % sub-aperture
 rx_fnum_constant = 0;   % F-number for constant f-num reconstruction.
@@ -243,72 +243,72 @@ for lineNo = 1:focalZoneSpacing_x
     % Also need to shift rf_data by forceMaxDelay before or after aligning 
     % to account for focusing delays.
     ele_waveform(xmt, (1:no_elements)', beam(:, :, 1)'); 
-    %[rf_data, start_time] = calc_scat_multi(xmt, rcv, pht_pos, pht_amp);
-%     rf_data = [rf_data(1+forceMaxDelay:end, :); zeros(forceMaxDelay, size(rf_data, 2))];
-%     rf_data = alignRF(rf_data,start_time,fs,Smin_c,Smax_c,no_rf_samples_c,no_elements);
-%     rf_data_m(:, :, 1) = rf_data;
+    [rf_data, start_time] = calc_scat_multi(xmt, rcv, pht_pos, pht_amp);
+    rf_data = [rf_data(1+forceMaxDelay:end, :); zeros(forceMaxDelay, size(rf_data, 2))];
+    rf_data = alignRF(rf_data,start_time,fs,Smin_c,Smax_c,no_rf_samples_c,no_elements);
+    rf_data_m(:, :, 1) = rf_data;
     
     % Repeat for second code in pair
     ele_waveform(xmt, (1:no_elements)', beam(:, :, 2)');
-    %[rf_data, start_time] = calc_scat_multi(xmt, rcv, pht_pos, pht_amp);
-%     rf_data = [rf_data(1+forceMaxDelay:end, :); zeros(forceMaxDelay, size(rf_data, 2))];
-%     rf_data = alignRF(rf_data,start_time,fs,Smin_c,Smax_c,no_rf_samples_c,no_elements);
-%     rf_data_m(:, :, 2) = rf_data;
+    [rf_data, start_time] = calc_scat_multi(xmt, rcv, pht_pos, pht_amp);
+    rf_data = [rf_data(1+forceMaxDelay:end, :); zeros(forceMaxDelay, size(rf_data, 2))];
+    rf_data = alignRF(rf_data,start_time,fs,Smin_c,Smax_c,no_rf_samples_c,no_elements);
+    rf_data_m(:, :, 2) = rf_data;
     
     %% Decode each line in the current line set for this transmit event
 
-%     % Store RF data for a single code pair (3rd dimension is transmit)
-%     rf_data_decoded = zeros(no_rf_samples, no_elements, 2);
-%     for i = 1:length(codes) % Loop through each code pair
-%         if (codes{i}.lineNo < 1)
-%             continue;
-%         end
-%         % Set center focus for current line and enable dynamic focusing
-%         x_line = x_lines(codes{i}.lineNo);
-%         bft_center_focus([x_line 0 0]);       
-%         bft_dynamic_focus(xdc, 0, 0); 
-%         
-%         % Constant F-Num reconstruction
-%         if (~rx_fnum_constant)
-%             % Use apodization calculated during beam construction
-%             tmp = find(codes{i}.apod_rx);
-%             apodStart = tmp(1);
-%             apodEnd = tmp(end);
-%             numEndZero = length(codes{i}.apod_rx) - apodEnd;
-%             apod = [zeros(1,apodStart-1) rxApodFunc(apodEnd - apodStart + 1)' zeros(1,numEndZero)];
-%             
-%             bft_apodization(xdc, 0, apod);
-%         else
-%             % Use constant f-num reconstruction
-%             rx_ap_c           = z_points/rx_fnum_constant;
-%             no_active_rx_c    = min(round(rx_ap_c/(width+kerf)), no_elements);
-% 
-%             mid_elements = round(x_line/(width+kerf)+no_elements/2);
-%             start_elements = round(max(mid_element - no_active_rx_c/2 + 1, 1));
-%             end_elements = round(min(mid_element+no_active_rx_c/2, no_elements));
-% 
-%             apo_vector_rx = zeros(no_points, no_elements);
-%             for j = 1:no_points
-%                 apo_vector_rx(j, start_elements(j):end_elements(j)) = rxApodFunc(end_elements(j)-start_elements(j)+1);
-%             end
-% 
-%             bft_apodization(xdc, T, apo_vector_rx);
-%         end
-%         
-%         for j = 1:length(codes{i}.code)
-%             % Decode with respect to first code in current pair
-%             temp_decoded = conv2(rf_data_m(:, :, 1), rot90(conj(codes{i}.code{j}'), 2), 'valid');
-%             rf_data_decoded(:, :, 1) = temp_decoded(1:no_rf_samples, :);
-% 
-%             % Decode with respect to second code in current pair
-%             temp_decoded = conv2(rf_data_m(:, :, 2), rot90(conj(codes{i}.ccode{j}'), 2), 'valid');
-%             rf_data_decoded(:, :, 2) = temp_decoded(1:no_rf_samples, :);
-% 
-%             % Beamform image for the current line
-%             bf_temp = bft_beamform(Tmin, sum(rf_data_decoded, 3));
-%             bf_image(:, codes{i}.lineNo) = bf_image(:, codes{i}.lineNo) + bf_temp;
-%         end
-%     end
+    % Store RF data for a single code pair (3rd dimension is transmit)
+    rf_data_decoded = zeros(no_rf_samples, no_elements, 2);
+    for i = 1:length(codes) % Loop through each code pair
+        if (codes{i}.lineNo < 1)
+            continue;
+        end
+        % Set center focus for current line and enable dynamic focusing
+        x_line = x_lines(codes{i}.lineNo);
+        bft_center_focus([x_line 0 0]);       
+        bft_dynamic_focus(xdc, 0, 0); 
+        
+        % Constant F-Num reconstruction
+        if (~rx_fnum_constant)
+            % Use apodization calculated during beam construction
+            tmp = find(codes{i}.apod_rx);
+            apodStart = tmp(1);
+            apodEnd = tmp(end);
+            numEndZero = length(codes{i}.apod_rx) - apodEnd;
+            apod = [zeros(1,apodStart-1) rxApodFunc(apodEnd - apodStart + 1)' zeros(1,numEndZero)];
+            
+            bft_apodization(xdc, 0, apod);
+        else
+            % Use constant f-num reconstruction
+            rx_ap_c           = z_points/rx_fnum_constant;
+            no_active_rx_c    = min(round(rx_ap_c/(width+kerf)), no_elements);
+
+            mid_elements = round(x_line/(width+kerf)+no_elements/2);
+            start_elements = round(max(mid_element - no_active_rx_c/2 + 1, 1));
+            end_elements = round(min(mid_element+no_active_rx_c/2, no_elements));
+
+            apo_vector_rx = zeros(no_points, no_elements);
+            for j = 1:no_points
+                apo_vector_rx(j, start_elements(j):end_elements(j)) = rxApodFunc(end_elements(j)-start_elements(j)+1);
+            end
+
+            bft_apodization(xdc, T, apo_vector_rx);
+        end
+        
+        for j = 1:length(codes{i}.code)
+            % Decode with respect to first code in current pair
+            temp_decoded = conv2(rf_data_m(:, :, 1), rot90(conj(codes{i}.code{j}'), 2), 'valid');
+            rf_data_decoded(:, :, 1) = temp_decoded(1:no_rf_samples, :);
+
+            % Decode with respect to second code in current pair
+            temp_decoded = conv2(rf_data_m(:, :, 2), rot90(conj(codes{i}.ccode{j}'), 2), 'valid');
+            rf_data_decoded(:, :, 2) = temp_decoded(1:no_rf_samples, :);
+
+            % Beamform image for the current line
+            bf_temp = bft_beamform(Tmin, sum(rf_data_decoded, 3));
+            bf_image(:, codes{i}.lineNo) = bf_image(:, codes{i}.lineNo) + bf_temp;
+        end
+    end
 end
 
 % Release memory used by Field II and BFT
@@ -322,11 +322,12 @@ env_bf = env_bf / max(max(env_bf));
 %% Plot image
 figure;
 imagesc(x_lines*1000, [Rmin Rmax]*1000, 20*log10(env_bf+eps));
+% imagesc(20*log10(interp2(env_bf, 4)+eps));
 title('Beamformed Image');
 xlabel('Lateral distance [mm]');
 ylabel('Axial distance [mm]')
 axis('image')
 
 colorbar
-colormap(gray);
+%colormap(gray);
 caxis([-55 0]);
