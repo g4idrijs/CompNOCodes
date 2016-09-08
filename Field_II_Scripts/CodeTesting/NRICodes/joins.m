@@ -14,7 +14,7 @@ for startEl = 1:length(intVect)
     for endEl = startEl:length(intVect)
         % Don't forget to add in the length of the nonzero elements 
         intervalsToSum = intVect(startEl:endEl);
-        joins(i) = sum(intervalsToSum) + numel(intervalsToSum);
+        joins(i) = sum(intervalsToSum); %+ numel(intervalsToSum);
         i = i+1;
     end
 end

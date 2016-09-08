@@ -6,7 +6,7 @@ function [ metric, message ] = maxToAvg(sigData, clutterData)
     maxCent = max(max(sigData));
 
     % Find average value in clutter region (dB)
-    avgClutter = mean(clutterData);
+    avgClutter = mean(mean(clutterData));
     
     % Take ratio of values
     metric = maxCent/avgClutter;

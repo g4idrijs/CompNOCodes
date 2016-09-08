@@ -1,4 +1,7 @@
 function [  intVect] = createIntVect( lenVect, seed, issAllow, badInt)
+% The interval lengths are the number of zeroes between the nonzero entries
+% (using the current definition of joins)
+
 % Start with the interval vector "seed", creates 
 % a vector of interval lengths intVect that has an upper bound
 % on tag issues of issAllow and length lenVect.

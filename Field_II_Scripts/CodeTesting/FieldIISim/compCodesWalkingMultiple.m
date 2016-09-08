@@ -13,11 +13,24 @@ addpath('../../Field_II', '../../bft_64bit');
 %% Simulation properties
 
 % Load codes used for excitation
-tempLoad = load(['../../../Complementary Pairs/compPairs_len_10_simMain.mat']);
-codeSet = tempLoad.('pairsSoFar');
+% tempLoad = load(['../../../Complementary Pairs/compPairs_len_10_simMain.mat']);
+% codeSet = tempLoad.('pairsSoFar');
+tempLoad =  load('../../../Complementary Pairs/len10_100codes_minInt2.mat');
+codeSet = tempLoad.('x');
+
+% tempLoad =  load('../../../Complementary Pairs/len5_3codes.mat');
+% codeSet = tempLoad.('x');
+
+
+% tempLoad1 = load(['../../../Complementary Pairs/len10_4codes_set1.mat']);
+% tempLoad2 = load(['../../../Complementary Pairs/len10_4codes_set2.mat']);
+% tempLoad3 = load(['../../../Complementary Pairs/len10_4codes_set3.mat']);
+% tempLoad4 = load(['../../../Complementary Pairs/len10_4codes_set4.mat']);
+% tempLoad = [tempLoad1.('x'); tempLoad2.('x'); tempLoad3.('x'); tempLoad4.('x')];
+% codeSet = tempLoad;
 
 % Store codes in a cell array for later use
-numCodesX = 16; % Number of parallel focal zones in X
+numCodesX = 1; % Number of parallel focal zones in X
 numCodesZ = 1; % Number of parallel focal zones in Z
 
 codes = cell(0);
@@ -29,8 +42,6 @@ else
    focalPoints_z = linspace(30, 50, numCodesZ)/1000;
 end
  
-
-
 for i = 1:numCodesX
     for j = 1:numCodesZ
         codes{i}.code{j} = codeSet(codesToUse(1+(i-1)*numCodesZ+(j-1)), :); % 1st pair code
@@ -50,8 +61,8 @@ width = 0.2/1000;       % Width of element [m]
 height = 5/1000;        % Height of element [m]
 kerf = 0.02/1000;       % Kerf [m] 
 
-no_lines = 256;         % Number of lines in image (must be odd)
-no_active_tx = 32;     % Number of active elements for transmit 
+no_lines = 151;         % Number of lines in image 
+no_active_tx = 64;     % Number of active elements for transmit 
                         % sub-aperture
 rx_fnum_constant = 0;   % F-number for constant f-num reconstruction.
                         % If this is set to 0 then no constant f-num
@@ -68,21 +79,42 @@ rx_focus = [0 0 40/1000]; % Receive focus for calculaing number of active
                         
 rxApodFunc = @(x) hanning(x); % Function to use for receive apodization
 
-image_width = 28/1000;  % Image width to simulate [m]
+image_width = 12/1000;  % Image width to simulate [m]
 
-forceMaxDelay = 300;   % Forces the maximum delay in manual focusing to 
+forceMaxDelay = 50;   % Forces the maximum delay in manual focusing to 
                         % this value. This is needed to align multiple 
                         % focused beams in the Z direction. [samples]
 
 %  Define the impulse response of the transducer
-impulse_response = sin(2*pi*f0*(0:1/fs:number_cycles/f0));
+Ts = 1 /fs; % Sampling period
+impulse_response = sin(2*pi*f0*(0:Ts:number_cycles/f0));
 impulse_response = impulse_response.*hanning(length(impulse_response))';
 
+%% Extend codes
+% Insert zeroes in codes to stop impulse responses from interfering
+% numZeroInsert = numel(impulse_response) - 1;
+% for i = 1:numCodesX*numCodesZ
+%     N = numel(codes{i}.code{1});
+%     
+%     codes{i}.code{1} = matintrlv([codes{i}.code{1}  zeros(1, N*numZeroInsert);],numZeroInsert+1,N);
+%     codes{i}.ccode{1} = matintrlv([codes{i}.ccode{1}  zeros(1, N*numZeroInsert);],numZeroInsert+1,N);
+% end
+
+% Extend codes by repeating elements
+timesToRepeat = 20; %numel(impulse_response) - 1;
+for i = 1:numCodesX*numCodesZ    
+    
+    codes{i}.code{1} = repelem(codes{i}.code{1} ,1,timesToRepeat);
+    codes{i}.ccode{1} = repelem(codes{i}.ccode{1} ,1,timesToRepeat);
+end
+
+%% Phantom definition
+
 %  Define the phantom
-pht_pos = [           
-           0 0 30; 0 0 35; 0 0 40; 0 0 45; 0 0 50;           
-           -6 0 30; -6 0 35; -6 0 40; -6 0 45; -6 0 50;
-           6 0 30; 6 0 35; 6 0 40; 6 0 45; 6 0 50;
+pht_pos = [     0 0 40  
+%            0 0 30; 0 0 35; 0 0 40; 0 0 45; 0 0 50;           
+%            -6 0 30; -6 0 35; -6 0 40; -6 0 45; -6 0 50;
+%            6 0 30; 6 0 35; 6 0 40; 6 0 45; 6 0 50;
            ] / 1000; %  The position of the phantom
 pht_amp = ones(size(pht_pos, 1),1); %  The amplitude of the back-scatter
 
@@ -91,6 +123,7 @@ pht_amp = ones(size(pht_pos, 1),1); %  The amplitude of the back-scatter
  Smin_c,Smax_c, no_rf_samples, no_rf_samples_c] = ...
 calcSampleTimeRanges(pht_pos, codes, c, fs);
 
+%% Field II and BFT setup
 %  Initialize Field II and BFT
 field_init(-1);
 bft_init;
@@ -296,7 +329,19 @@ for lineNo = 1:focalZoneSpacing_x
         end
         
         for j = 1:length(codes{i}.code)
-            % Decode with respect to first code in current pair
+%             % Try correlating to codes after have gone through transducer
+%             % (DEBUG)
+%             scrCode = rand(1,2)*2-1; %conv(conv(codes{i}.code{j}, impulse_response),impulse_response);
+%             scrCCode = rand(1,2)*2-1; %conv(conv(codes{i}.ccode{j}, impulse_response),impulse_response);
+% 
+%              
+%             temp_decoded = conv2(rf_data_m(:, :, 1), rot90(conj(scrCode'), 2), 'valid');
+%             rf_data_decoded(:, :, 1) = temp_decoded(1:no_rf_samples, :);
+% 
+%             temp_decoded = conv2(rf_data_m(:, :, 2), rot90(conj(scrCCode'), 2), 'valid');
+%             rf_data_decoded(:, :, 2) = temp_decoded(1:no_rf_samples, :);
+            
+            % Decode with respect to first code in current pair   
             temp_decoded = conv2(rf_data_m(:, :, 1), rot90(conj(codes{i}.code{j}'), 2), 'valid');
             rf_data_decoded(:, :, 1) = temp_decoded(1:no_rf_samples, :);
 
@@ -321,9 +366,9 @@ env_bf = env_bf / max(max(env_bf));
 
 %% Plot image
 figure;
-imagesc(x_lines*1000, [Rmin Rmax]*1000, 20*log10(env_bf+eps));
-% imagesc(20*log10(interp2(env_bf, 4)+eps));
-title('Beamformed Image');
+imagesc([x_lines(1) x_lines(end)]*1000, [Rmin Rmax]*1000, 20*log10(env_bf+eps));
+
+title('Repeat 20 times. Correlation with Codes.');
 xlabel('Lateral distance [mm]');
 ylabel('Axial distance [mm]')
 axis('image')

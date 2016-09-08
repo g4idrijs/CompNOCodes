@@ -1,0 +1,1 @@
+All of these have Hanning apodization, I believe.

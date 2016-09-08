@@ -64,13 +64,12 @@ for pointCount = 1:size(analysisPoints,1)
     % Grab points in clutter, not in signal
     jCluttLoc = setdiff(clutterPoints,sigPoints,'rows'); 
     jCluttLinInd = sub2ind(size(imgData),jCluttLoc(:,1),jCluttLoc(:,2)); 
-    justClutterData = imgData(jCluttLinInd);
-
+    justClutterData = imgData(jCluttLinInd);    
 
     %% Find max value in signal and clutter regions
-    normResultsTo = 
-    [metric, message ] = maxToMax( arrDataSig, justClutterData); 
-    % [metric, message ] = maxToAvg( arrDataSig, justClutterData); 
+    % normResultsTo = 
+    %[metric, message ] = maxToMax( arrDataSig, justClutterData); 
+     [metric, message ] = maxToAvg( arrDataSig, justClutterData); 
    
     
     metricArr(pointCount) = metric;
@@ -95,13 +94,26 @@ sizePlot = [numel(unique(yPoints)), numel(unique(xPoints))];
 lineIndPlot = sub2ind(sizePlot,yChunkInd,xChunkInd);
 
 plotArr = reshape(metricArr(lineIndPlot),sizePlot(1) ,sizePlot(2));
+
+% Print metric results
 disp('Metric results:')
 disp(plotArr)
 
-% Plot main to clutter metric
+% Plot metric results
 figure
-imagesc(log10(plotArr));
-title(['log_{10} of: ', message])
+imagesc( unique(xPoints), unique(yPoints), log10(plotArr));
+title(['(Scrambled Correlation) log_{10} of: ', message])
 colormap(gray);
 colorbar
+xlabel('Lateral distance [mm]');
+ylabel('Axial distance [mm]')
 
+caxis([2 3]) % Normalize color display (expand as needed)
+
+% Debug: show last area based filter
+% figure
+% toPlotOrig = imgDataObj{:}.get('CData');
+% toPlotOrig(jCluttLinInd) = 0;
+% imagesc(toPlotOrig);
+% colormap(gray);
+% caxis([-55 0]);

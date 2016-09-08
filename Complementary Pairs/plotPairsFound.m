@@ -1,32 +1,36 @@
-close all
+clear
+
+addpath('C:\Users\User\Dropbox\Grad_School\HighSpeedCodes\CompNOCodes\FastCompOptimizer')
 
 %% Load in the appropriate pairs
-numPairs = 10;
-N = 100;
+numPairs = 16;
+N = 10;
 
-tempDat = load('bestPairsAug9//SQPappr800kIter//bestPairsSQP61.mat');
-x = tempDat.('x');
+% tempDat = load('compPairs_len_10_simMain.mat');
+% x = tempDat.('pairsSoFar');
 
-plot(x(1,:))
+tempDat = load('len10_100codes_minInt2.mat');
+x= tempDat.('x');
+
 
 
 %% Compare to Welch bound
-disp('Welch bound:')    
-disp(welchBound( N, numPairs, 2 ))
+% disp('Welch bound:')    
+% disp(welchBound( N, numPairs, 2 ))
 
 % Would like to be welch bound
 % Max cross correlation of normalized codes
 % We set the magnitude of each individual pair to sqrt(2)
 disp('Welch metric:') 
-disp(maxXcorr(normr(x)/sqrt(2)))
+intervals = [];
+disp(maxXcorr(normr(x)/sqrt(2),intervals))
 
 
 %% Plot autocorrelation
 % Create x axis (shift from -(codeLength-1) to +(codeLength-1)
 xAxis = -(N-1):(N-1);
-
+figure
 minACFMain = -1;
-
 for i=1:numPairs
     currPair = x((2*i-1):2*i,:);
     currAc = xcorr(currPair(1,:)) + xcorr(currPair(2,:));
@@ -46,7 +50,7 @@ for i=1:numPairs
 end    
 
 % Min ACF mainlobe to CCF sidelobe ratio
-ACFToCCF = minACFMain / maxXcorr(x);
+ACFToCCF = minACFMain / maxXcorr(x, intervals);
 disp('ACF to CCF:');
 disp(ACFToCCF);
 
@@ -67,7 +71,7 @@ if (plotCcSum == 1 && numPairs > 1)
         plot(xAxis,currXcorr)
         hold on
     end
-    title(sprintf('ACF and CCF with Code Length = %d and #Pairs = %d', N,numPairs));
+    title(sprintf('Optimized: ACF and CCF with Code Length = %d and #Pairs = %d', N,numPairs));
 else      
     title(sprintf('ACF with Code Length = %d and #Pairs = %d', N,numPairs));
 end

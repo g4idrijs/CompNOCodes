@@ -4,7 +4,7 @@ close all
 % x holds all the codes
 % Each two rows holds a pair
 
-intervals = [1 2 3 5 7 10 15];
+%intervals = [1 2 3 5 7 10 15];
 intervals = [];
 
 % f = The function we aim to minimize (maximize its reciprocal)
@@ -20,10 +20,10 @@ fZero = @(x)0; % Use this if we don't care about cross correlation
 %% Initial guess 
 
 % Set code length
-N = 10;
+N = 5;
 
 % Set number of pairs
-numPairs = 9;
+numPairs = 3;
 
 %startLoad = 1;
 % Load in an appropriate number of pairs that satisfy
@@ -58,7 +58,7 @@ ub = 3*ones(size(x0(:)));
 ACFConstr = @(x)ACFSumFuncConst(x,N,numPairs,intervals);
 
 % A good display option is 'final'. Also 'iter'.
-options = optimoptions('fmincon','Display','iter', 'UseParallel', 'always', 'MaxFunEvals',1000000, 'algorithm', 'sqp');
+options = optimoptions('fmincon','Display','iter', 'UseParallel', 'always', 'MaxFunEvals',20000, 'algorithm', 'sqp');
 %options = psoptimset('Display','iter', 'UseParallel', 'always');
 
 % Set tolerance on constraint (not to be confused with CCF requirements)
@@ -87,7 +87,7 @@ disp(['minAutoCorr/maxCrossCor = ', num2str(metric)]);
 % Save the results
 % disp(startLoad)
 % save(strcat('NRI_Aug29',num2str(startLoad),'.mat'),'x')
-% save(strcat('NRI_Aug29.mat'),'x')
+save(strcat('len5_3codes.mat'),'x')
 
 % What's the signal strength (main lobe) to interference (side lobe) ratio?
 % if(numPairs > 1)
