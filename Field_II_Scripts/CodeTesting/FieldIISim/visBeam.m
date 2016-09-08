@@ -1,3 +1,6 @@
+% Copy of compCodesWalkingMultiple (September 8, 2016)
+% Purpose: try out calc_hp: visualize transducer output
+
 % compCodesWalkingMultiple.m
 
 % Authors: Tarek, David
@@ -8,6 +11,7 @@
 % will be simultaneously walked, and number of parallel zones in Z 
 % direction determine how many parallel focal zones in the Z direction.
 
+clear
 addpath('../../Field_II', '../../bft_64bit');
 
 %% Simulation properties
@@ -20,7 +24,6 @@ codeSet = tempLoad.('x');
 
 % tempLoad =  load('../../../Complementary Pairs/len5_3codes.mat');
 % codeSet = tempLoad.('x');
-
 
 % tempLoad1 = load(['../../../Complementary Pairs/len10_4codes_set1.mat']);
 % tempLoad2 = load(['../../../Complementary Pairs/len10_4codes_set2.mat']);
@@ -44,8 +47,8 @@ end
  
 for i = 1:numCodesX
     for j = 1:numCodesZ
-        codes{i}.code{j} = codeSet(codesToUse(1+(i-1)*numCodesZ+(j-1)), :); % 1st pair code
-        codes{i}.ccode{j} = codeSet(codesToUse(1+(i-1)*numCodesZ+(j-1))+1, :); % 2nd pair code
+        codes{i}.code{j} = [1 -1]; %codeSet(codesToUse(1+(i-1)*numCodesZ+(j-1)), :); % 1st pair code
+        codes{i}.ccode{j} = [1 -1]; %codeSet(codesToUse(1+(i-1)*numCodesZ+(j-1))+1, :); % 2nd pair code
         codes{i}.focusZ(j) = focalPoints_z(j);
     end
 end
@@ -266,7 +269,7 @@ for lineNo = 1:focalZoneSpacing_x
         end
     end
     
-    % Don't transmit or receive focus using Field II
+    % Don't tranmit or receive focus using Field II
     xdc_focus_times(xmt, 0, zeros(1, no_elements));
     xdc_focus_times(rcv, 0, zeros(1, no_elements));
     
@@ -275,18 +278,79 @@ for lineNo = 1:focalZoneSpacing_x
     % The corresponding sample window is [Smin_c, Smax_c]
     % Also need to shift rf_data by forceMaxDelay before or after aligning 
     % to account for focusing delays.
-    ele_waveform(xmt, (1:no_elements)', beam(:, :, 1)'); 
+    ele_waveform(xmt, (1:no_elements)', beam(:, :, 1)');     
+   
+    %% Try visualizing beam
+    if(xLine == 0)
+        % Plot excitation over time at a single points
+        plotSingLoc = 0;
+        if(plotSingLoc == 1)
+            visLoc = [0 0 60];
+            [h,start_time] = calc_hp(xmt,visLoc/1000);
+            figure
+            plot(h)
+            title(['Energy at [', num2str(visLoc),'] mm']);
+        end
+
+        % Get excitation at a range of positions over time
+        xRange = [-10:0.1:10]/1000; % m
+        zRange = [0:0.1:40]/1000; %[35:0.1:45]/1000; % m    
+        pointsInterest = zeros(numel(zRange),3);
+        pointsInterest(:,3) = zRange'; 
+
+        % Determine indices of samples to keep
+        [Rmax, Rmin, ~, ~, ~, Smin_cVis, Smax_cVis, ~, no_rf_samples_cVis] =...
+        calcSampleTimeRanges(pointsInterest, codes, c, fs);
+        Smin_cVis = round(Smin_cVis/2); % Adjust for no echo here
+        Smax_cVis = round(Smax_cVis/2);
+        no_rf_samples_cVis = round(no_rf_samples_cVis /2);
+
+        for xRangeInd = 1:numel(xRange)
+           for zRangeInd = 1:numel(zRange)
+               currX = xRange(xRangeInd);
+               currZ = zRange(zRangeInd);
+               [currResp,start_timeVis] = calc_hp(xmt,[currX 0 currZ]);  
+               
+               currResp = alignRF(currResp,start_timeVis,fs,Smin_cVis,Smax_cVis,no_rf_samples_cVis,1);
+
+               % Store sequence at right (x,z) location
+               respMat(zRangeInd,xRangeInd,:) = currResp;
+           end
+        end
+
+        plot(currResp)   
+
+        %% Show the animation
+        numFrames = size(respMat,3);
+        for frame = 1:5:numFrames 
+           imagesc([min(xRange), max(xRange)]*1000,[Rmin, Rmax]*1000, respMat(:,:,frame));
+
+           title(['First Code Set. Line: ', num2str(lineNo),'. Frame: ', num2str(frame), ' of ', num2str(numFrames)]);
+           colorbar;
+           caxis([-0.1 0.1]*1e-11)
+           ylabel('z (mm)')
+           xlabel('x (mm)')
+
+           pause(0.01);
+        end
+
+        pause  
+    end
+    
     [rf_data, start_time] = calc_scat_multi(xmt, rcv, pht_pos, pht_amp);
     rf_data = [rf_data(1+forceMaxDelay:end, :); zeros(forceMaxDelay, size(rf_data, 2))];
     rf_data = alignRF(rf_data,start_time,fs,Smin_c,Smax_c,no_rf_samples_c,no_elements);
     rf_data_m(:, :, 1) = rf_data;
     
     % Repeat for second code in pair
-    ele_waveform(xmt, (1:no_elements)', beam(:, :, 2)');
+    ele_waveform(xmt, (1:no_elements)', beam(:, :, 2)');    
+
+    
     [rf_data, start_time] = calc_scat_multi(xmt, rcv, pht_pos, pht_amp);
     rf_data = [rf_data(1+forceMaxDelay:end, :); zeros(forceMaxDelay, size(rf_data, 2))];
     rf_data = alignRF(rf_data,start_time,fs,Smin_c,Smax_c,no_rf_samples_c,no_elements);
-    rf_data_m(:, :, 2) = rf_data;
+    rf_data_m(:, :, 2) = rf_data;    
+
     
     %% Decode each line in the current line set for this transmit event
 
