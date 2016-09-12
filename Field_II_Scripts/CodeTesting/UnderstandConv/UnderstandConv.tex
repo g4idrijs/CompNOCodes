@@ -1,0 +1,189 @@
+% This is the preamble
+
+\documentclass[a4paper]{article}
+\usepackage[margin=1in]{geometry}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\lhead{DSP HW 1}
+\rhead{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\usepackage{mathtools}
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+
+\usepackage[utf8x]{inputenc}
+\usepackage{amsmath} % For math formatting
+\usepackage{graphicx}
+\usepackage{hyperref} 
+\usepackage{tcolorbox}
+\usepackage{commath}
+\usepackage{xcolor}
+\hypersetup{
+    colorlinks,
+    linkcolor={red!50!black},
+    citecolor={blue!50!black},
+    urlcolor={blue!80!black}
+}
+\usepackage{multicol}
+\usepackage{amssymb}
+
+\newcommand{\op}[2]{#1\{#2\}}
+
+\title{Understanding Convolution}
+\author{David Egolf}
+\date{September 12, 2016}
+% Where the document starts
+\begin{document}
+\maketitle
+
+\section*{Definition}
+The convolution of two sequences $x[n]$ and $h[n]$:
+\begin{align*}
+(x*h)[n] = \sum_{k=-\infty}^{\infty}x[k]h[n-k]
+\end{align*}
+Intuitively, we are placing a shifted copy of the sequence $h$ centered at $x = k$, and multiplying this by the $k_{th}$ element in the sequence $x[n]$. We do this for all elements $x[k]$ in the input sequence and add the results.
+\\\\
+Note that convolution is commutative, distributive, and associative.
+\section*{Output of LTI System}
+Assume $T$ is a linear time invariant system. Then:
+\begin{align*}
+\op{T}{\delta[n]} &= h[n] \text{ (impulse response)}\\
+\implies \op{T}{x[n]} &= \sum_{k=-\infty}^{k=\infty}x[k]h[n-k]
+\end{align*}
+\section*{Model Ultrasound System as LTI System}
+Consider a single ultrasound transducer, and assume that we use it to transmit a signal, which is then reflected and received by the transducer. Let us define an ultrasound system $U$ that maps from transducer input excitation to the final signal decoded by the transducer:
+\begin{align*}
+U = T_x \circ M_x \circ R_x
+\end{align*}
+where $T_x$ is the transmission operator, $M_x$ is the reflection operator (acts like a ``mirror"), and $R_x$  is the receiving operator.
+\\\\
+If we ignore the transmission delay, and assume that the reflected signal is identical to the transmitted signal up to a change in amplitude, then:
+\begin{align*}
+\op{M_x}{x[n]} = A \cdot x[n]
+\end{align*}
+where $A \in \mathbb{R}$.
+\\\\
+In our simulations we assume that the both $T_x$ and $R_x$ are LTI systems, with the same impulse response. Call this common transducer impulse response $h$. 
+\\\\
+Using these definitions, we can calculate the output of the ultrasound system:
+\begin{align*}
+\op{U}{x[n]} &= \op{T_x \circ M_x \circ R_x}{x[n]} \\
+&= h[n] *(A \cdot h[n] * x[n]) \\
+&= A \cdot \ (h[n] * h[n]) *x[n]
+\end{align*}
+where we have used the fact that convolution is commutative.
+\clearpage
+\subsection*{Motivation}
+So, in order to understand the action of the ultrasound system, it would be useful to understand the properties of $h[n] * h[n]$, since this is the impulse response of the entire system (up to a scalar multiple).
+\section*{Problem Statement}
+Investigate the properties of  the self convolution $(h*h)[n]$ of a sequence $h: \mathbb{Z} \rightarrow \mathbb{R}$, in the context of an ultrasound system.
+\section*{Solution}
+\subsection*{Causal}
+I assume there is no noise in the ultrasound system to be modeled. I assume that in a noise free ultrasound system, the system will not begin to transmit data prior to excitation, and the system will not begin to receive data prior to a transmitted signal hitting the receiver. Therefore:
+\begin{align*}
+h[n] = 0 \text{ for } n < 0 \implies (h*h)[n] = 0 \text{ for } n < 0 
+\end{align*}
+This implies that the LTI system  $h*h$ is causal. 
+\subsection*{Stable}
+I assume that if we stop exciting the transducer, then after a finite amount of time the ultrasound receiver will stop receiving anything. That is:
+\begin{align*}
+(h*h)[n] = 0 \text{ for } n \geq N
+\end{align*}
+This implies that we are working with a finite impulse response system, and therefore the system is stable.
+\subsection*{Not Memory-less}
+The output $y[n]$ depends on all values of the input $h[n]$, not just the current value of $n$. Therefore, the system is not memory-less.
+\subsection*{Equation for Output}
+The output of the system $(h*h)[n]$ is explicitly:
+\begin{align*}
+(h*h)[n] &= \sum_{k=-\infty}^{\infty}h[k]h[n-k]
+\end{align*}
+Since the system is causal, we only need to sum over the terms where $k \geq 0$ and $n - k \geq 0 \implies k \leq n$:
+\begin{align*}
+(h*h)[n] &= \sum_{k=0}^{n}h[k]h[n-k]
+\end{align*}
+To get some intuition, we write out this sum explicitly in the case when $h[0] = 1, h[1] = 2, h[2] = 3, h[3] = 4, h[4] = 5$ and $h[j] = 0$ for all other $j \in \mathbb{Z}$:
+\begin{align*}
+(h*h)[n] &= h[0]h[n] + h[1]h[n-1] + h[2]h[n-2] + h[3]h[n-3] + h[4]h[n-4]
+\end{align*}
+\clearpage
+\subsection*{Nonzero Output Region As Function of Length}
+Let $L$ be an integer called the ``length" of the impulse response. We provide elements $h[0], h[1], ..., h[L-1]$ to MATLAB when specifying the impulse response. We require $L \geq 1$ and $h[n] = 0$ for all $n \geq L$.
+\\\\
+We assume that our impulse response starts at zero and ends at zero, so set $h[0] = h[L-1] = 0$.
+\\\\
+Using this information, we can rewrite the form of the output $(h*h)[n]$. We are interesting in determining exactly at which times the output can be nonzero. The output $(h*h)[n]$ will be zero at $n$ if:
+\begin{align*}
+h[k]h[n-k] = 0 \text{ for } k = 0,1,..,n
+\end{align*}
+Since we assume $h[0] = 0$ and $(h*h)[n] = 0$ for all $n \geq L -1$, we can reduce the number of terms under consideration. Specifically, if $n \geq L-1$, then the output is zero, and if $n \leq 0$ then the output is zero. So, it remains to consider the cases in which $1 \leq n \leq L -2$. These are the only cases in which would possibly get nonzero output.
+\\\\ 
+We can further restrict these cases by realizing that if $L \leq 2$, then the entire sequence is zero and so the output will be zero. So, we only need to consider the cases $1 \leq n \leq L -2$ where $L \geq 3$. We want to know for which of these $n$ values we have a chance for nonzero output, as a function of $L$ (clearly the maximum $n$ for nonzero output will increase with $L$).
+\\\\
+Our strategy is to start small and search for a pattern:
+\\\\
+If $n = 1$:
+\begin{align*}
+h[k]h[n-k] = h[k]h[1-k]
+\end{align*}
+Since $1 - k \leq 0$ for $k = 1,..,L-2$, the output is always zero in this case. As a result, we only need to consider the possible nonzero cases as consisting of $2 \leq n \leq L -2$.
+\\\\
+If $n = 2$:
+\begin{align*}
+h[k]h[n-k] = h[k]h[2-k] \\
+\end{align*}
+The possible nonzero $h[i]$ range is $i = 1,2..,L-2$. Checking when we are in this range:
+\begin{align*}
+1 \leq 2-k \leq L -2 \\
+\implies k &\leq 1 \text{ and}\\
+\implies 4 &\leq L + k \implies k \geq 4 - L \\
+\text{Together: } \\
+4 - L \leq k \leq 1
+\end{align*}
+In order to satisfy this inequality, we need:
+\begin{align*}
+4 - L \leq 1 \implies L \geq 3
+\end{align*}
+We also need:
+\begin{align*}
+4 - L  \leq k_{max}, 1  \geq k_{min}
+\end{align*}
+Where $k_{max}$ is the largest value $k$ can take on, and $k_{min}$ is the smallest value $k$ can take on, while preserving the fact that $h[k]$ might be nonzero. From our work before, $k_{max} = L - 2$ and $k_{min} = 1$.
+\\\\
+So, we need:
+\begin{align*}
+4 - L \leq L -2, 1 \geq 1 \\
+\implies 2L \geq 6 \implies L \geq 3
+\end{align*}
+\\\\
+So, $(h*h)[2]$ has a chance to be nonzero when $L \geq 3$.
+\clearpage
+Let's generalize this argument, setting $n = a$:
+\begin{align*}
+h[k]h[n-k] = h[k]h[a-k] \\
+\end{align*}
+The possible nonzero $h[i]$ range is $i = 1,2..,L-2$. Checking when we are in this range:
+\begin{align*}
+1 \leq a-k \leq L -2 \\
+&\implies k \leq a - 1 \text{ and}\\
+&\implies a + 2 \leq L + k \implies k \geq a + 2 - L \\
+\text{Together: } \\
+a + 2 - L \leq k \leq a - 1
+&\implies L \geq 3
+\end{align*}
+We also need:
+\begin{align*}
+a + 2 - L  \leq k_{max}, a - 1  \geq k_{min}
+\end{align*}
+Where $k_{max}$ is the largest value $k$ can take on, and $k_{min}$ is the smallest value $k$ can take on, while preserving the chance that $h[k]$ might be nonzero. From our work before, $k_{max} = L - 2$ and $k_{min} = 1$.
+\\\\
+So, we need:
+\begin{align*}
+a +2 - L \leq L -2,~a-1 \geq 1 \\
+\implies 2L \geq a + 4 \implies L \geq \frac{a+4}{2}
+\end{align*}
+\\\\
+Substituting $n = a$, we find $(h*h)[n]$ has a chance to be nonzero when $L \geq \frac{n+4}{2}$. That means when we are computing the sum to get the response, we only need to add terms from $n = 1$ to $2L - 4$.
+\end{document}

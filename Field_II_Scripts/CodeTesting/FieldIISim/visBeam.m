@@ -47,8 +47,8 @@ end
  
 for i = 1:numCodesX
     for j = 1:numCodesZ
-        codes{i}.code{j} = [1 -1]; %codeSet(codesToUse(1+(i-1)*numCodesZ+(j-1)), :); % 1st pair code
-        codes{i}.ccode{j} = [1 -1]; %codeSet(codesToUse(1+(i-1)*numCodesZ+(j-1))+1, :); % 2nd pair code
+        codes{i}.code{j} = [1]; %codeSet(codesToUse(1+(i-1)*numCodesZ+(j-1)), :); % 1st pair code
+        codes{i}.ccode{j} = [1]; %codeSet(codesToUse(1+(i-1)*numCodesZ+(j-1))+1, :); % 2nd pair code
         codes{i}.focusZ(j) = focalPoints_z(j);
     end
 end
@@ -306,6 +306,7 @@ for lineNo = 1:focalZoneSpacing_x
         no_rf_samples_cVis = round(no_rf_samples_cVis /2);
 
         for xRangeInd = 1:numel(xRange)
+           disp(xRangeInd);
            for zRangeInd = 1:numel(zRange)
                currX = xRange(xRangeInd);
                currZ = zRange(zRangeInd);
@@ -318,11 +319,12 @@ for lineNo = 1:focalZoneSpacing_x
            end
         end
 
-        plot(currResp)   
+        %plot(currResp)   
 
         %% Show the animation
+        figure
         numFrames = size(respMat,3);
-        for frame = 1:5:numFrames 
+        for frame = 300 %1:5:numFrames 
            imagesc([min(xRange), max(xRange)]*1000,[Rmin, Rmax]*1000, respMat(:,:,frame));
 
            title(['First Code Set. Line: ', num2str(lineNo),'. Frame: ', num2str(frame), ' of ', num2str(numFrames)]);
@@ -331,10 +333,10 @@ for lineNo = 1:focalZoneSpacing_x
            ylabel('z (mm)')
            xlabel('x (mm)')
 
-           pause(0.01);
+           pause(0.1);
         end
 
-        pause  
+        %pause  
     end
     
     [rf_data, start_time] = calc_scat_multi(xmt, rcv, pht_pos, pht_amp);
