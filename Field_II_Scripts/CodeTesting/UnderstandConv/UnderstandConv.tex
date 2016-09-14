@@ -5,7 +5,7 @@
 
 \usepackage{fancyhdr}
 \pagestyle{fancy}
-\lhead{DSP HW 1}
+\lhead{Convolution Investigation}
 \rhead{\thepage}
 \renewcommand{\headrulewidth}{0.4pt}
 \renewcommand{\footrulewidth}{0.4pt}
@@ -181,9 +181,125 @@ Where $k_{max}$ is the largest value $k$ can take on, and $k_{min}$ is the small
 \\\\
 So, we need:
 \begin{align*}
-a +2 - L \leq L -2,~a-1 \geq 1 \\
+a +2 - L \leq L -2,~a-1 \geq 1 \implies a \geq 2 \\
 \implies 2L \geq a + 4 \implies L \geq \frac{a+4}{2}
 \end{align*}
 \\\\
-Substituting $n = a$, we find $(h*h)[n]$ has a chance to be nonzero when $L \geq \frac{n+4}{2}$. That means when we are computing the sum to get the response, we only need to add terms from $n = 1$ to $2L - 4$.
+Substituting $n = a$, we find $(h*h)[n]$ has a chance to be nonzero when $L \geq \frac{n+4}{2}$ and when $n \geq 2$.
+\\\\
+\subsection*{Largest and Smallest Nonzero $(h*h)[n]$}
+Using this information, we can find the first possibly nonzero term. Trying $n = 2$, the condition for the output to be nonzero is:
+\begin{align*}
+L \geq \frac{2+4}{2} = 3 \implies L \geq 3
+\end{align*}
+So, $n = 2$ is the smallest value of $n$ for which $(h*h)[n]$ is possibly not zero. 
+\\\\
+Next, let's find the largest $n = n_{max}$ for which $(h*h)[n]$ is possibly nonzero. We know that this $n \geq 2$. Also, for $(h*h)[n_{max}]$ to be possibly nonzero, we need:
+\begin{align*}
+2L \geq n_{max} + 4 \\ 
+\implies n_{max} \leq 2L - 4
+\end{align*}
+Choosing the largest element in this set, we get $n_{max} = 2L -4$.
+\\\\
+So, $(h*h)[n]$ is possibly nonzero for $2 \leq n \leq 2L-4$.
+\subsection*{Properties of $h*h$ So Far}
+Adding this new information about the nonzero range for $n$:
+\begin{align*}
+(h*h)[n] = \sum_{k=0}^{n}h[k]h[n-k] \text{ (possibly nonzero for } 2 \leq n \leq 2L-4) 
+\end{align*}
+This system is LTI, causal, stable, and not memory-less.
+\clearpage
+\subsection*{Lack of Symmetry in Self Convolution}
+It turns out that the convolution of a sequence with itself is NOT symmetric (doesn't form a palindrome when written out), even though the autocorrelation of a sequence with itself is! For example, if $h = [0,1,2,0]$ (starting at $n = 0$), then:
+\begin{align*}
+(h*h)[0]& = \sum_{k=0}^{0}h[k]h[0-k] = h[0]h[0] = 0 \\
+(h*h)[1] &= \sum_{k=0}^{1}h[k]h[1-k] = h[0]h[1] + h[1]h[0] = 0 \\
+(h*h)[2] &= \sum_{k=0}^{2}h[k]h[2-k] = h[0]h[2] + h[1]h[1]+h[2]h[0]= 0 + 1 + 0 = 1 \\
+(h*h)[3] &= \sum_{k=0}^{3}h[k]h[3-k] = h[0]h[3] + h[1]h[2]+h[2]h[1]+h[3]h[0]= 0 + 2 + 2 + 0 = 4 \\
+(h*h)[4] &= \sum_{k=0}^{4}h[k]h[4-k] = h[0]h[4] + h[1]h[3]+h[2]h[2]+h[3]h[1] + h[4]h[0]= 0 + 0 + 4 + 0 = 4 \\
+\end{align*}
+And since $n_{max} = 2L-4 = 4$, $(h*h)[n] = 0$ for all larger $n$.
+\subsection*{Sufficient Condition for Symmetry in Self Convolution}
+The autocorrelation of a sequence is known to be symmetric. The autocorrelation for a real sequence is:
+\begin{align*}
+ACF(h[n]) = \sum_{k=-\infty}^{\infty}h[k]h[k-n]
+\end{align*}
+For comparison, here is the the definition of a sequence convolved with itself:
+\begin{align*}
+(h*h)[n] &= \sum_{k=-\infty}^{\infty}h[k]h[n-k] \\
+&= \sum_{k=-\infty}^{\infty}h[k]h[-(k-n)]
+\end{align*}
+If we assume that $h[n]$ satisfies $h[n] = h[-n]$ (it is symmetric in time), then $h[-(k-n)] = h[n-k]$ and we find $ACF(h[n]) = (h*h[n])$ in this case. So, a time symmetric sequence $h[n] = h[-n]$ has a symmetric self convolution.
+\subsection*{Incorporating Sinusoidal Shape}
+The impulse function $h[n]$ we use in simulation is of the form:
+\begin{align*}
+h[n] = a[n]\sin(w \cdot n)
+\end{align*}
+where $a[n]$ is a sequence of real numbers and $w \in \mathbb{R}$. I assume that we use  a natural number $m$ of cycles (in order to ensures that $h[0] = h[L-1] = 0$ and also to produce an output that integrates to zero - which helps reduce side lobe energy). This tells us the value of $w$:
+\begin{align*}
+w \cdot (L-1) = 2 \pi m \\
+\implies w = \frac{2 \pi m}{L-1}
+\end{align*}
+So, the impulse $h[n]$ is of the form, where $m \in \mathbb{N}$ is the number of cycles used:
+\[
+ h[n] =
+  \begin{cases} 
+      \hfill a[n]\sin(\frac{2 \pi m}{L-1} \cdot n)   \hfill & 0 \leq n \leq L -1 \\
+      \hfill 0 \hfill & \text{ for all other $n$} \\
+  \end{cases}
+\]
+\clearpage
+\subsection*{Consequences of Sinusoidal Shape}
+For simplicity, we begin by assuming $a[n] = 1$ for all $n$. MATLAB evidencce seems to suggest that with the additional assumption of sinusoidal shape, the impulse response of the ultrasound system $h*h$ is now symmetric:
+\begin{center}
+\includegraphics[scale=1]{symmConvSin.png}
+\end{center}
+The most immediate symmetry present in an impulse response of this form is as follows:
+\begin{align*}
+h[a] = -h[L-1 - a]~\forall a \in \mathbb{Z} \\
+\implies 
+h[a-u] = -h[L-1 - (a-u)] = -h[L-1 - a + u)]
+\end{align*}
+(ASSUMED FOR NOW)
+\\\\
+If a sequence has this symmetry, it its self convolution symmetric? That is, we want to show:
+\begin{align*}
+(h*h)[2 + a] &= \sum_{k=0}^{2+a}h[k]h[2+a-k] = (h*h)[2L-4- a] = \sum_{k=0}^{2L-4-a}h[k]h[2L-4-a-k] \\
+\iff
+\sum_{k=0}^{2+a}h[k]h[2+a-k] &= \sum_{k=0}^{2L-4-a}h[k]h[2L-4-a-k]
+\end{align*}
+Define $u$ so that $k = L -1-u$. Then $h[k] = h[L -1-u] = -h[u]$, and $2L -4 -a -k = -a+L+u-3$. Since $u = L-k-1$, if $k = 0$ then $u = L - 1$. If $k = 2L-4-a$ then $u = a-L+3$:
+\begin{align*}
+\iff \sum_{k=0}^{2+a}h[k]h[2+a-k] &= \sum_{u=L-1}^{a-L+3}h[L-1-u]h[L-3-a+u] &= \sum_{u=L-1}^{a-L+3}-h[u]h[L-3-a+u]
+\end{align*}
+Rewriting the second part of the second sum:
+\begin{align*}
+h[L-3-a+u] = h[L-1-a+(u-2)] = -h[a-(u-2)] = -h[2+a-u]
+\end{align*}
+Plugging this back in, renaming $u$ to $k$, and continuing the same chain of implications:
+\begin{align*}
+\iff \sum_{k=0}^{2+a}h[k]h[2+a-k] &= \sum_{k=L-1}^{a-L+3}h[k]h[2+a-k]
+\end{align*}
+Call $A = 2+a$:
+\begin{align*}
+\iff \sum_{k=0}^{A}h[k]h[A-k] &= \sum_{k=L-1}^{A-(L-1)}h[k]h[A-k]
+\end{align*}
+This seems to work in MATLAB. Maybe look to apply the fact that $h$ goes to zero outside a certain range now? Could also look at cases on $A-(L-1)$
 \end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
