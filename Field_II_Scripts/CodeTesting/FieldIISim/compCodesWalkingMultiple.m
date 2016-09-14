@@ -89,7 +89,11 @@ forceMaxDelay = 50;   % Forces the maximum delay in manual focusing to
 Ts = 1 /fs; % Sampling period
 %Note: depending on Ts and number_cycles/f0, impulse_response may not have complete cycles
 impulse_response = sin(2*pi*f0*(0:Ts:number_cycles/f0)); 
+plot(impulse_response);
+
+
 impulse_response = impulse_response.*hanning(length(impulse_response))';
+
 
 %% Extend codes
 % Insert zeroes in codes to stop impulse responses from interfering

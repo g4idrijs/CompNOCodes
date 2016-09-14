@@ -283,8 +283,92 @@ Plugging this back in, renaming $u$ to $k$, and continuing the same chain of imp
 Call $A = 2+a$:
 \begin{align*}
 \iff \sum_{k=0}^{A}h[k]h[A-k] &= \sum_{k=L-1}^{A-(L-1)}h[k]h[A-k]
+\end{align*}\
+We want to show that this relationship holds for all integers $A$.
+\\\\
+Based on experiments in MATLAB, it appears that the right side contains all the same nonzero terms in the sum as does the left side (and it may have more or less zero terms). We try to show that the right and left side have the same nonzero terms.
+\\\\
+We need to deal with the case where $2 \leq A \leq 2L -4$, since the two sides are both zero for other values of $A$. To show this, consider the case in which $A$ is outside of this range. In this case, then clearly the left handside $(h*h)[A] = 0$. The righthand side is $(h*h)[2L-4-a]$, and so if $-a > 1$, the righthand side is zero. Now $-a>1 \implies a > -1 \implies A -2 > -1 \implies A > 1$. So we need $A  \geq 2$ for the righthand side to be possibly nonzero. Also, since the righthand side is $(h*h)[2L-4-a]$, if $2L-4-a \leq 1$ then the righthand side is zero. To make the righthand side nonzero we therefore need $2L-4-a \geq 2 \implies 2L-4-(A-2) \geq 2 \implies 2L -4 \geq A$. So, for the righthand side to be possibly nonzero we need $2 \leq A \leq 2L-4$. If $A$ is not in this range, the two sides are equal. Also note that we only need to check for $L \geq 3$, since the output is otherwise always zero.
+\subsubsection*{Simple Case Investigation}
+Our strategy is to look at a simple case, and then generalize. \\
+If $A = 2$, we get (LHS):
+\begin{align*}
+\sum_{k=0}^{2}h[k]h[2-k] = h[0]h[2] + h[1]h[1] + h[2]h[0] = h[1]h[1]
 \end{align*}
-This seems to work in MATLAB. Maybe look to apply the fact that $h$ goes to zero outside a certain range now? Could also look at cases on $A-(L-1)$
+For the RHS, we get:
+\begin{align*}
+\sum_{k=L-1}^{2-(L-1)}h[k]h[2-k] = \sum_{k=2-(L-1)}^{L-1}h[k]h[2-k]
+\end{align*}
+We only need to sum over $k \geq 1$. Since $2-(L-1) < 1$ (for $L \geq 3$ - the output is always zero otherwise), we can start summing at $k = 1$:
+\begin{align*}
+\sum_{k=2-(L-1)}^{L-1}h[k]h[2-k] = \sum_{k=1}^{L-1}h[k]h[2-k]
+\end{align*}
+We also require $2-k \geq 1$ to get a possibly nonzero output. This implies we only need to sum up to when $k = 1$:
+\begin{align*}
+\sum_{k=2-(L-1)}^{L-1}h[k]h[2-k] = \sum_{k=1}^{1}h[k]h[2-k] = h[1]h[1]
+\end{align*}
+And so the left and right side match in this case.
+\clearpage
+\subsubsection*{Generalizing}
+We now try and show this result holds for all integers $A$:
+\begin{align*}
+\sum_{k=0}^{A}h[k]h[A-k] &= \sum_{k=L-1}^{A-(L-1)}h[k]h[A-k]
+\end{align*}
+Our idea is to remove any terms that will always be zero from each side. Keep in mind that there is only a possibility of nonzero terms when $2 \leq A \leq 2L -4$.
+\\\\
+On both sides, we want to include all nonzero terms when summing $\sum_{-\infty}^{\infty}h[h]h[A-k]$. A term is possibly nonzero if $1 \leq k \leq L - 2$ and $1 \leq A - k \leq L -2$. This means we need to sum exactly the terms that satisfy the following conditions:
+\begin{align*}
+k &\geq 1 \\
+k &\leq L-2 \\
+k &\leq A \\
+k &\geq A - L + 2
+\end{align*}
+The sum on both sides should be:
+\begin{align*}
+\sum_{k=\max(1,A-L+2)}^{\min(A,L-2)}h[k]h[A-k] 
+\end{align*}
+However, including extra terms doesn't hurt. The left side is clearly equal to this sum. It sums starting a $k = 0$, while the first needed index is at least 1. It stops summing at $A$, and $A \geq \min(A,L-2)$.
+\\\\
+It remains to show that the sum on the right side also has the same value as the general form. There are two major cases to consider: when $L-1 < A-(L-1)$ and when $L - 1 \geq  A-(L-1)$.  We also have to consider when $L -1 = A-(L-1)$.
+\\\\
+Let us begin by considering the case $L-1 < A -(L-1) \implies A > 2L - 2 \implies A - L +2 > L$. Since $L \geq 3$, then $A - L + 2 > 3$. So, $\max(1,A-L+2)$ in this case is $A-L+2$. Also, since $A-L+2 > L$, then $A-L+2 > L -1$ and so $\max(1,A-L+2) > L - 1$ in this case. That means the right side starts at a small enough summation index. Considering the upper index in this case, we need to know the minimum of $A$ and $L-2$. Now, $L-1 < A -(L-1) \implies L+(L-2) < A \implies \min{(A,L-2)} = L-2$. Also, since we just saw $A-(L-1) > L - 1 > L - 2 = \min{(A,L-2)}$, the right side ends at a large enough summation index.
+\\\\
+Now we consider the case $A-(L-1) < L - 1$. We start summing at $k = A -(L-1)$ and stop summing at $k = L -1$. We need to make sure $A-(L-1) \leq \max(1,A-L+2)$. Clearly $A-L+1 < A-L+2 \implies A-(L-1) \leq \max(1,A-L+2)$. We also need to make sure that $L-1 \geq \min(A,L-2)$ in this case. Since $L -1 > L - 2$, $L-1 \geq \min(A,L-2)$.
+\\\\
+Finally, we consider the case in which $L-1 = A-(L-1) \ A = 2L-2$. However, we already proved the two sides were equal for $A \geq 2L-4$.
+\clearpage
+\section*{Alternate Proof: \\ Symmetric Self Convolution for Symmetric Enough Sequences}
+\subsection*{Self Convolution Operator Shape Invariance Under Time Shift}
+Consider an arbitrary sequence $h: \mathbb{Z} \rightarrow \mathbb{R}$. Define an operator $T$, ``the self convolution operator", so that:
+\begin{align*}
+\op{T}{h}[n] = (h*h)[n]
+\end{align*}
+We want to show that as the input is shifted, the output is shifted but preserves its shape. Define a shifted input as $h_1[n] = h[n-n_0]$.
+\\\\
+Seeing if this definition is met:
+\begin{align*}
+\op{T}{h_1}[n] = (h_1*h_1)[n] =  \sum_{k=-\infty}^{\infty}h_1[k]h_1[n-k] = \sum_{k=-\infty}^{\infty}h[k - n_0]h[n-k-n_0]
+\end{align*}
+Setting $u = k - n_0 \implies k = u + n_0$:
+\begin{align*}
+\op{T}{h_1}[n] =  \sum_{u=-\infty}^{\infty}h[u]h[n-(u+n_0)-n_0] =\sum_{u=-\infty}^{\infty}h[u]h[n-2n_0 -u] = \op{T}{h}[n-2n_0]
+\end{align*}
+And so the shape stays the same as the input changes. Therefore, if $h[n]*h[n]$ has a symmetric shape about some point if and only $h[n-n_0]*h[n-n_0]$ has a symmetric shape about some point.
+\subsection*{Time Shifting the Signal to be Odd About Origin}
+We are interested in the self convolution of the signal $h[n]$, which is possibly nonzero for $1 \leq n \leq L -1$, but is otherwise zero. In addition, $h[n] = -h[L-1-n]$ for all integers $n$. Assume that $h$ has an odd number of possibly nonzero values: $L$ is odd. Then we can shift $h$ so that it has odd symmetry. Calling this shifted version $g$, we have $g[-n] = -g[n]$ for all integers $n$.
+\\\\
+Specifically, if $L$ is odd, then we want to shift the center of the new sequence to be at $(L-1)/2$. So, $g[n] = h[n+(L-1)/2]$. This new sequence $g[n]$ is odd about $n = 0$. Since it is  a shifted version of $h[n]$, its self convolution will be a shifted copy of the self convolution of $h[n]$. We now compare the self convolution of $g[n]$ to its autocorrelation:
+\begin{align*}
+(g*g)[n] = \sum_{k = -\infty}^{\infty} g[k]g[n-k] \\
+ACF(g)[n] = \sum_{k = -\infty}^{\infty} g[k]g[k-n] 
+\end{align*}
+However, $g[n-k] = -g[k-n]$ by the nature of our construction. Therefore, in this case we can relate self convolution and autocorrelation:
+\begin{align*}
+-(g*g)[n] = ACF(g[n])
+\end{align*}
+Since the autocorrelation of a sequence is symmetric about a point, so must the self-convolution in this case.  This shows that sequences $h[n]$ of the form used as the impulse response for our ultrasound system have a self convolution symmetric about a point. In addition, it shows that the peak of the self convolution must be negative. Indeed, the earlier plot of self convolution has a negative peak.
+\\\\
+In general, for our ultrasound system, we can study the impulse response of the system as being a positive fractional multiple of the negative of the autocorrelation of the impulse response of the transducer.
 \end{document}
 
 

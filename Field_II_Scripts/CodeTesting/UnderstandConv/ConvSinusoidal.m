@@ -19,3 +19,5 @@ plot(n,h,'o')
 % response
 figure
 plot(conv(h,h))
+figure
+plot(xcorr(h,h))
