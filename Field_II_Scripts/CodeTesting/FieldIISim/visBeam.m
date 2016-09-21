@@ -17,10 +17,10 @@ addpath('../../Field_II', '../../bft_64bit');
 %% Simulation properties
 
 % Load codes used for excitation
-% tempLoad = load(['../../../Complementary Pairs/compPairs_len_10_simMain.mat']);
-% codeSet = tempLoad.('pairsSoFar');
-tempLoad =  load('../../../Complementary Pairs/len10_100codes_minInt2.mat');
-codeSet = tempLoad.('x');
+tempLoad = load(['../../../Complementary Pairs/compPairs_len_10_simMain.mat']);
+codeSet = tempLoad.('pairsSoFar');
+% tempLoad =  load('../../../Complementary Pairs/len100_10codes.mat');
+% codeSet = tempLoad.('x');
 
 % tempLoad =  load('../../../Complementary Pairs/len5_3codes.mat');
 % codeSet = tempLoad.('x');
@@ -47,8 +47,8 @@ end
  
 for i = 1:numCodesX
     for j = 1:numCodesZ
-        codes{i}.code{j} = [1]; %codeSet(codesToUse(1+(i-1)*numCodesZ+(j-1)), :); % 1st pair code
-        codes{i}.ccode{j} = [1]; %codeSet(codesToUse(1+(i-1)*numCodesZ+(j-1))+1, :); % 2nd pair code
+        codes{i}.code{j} = codeSet(codesToUse(1+(i-1)*numCodesZ+(j-1)), :); % 1st pair code
+        codes{i}.ccode{j} = codeSet(codesToUse(1+(i-1)*numCodesZ+(j-1))+1, :); % 2nd pair code
         codes{i}.focusZ(j) = focalPoints_z(j);
     end
 end
@@ -65,7 +65,7 @@ height = 5/1000;        % Height of element [m]
 kerf = 0.02/1000;       % Kerf [m] 
 
 no_lines = 151;         % Number of lines in image 
-no_active_tx = 64;     % Number of active elements for transmit 
+no_active_tx = 1; %64;     % Number of active elements for transmit 
                         % sub-aperture
 rx_fnum_constant = 0;   % F-number for constant f-num reconstruction.
                         % If this is set to 0 then no constant f-num
@@ -90,7 +90,7 @@ forceMaxDelay = 50;   % Forces the maximum delay in manual focusing to
 
 %  Define the impulse response of the transducer
 Ts = 1 /fs; % Sampling period
-impulse_response = sin(2*pi*f0*(0:Ts:number_cycles/f0));
+impulse_response = [1]; %sin(2*pi*f0*(0:Ts:number_cycles/f0));
 impulse_response = impulse_response.*hanning(length(impulse_response))';
 
 %% Extend codes
@@ -104,7 +104,7 @@ impulse_response = impulse_response.*hanning(length(impulse_response))';
 % end
 
 % Extend codes by repeating elements
-timesToRepeat = 20; %numel(impulse_response) - 1;
+timesToRepeat = 100; %numel(impulse_response) - 1;
 for i = 1:numCodesX*numCodesZ    
     
     codes{i}.code{1} = repelem(codes{i}.code{1} ,1,timesToRepeat);
@@ -280,7 +280,7 @@ for lineNo = 1:focalZoneSpacing_x
     % to account for focusing delays.
     ele_waveform(xmt, (1:no_elements)', beam(:, :, 1)');     
    
-    %% Try visualizing beam
+    %% Try visualizing beam (only for first code in pair)
     if(xLine == 0)
         % Plot excitation over time at a single points
         plotSingLoc = 0;
@@ -294,10 +294,10 @@ for lineNo = 1:focalZoneSpacing_x
 
         % Get excitation at a range of positions over time
         xRange = [-10:0.1:10]/1000; % m
-        zRange = [0:0.1:40]/1000; %[35:0.1:45]/1000; % m    
+        zRange = [5:0.1:40]/1000; %[35:0.1:45]/1000; % m    
         pointsInterest = zeros(numel(zRange),3);
-        pointsInterest(:,3) = zRange'; 
-
+        pointsInterest(:,3) = zRange';  
+        
         % Determine indices of samples to keep
         [Rmax, Rmin, ~, ~, ~, Smin_cVis, Smax_cVis, ~, no_rf_samples_cVis] =...
         calcSampleTimeRanges(pointsInterest, codes, c, fs);
@@ -305,15 +305,18 @@ for lineNo = 1:focalZoneSpacing_x
         Smax_cVis = round(Smax_cVis/2);
         no_rf_samples_cVis = round(no_rf_samples_cVis /2);
 
+         % Create matrix to store data (preallocate)
+        respMat = zeros(numel(zRange), numel(xRange), no_rf_samples_cVis);
+        
         for xRangeInd = 1:numel(xRange)
-           disp(xRangeInd);
+           disp(sprintf('%d of %d', xRangeInd, numel(xRange)));
            for zRangeInd = 1:numel(zRange)
                currX = xRange(xRangeInd);
                currZ = zRange(zRangeInd);
                [currResp,start_timeVis] = calc_hp(xmt,[currX 0 currZ]);  
                
                currResp = alignRF(currResp,start_timeVis,fs,Smin_cVis,Smax_cVis,no_rf_samples_cVis,1);
-
+                
                % Store sequence at right (x,z) location
                respMat(zRangeInd,xRangeInd,:) = currResp;
            end
@@ -324,19 +327,22 @@ for lineNo = 1:focalZoneSpacing_x
         %% Show the animation
         figure
         numFrames = size(respMat,3);
-        for frame = 300 %1:5:numFrames 
-           imagesc([min(xRange), max(xRange)]*1000,[Rmin, Rmax]*1000, respMat(:,:,frame));
+        for frame = 1600; %500:5:numFrames %300:5:numFrames 
+            imagesc([min(xRange), max(xRange)]*1000,[Rmin, Rmax]*1000, respMat(:,:,frame))
 
-           title(['First Code Set. Line: ', num2str(lineNo),'. Frame: ', num2str(frame), ' of ', num2str(numFrames)]);
-           colorbar;
-           caxis([-0.1 0.1]*1e-11)
-           ylabel('z (mm)')
-           xlabel('x (mm)')
+            title(['First Code Set. Line: ', num2str(lineNo),'. Frame: ', num2str(frame), ' of ', num2str(numFrames)]);
+            %            colorbar;
+            %            caxis([-0.1 0.1]*1e-11)
+            caxis(1.0e-12 *[-0.1417,0.1398])
 
-           pause(0.1);
+
+            ylabel('z (mm)')
+            xlabel('x (mm)')    
+            
+            pause(eps)
+           
         end
-
-        %pause  
+          
     end
     
     [rf_data, start_time] = calc_scat_multi(xmt, rcv, pht_pos, pht_amp);

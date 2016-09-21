@@ -9,7 +9,7 @@ N = 10;
 % tempDat = load('compPairs_len_10_simMain.mat');
 % x = tempDat.('pairsSoFar');
 
-tempDat = load('len10_100codes_minInt2.mat');
+tempDat = load('len10_16codes_minInt2');
 x= tempDat.('x');
 
 

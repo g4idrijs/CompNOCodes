@@ -3,21 +3,26 @@
 % and 0 for all other n
 
 % I suspect there will be some kind of odd symmetry
+close all
+clear
 
 % Define sequence length
-L = 50;
-n = 0:L-1;
+L = 34;
 
 % Define number of cycles
-m = 3;
+m = 2;
 
 % Define the corresponding m-cycle sinusoid
+n = 0:L-1;
 h = sin(2*pi*m/(L-1)*n);
 plot(n,h,'o')
+title('Original sequence')
 
 % Convolve this sequence with itself, to get the ultrasound system impulse
 % response
 figure
 plot(conv(h,h))
+title('Self Convolution')
 figure
 plot(xcorr(h,h))
+title('Autocorrelation')

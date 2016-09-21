@@ -53,6 +53,26 @@ Assume $T$ is a linear time invariant system. Then:
 \op{T}{\delta[n]} &= h[n] \text{ (impulse response)}\\
 \implies \op{T}{x[n]} &= \sum_{k=-\infty}^{k=\infty}x[k]h[n-k]
 \end{align*}
+\subsection*{Non-linearity of Auto-Correlation and Convolution}
+We begin with self convolution (SC), with $A, B \in \mathbb{C}$:
+\begin{align*}
+((A \cdot h+B \cdot g)*(A \cdot h+B \cdot g))[n] &= \sum_{k = -\infty}^{\infty} (A \cdot h+B \cdot g)[k] \cdot (A \cdot h+B \cdot g)[n-k] \\
+&= \sum_{k = -\infty}^{\infty} (A \cdot h[k]+B \cdot g[k]) \cdot (A \cdot h[n-k]+B \cdot g[n-k]) \\
+&= \sum_{k = -\infty}^{\infty} A^2  h[k]h[n-k]+B^2 g[k]g[n-k] + A \cdot B \cdot h[k]g[n-k] + A \cdot B \cdot g[k]h[n-k] \\
+&= A^2(h*h)[n] + B^2(g*g)[n] + A \cdot B \cdot ((h*g)[n] + (g*h)[n])
+\end{align*}
+So, self convolution is in general not a linear operation. Note also that unless $(h*g)[n] = 0$, then we can't have $(h*g)[n] = -(g*h)[n]$. This is because convolution is commutative.
+\\\\
+We are therefore interested in finding nonzero sequences that have zero convolution. Looking on Google, one can find examples of such sequence pairs, although it appears that at least one of the sequences in the pair needs to have nonzero values arbitrarily far out. While this is interesting, it looks probably difficult to use this to exploit this pseudo linear property of self convolution.
+\\\\
+Considering now autocorrelation:
+\begin{align*}
+((A \cdot h+B \cdot g)\star(A \cdot h+B \cdot g))[n] &= \sum_{k = -\infty}^{\infty} (A \cdot h+B \cdot g)[k] \cdot (A \cdot h+B \cdot g)[k-n] \\
+&= \sum_{k = -\infty}^{\infty} (A \cdot h[k]+B \cdot g[k]) \cdot (A \cdot h[n-k]+B \cdot g[k-n]) \\
+&= \sum_{k = -\infty}^{\infty} A^2  h[k]h[n-k]+B^2 g[k]g[k-n] + A \cdot B \cdot h[k]g[k-n] + A \cdot B \cdot g[k]h[k-n] \\
+&= A^2(h\star h)[n] + B^2(g \star g)[n] + A \cdot B \cdot ((h\star g)[n] + (g \star h)[n])
+\end{align*}
+So, autocorrelation is similarly not linear.
 \section*{Model Ultrasound System as LTI System}
 Consider a single ultrasound transducer, and assume that we use it to transmit a signal, which is then reflected and received by the transducer. Let us define an ultrasound system $U$ that maps from transducer input excitation to the final signal decoded by the transducer:
 \begin{align*}
@@ -254,121 +274,74 @@ For simplicity, we begin by assuming $a[n] = 1$ for all $n$. MATLAB evidencce se
 \begin{center}
 \includegraphics[scale=1]{symmConvSin.png}
 \end{center}
-The most immediate symmetry present in an impulse response of this form is as follows:
+The reason we get a symmetric self convolution with a negative peak  is that our sine wave excitation has odd symmetry about its center:
 \begin{align*}
 h[a] = -h[L-1 - a]~\forall a \in \mathbb{Z} \\
-\implies 
-h[a-u] = -h[L-1 - (a-u)] = -h[L-1 - a + u)]
 \end{align*}
-(ASSUMED FOR NOW)
+So, in a sine wave, as we come in from the left, we find a value negative of what we find as we come in from the right.
+(ASSUMED FOR NOW) \\\\
+As a consequence of this symmetry, then $h*h$ is the negative of the autocorrelation of $h$. As a result, $h*h$ has a negative peak and is symmetric about the center of its nonzero values.
 \\\\
-If a sequence has this symmetry, it its self convolution symmetric? That is, we want to show:
+To see why this is the case, note that the definition of autocorrelation of $h$ corresponds to fixing one copy of $h$ and sliding another copy of $h$ past it to the right, multiplying vertically and then summing:
 \begin{align*}
-(h*h)[2 + a] &= \sum_{k=0}^{2+a}h[k]h[2+a-k] = (h*h)[2L-4- a] = \sum_{k=0}^{2L-4-a}h[k]h[2L-4-a-k] \\
-\iff
-\sum_{k=0}^{2+a}h[k]h[2+a-k] &= \sum_{k=0}^{2L-4-a}h[k]h[2L-4-a-k]
+ACF(h[n]) = \sum_{k=-\infty}^{\infty}h[k]h[k-n]
 \end{align*}
-Define $u$ so that $k = L -1-u$. Then $h[k] = h[L -1-u] = -h[u]$, and $2L -4 -a -k = -a+L+u-3$. Since $u = L-k-1$, if $k = 0$ then $u = L - 1$. If $k = 2L-4-a$ then $u = a-L+3$:
-\begin{align*}
-\iff \sum_{k=0}^{2+a}h[k]h[2+a-k] &= \sum_{u=L-1}^{a-L+3}h[L-1-u]h[L-3-a+u] &= \sum_{u=L-1}^{a-L+3}-h[u]h[L-3-a+u]
-\end{align*}
-Rewriting the second part of the second sum:
-\begin{align*}
-h[L-3-a+u] = h[L-1-a+(u-2)] = -h[a-(u-2)] = -h[2+a-u]
-\end{align*}
-Plugging this back in, renaming $u$ to $k$, and continuing the same chain of implications:
-\begin{align*}
-\iff \sum_{k=0}^{2+a}h[k]h[2+a-k] &= \sum_{k=L-1}^{a-L+3}h[k]h[2+a-k]
-\end{align*}
-Call $A = 2+a$:
-\begin{align*}
-\iff \sum_{k=0}^{A}h[k]h[A-k] &= \sum_{k=L-1}^{A-(L-1)}h[k]h[A-k]
-\end{align*}\
-We want to show that this relationship holds for all integers $A$.
+Here, $h[k]$ is the unshifted copy, and $h[k-n]$ is the copy which is shifted by $n$.
 \\\\
-Based on experiments in MATLAB, it appears that the right side contains all the same nonzero terms in the sum as does the left side (and it may have more or less zero terms). We try to show that the right and left side have the same nonzero terms.
-\\\\
-We need to deal with the case where $2 \leq A \leq 2L -4$, since the two sides are both zero for other values of $A$. To show this, consider the case in which $A$ is outside of this range. In this case, then clearly the left handside $(h*h)[A] = 0$. The righthand side is $(h*h)[2L-4-a]$, and so if $-a > 1$, the righthand side is zero. Now $-a>1 \implies a > -1 \implies A -2 > -1 \implies A > 1$. So we need $A  \geq 2$ for the righthand side to be possibly nonzero. Also, since the righthand side is $(h*h)[2L-4-a]$, if $2L-4-a \leq 1$ then the righthand side is zero. To make the righthand side nonzero we therefore need $2L-4-a \geq 2 \implies 2L-4-(A-2) \geq 2 \implies 2L -4 \geq A$. So, for the righthand side to be possibly nonzero we need $2 \leq A \leq 2L-4$. If $A$ is not in this range, the two sides are equal. Also note that we only need to check for $L \geq 3$, since the output is otherwise always zero.
-\subsubsection*{Simple Case Investigation}
-Our strategy is to look at a simple case, and then generalize. \\
-If $A = 2$, we get (LHS):
+The self convolution is really similar:
 \begin{align*}
-\sum_{k=0}^{2}h[k]h[2-k] = h[0]h[2] + h[1]h[1] + h[2]h[0] = h[1]h[1]
+(h*h)[n] = \sum_{k=-\infty}^{\infty}h[k]h[n-k] =  \sum_{k=-\infty}^{\infty}h[k]h[-(k-n)]
 \end{align*}
-For the RHS, we get:
-\begin{align*}
-\sum_{k=L-1}^{2-(L-1)}h[k]h[2-k] = \sum_{k=2-(L-1)}^{L-1}h[k]h[2-k]
-\end{align*}
-We only need to sum over $k \geq 1$. Since $2-(L-1) < 1$ (for $L \geq 3$ - the output is always zero otherwise), we can start summing at $k = 1$:
-\begin{align*}
-\sum_{k=2-(L-1)}^{L-1}h[k]h[2-k] = \sum_{k=1}^{L-1}h[k]h[2-k]
-\end{align*}
-We also require $2-k \geq 1$ to get a possibly nonzero output. This implies we only need to sum up to when $k = 1$:
-\begin{align*}
-\sum_{k=2-(L-1)}^{L-1}h[k]h[2-k] = \sum_{k=1}^{1}h[k]h[2-k] = h[1]h[1]
-\end{align*}
-And so the left and right side match in this case.
+In this case, we fix one copy of $h$ and slide a horizontally flipped copy of $h$ past it to the right, multiplying vertically and then summing.
 \clearpage
-\subsubsection*{Generalizing}
-We now try and show this result holds for all integers $A$:
+The following figure shows that summing over $h[-(k-n)]$ consists of summing over reversed shifted copies of $h[n]$ (source ``Artificial Intelligence" on GitBook, by Leonardo Araujo dos Santos):
+\begin{center}
+\begin{figure}[h]
+\includegraphics[scale=0.4]{TimeFlipConv.png}
+\caption{Convolution slides and sums over a time reversed copy of $h[n]$}
+\end{figure}
+\end{center}
+Since in our case the horizontally flipped version of $h[n]$ will be vertically flipped (negative where it was positive, and vice versa), then multiplying by a flipped and shifted copy is the same as multiplying by a shifted copy - except off by a sign.
+\begin{tcolorbox}
+So when the following is satisfied:
 \begin{align*}
-\sum_{k=0}^{A}h[k]h[A-k] &= \sum_{k=L-1}^{A-(L-1)}h[k]h[A-k]
+h[a] = -h[L-1 - a]~\forall a \in \mathbb{Z} \\
 \end{align*}
-Our idea is to remove any terms that will always be zero from each side. Keep in mind that there is only a possibility of nonzero terms when $2 \leq A \leq 2L -4$.
-\\\\
-On both sides, we want to include all nonzero terms when summing $\sum_{-\infty}^{\infty}h[h]h[A-k]$. A term is possibly nonzero if $1 \leq k \leq L - 2$ and $1 \leq A - k \leq L -2$. This means we need to sum exactly the terms that satisfy the following conditions:
-\begin{align*}
-k &\geq 1 \\
-k &\leq L-2 \\
-k &\leq A \\
-k &\geq A - L + 2
-\end{align*}
-The sum on both sides should be:
-\begin{align*}
-\sum_{k=\max(1,A-L+2)}^{\min(A,L-2)}h[k]h[A-k] 
-\end{align*}
-However, including extra terms doesn't hurt. The left side is clearly equal to this sum. It sums starting a $k = 0$, while the first needed index is at least 1. It stops summing at $A$, and $A \geq \min(A,L-2)$.
-\\\\
-It remains to show that the sum on the right side also has the same value as the general form. There are two major cases to consider: when $L-1 < A-(L-1)$ and when $L - 1 \geq  A-(L-1)$.  We also have to consider when $L -1 = A-(L-1)$.
-\\\\
-Let us begin by considering the case $L-1 < A -(L-1) \implies A > 2L - 2 \implies A - L +2 > L$. Since $L \geq 3$, then $A - L + 2 > 3$. So, $\max(1,A-L+2)$ in this case is $A-L+2$. Also, since $A-L+2 > L$, then $A-L+2 > L -1$ and so $\max(1,A-L+2) > L - 1$ in this case. That means the right side starts at a small enough summation index. Considering the upper index in this case, we need to know the minimum of $A$ and $L-2$. Now, $L-1 < A -(L-1) \implies L+(L-2) < A \implies \min{(A,L-2)} = L-2$. Also, since we just saw $A-(L-1) > L - 1 > L - 2 = \min{(A,L-2)}$, the right side ends at a large enough summation index.
-\\\\
-Now we consider the case $A-(L-1) < L - 1$. We start summing at $k = A -(L-1)$ and stop summing at $k = L -1$. We need to make sure $A-(L-1) \leq \max(1,A-L+2)$. Clearly $A-L+1 < A-L+2 \implies A-(L-1) \leq \max(1,A-L+2)$. We also need to make sure that $L-1 \geq \min(A,L-2)$ in this case. Since $L -1 > L - 2$, $L-1 \geq \min(A,L-2)$.
-\\\\
-Finally, we consider the case in which $L-1 = A-(L-1) \ A = 2L-2$. However, we already proved the two sides were equal for $A \geq 2L-4$.
+then $ACF(h)[n] = -(h*h)[n]$.
+\end{tcolorbox}
 \clearpage
-\section*{Alternate Proof: \\ Symmetric Self Convolution for Symmetric Enough Sequences}
-\subsection*{Self Convolution Operator Shape Invariance Under Time Shift}
-Consider an arbitrary sequence $h: \mathbb{Z} \rightarrow \mathbb{R}$. Define an operator $T$, ``the self convolution operator", so that:
-\begin{align*}
-\op{T}{h}[n] = (h*h)[n]
-\end{align*}
-We want to show that as the input is shifted, the output is shifted but preserves its shape. Define a shifted input as $h_1[n] = h[n-n_0]$.
+\section*{Introducing Codes}
+\subsection*{Complementary Codes}
+We fire two complementary codes $h_1$ and $h_2$ of length $L$ so that $AC(h_1) + AC(h_2) = k\cdot \delta[L-1]$ for some $k \in \mathbb{R}$. The reason we have the spike at $L-1$ is because this is the central element of the autocorrelation of these sequences.
 \\\\
-Seeing if this definition is met:
+We now show this is the case. For a general sequence, when $L = 1$, we have one element in the output autocorrelation. Increasing the length of both of the sequences by one increases the length of the autocorrelation by two, and so the nonzero length of the autocorrelation of a sequence with length $L$ is: $1+2(L-1) = 2L-1$. The first element has index 0 and the last element has index $2L-2$. Therefore, the middle element has index $(0+2L-2)/2 = L -1$.
+\section*{Convolving with System Impulse Response}
+The output of our system is:
 \begin{align*}
-\op{T}{h_1}[n] = (h_1*h_1)[n] =  \sum_{k=-\infty}^{\infty}h_1[k]h_1[n-k] = \sum_{k=-\infty}^{\infty}h[k - n_0]h[n-k-n_0]
+y[n] = c_1[n] \star (h[n] * (A \cdot h[n] * c_1[n])) + c_2[n] \star (h[n] * (A \cdot h[n] * c_2[n]))
 \end{align*}
-Setting $u = k - n_0 \implies k = u + n_0$:
+where $c_1[n]$ and $c_2[n]$ are a pair of complementary codes, $h[n]$ is the transducer impulse response, and $A \in \mathbb{R}$ captures reflection. Since convolution is commutative, and correlation can be written as a convolution:
 \begin{align*}
-\op{T}{h_1}[n] =  \sum_{u=-\infty}^{\infty}h[u]h[n-(u+n_0)-n_0] =\sum_{u=-\infty}^{\infty}h[u]h[n-2n_0 -u] = \op{T}{h}[n-2n_0]
+y[n]/A = (c_1[n] \star c_1[n] + c_2[n] \star c_2[n]) * (h[n] * h[n])
 \end{align*}
-And so the shape stays the same as the input changes. Therefore, if $h[n]*h[n]$ has a symmetric shape about some point if and only $h[n-n_0]*h[n-n_0]$ has a symmetric shape about some point.
-\subsection*{Time Shifting the Signal to be Odd About Origin}
-We are interested in the self convolution of the signal $h[n]$, which is possibly nonzero for $1 \leq n \leq L -1$, but is otherwise zero. In addition, $h[n] = -h[L-1-n]$ for all integers $n$. Assume that $h$ has an odd number of possibly nonzero values: $L$ is odd. Then we can shift $h$ so that it has odd symmetry. Calling this shifted version $g$, we have $g[-n] = -g[n]$ for all integers $n$.
+Call $H[n] = (h*h)[n]$ the impulse response of the ultrasound system, $Y[n] = y[n]/A$ the output normalized per reflection, and $C[n] = c_1[n] \star c_1[n] + c_2[n] \star c_2[n]$ the autocorrelation of the code pair. Then:
+\begin{align*}
+Y[n] = C[n]*H[n]
+\end{align*}
+If we define a system $T$ that maps a code autocorrelation to the output, then this system is linear and time invariant, since it is just a convolution with a fixed function:
+\begin{align*}
+\op{T}{C}[n] \rightarrow C[n] * H[n]
+\end{align*}
+So, the question for us is: How do we choose a finite symmetric sequence $C[n]$ with a positive peak, so that when we convolve with a symmetric sequence with a negative peak $H[n]$ then we get something very close to a delta function? 
 \\\\
-Specifically, if $L$ is odd, then we want to shift the center of the new sequence to be at $(L-1)/2$. So, $g[n] = h[n+(L-1)/2]$. This new sequence $g[n]$ is odd about $n = 0$. Since it is  a shifted version of $h[n]$, its self convolution will be a shifted copy of the self convolution of $h[n]$. We now compare the self convolution of $g[n]$ to its autocorrelation:
+One approach would be to add an additional processing step, $P$, so that the final output is:
 \begin{align*}
-(g*g)[n] = \sum_{k = -\infty}^{\infty} g[k]g[n-k] \\
-ACF(g)[n] = \sum_{k = -\infty}^{\infty} g[k]g[k-n] 
-\end{align*}
-However, $g[n-k] = -g[k-n]$ by the nature of our construction. Therefore, in this case we can relate self convolution and autocorrelation:
-\begin{align*}
--(g*g)[n] = ACF(g[n])
-\end{align*}
-Since the autocorrelation of a sequence is symmetric about a point, so must the self-convolution in this case.  This shows that sequences $h[n]$ of the form used as the impulse response for our ultrasound system have a self convolution symmetric about a point. In addition, it shows that the peak of the self convolution must be negative. Indeed, the earlier plot of self convolution has a negative peak.
+P(\op{T}{C}[n]) = P(C[n]*H[n])
+\end{align*} If we choose our codes so that $C[n] = k \cdot \delta[n]$, then we want $P$ to undo the effects of convolving with $H$ - we want it to carry out deconvolution.
 \\\\
-In general, for our ultrasound system, we can study the impulse response of the system as being a positive fractional multiple of the negative of the autocorrelation of the impulse response of the transducer.
+Also, this implies that if we pick $H[n]$ to be a delta function, then we should decode a delta.
+\section*{Repeating Code Elements}
+One idea Dr. Zemp had was that by repeating each element in a code, the output should be more peak-like.
 \end{document}
 
 

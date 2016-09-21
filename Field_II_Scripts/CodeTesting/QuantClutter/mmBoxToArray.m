@@ -12,9 +12,9 @@ widthLines = boxWidth / mmPerElsX;
 heightLines = boxHeight / mmPerElsY;
 
 % Get the box data
-boxRowInd = arrPos(1) +(-floor(heightLines/2):floor(heightLines/2)); 
-boxColInd = arrPos(2) +(-floor(widthLines/2):floor(widthLines/2));
+boxRowInd = arrPos(1) +(round(-heightLines/2):round(heightLines/2)); 
+boxColInd = arrPos(2) +(round(-widthLines/2):round(widthLines/2));
 imgData = imgDataObj{:}.get('CData');
-arrData = 10.^(imgData(boxRowInd, boxColInd)./20);
+arrData = 10.^(imgData(boxRowInd, boxColInd)./20); % Remove log compression
 
     
