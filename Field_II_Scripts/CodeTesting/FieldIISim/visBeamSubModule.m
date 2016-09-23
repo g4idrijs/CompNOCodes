@@ -1,21 +1,35 @@
-function visBeamSubModule(xmt,codes,c,fs,lineNo, plotSingLoc)
+function animInfo = visBeamSubModule(xmt,codes,c,fs, plotSingLoc)
 
 % Visualize the beam currently planned for xmt
 
 %% Plot excitation over time at a single point
-plotSingLoc = 1;
 if(plotSingLoc == 1)
-    visLoc = [0 0 40];
-    [h,start_time] = calc_hp(xmt,visLoc/1000);
+    visLoc = [0 0 40/1000];
+    [h,~] = calc_hp(xmt,visLoc);
+    
+    if(numel(h) > 1000)
+       h = h(1:1000); 
+    end
+    
     figure
     plot(h)
-    title(['Energy at [', num2str(visLoc),'] mm During First Transmission']);
-    ylabel('Energy')
+    title(['Beam at [', num2str(visLoc),'] mm During First Transmission']);
+    ylabel('Emitted Pressure Field')
     xlabel('Time Index (right is later in time)')
+    
+    animInfo = {};
+    
+    % Convolve with the spatial impulse response (get expected echo)
+%     [impResp, ~] = calc_h(xmt, visLoc);
+%     expecEcho = conv(impResp,h);
+%     figure
+%     plot(expecEcho)
+%     title('Expected Echo')
+    
 else
     %% Plot excitation over a region
     % Get excitation at a range of positions over time
-    xRange = [-10:0.1:10]/1000; % m
+    xRange = [-10:1:10]/1000; % m
     zRange = [5:0.1:40]/1000; %[35:0.1:45]/1000; % m    
     pointsInterest = zeros(numel(zRange),3);
     pointsInterest(:,3) = zRange';  
@@ -54,10 +68,10 @@ else
     %% Show the animation
     figure
     numFrames = size(respMat,3);
-    for frame = 1600; 
+    for frame = 1000; 
         imagesc([min(xRange), max(xRange)]*1000,[Rmin, Rmax]*1000, respMat(:,:,frame))
 
-        title(['First Code Set. Line: ', num2str(lineNo),'. Frame: ', num2str(frame), ' of ', num2str(numFrames)]);
+        title(['First Code Set. Middle Line. Frame: ', num2str(frame), ' of ', num2str(numFrames)]);
         colorbar;
         caxis(1.0e-12 *[-0.1417,0.1398])
 
@@ -65,4 +79,9 @@ else
         xlabel('x (mm)')   
 
     end   
+    
+    % Allows us to call up a different frame as desired
+    animInfo = {respMat, xRange, Rmin, Rmax};
+end
+
 end
