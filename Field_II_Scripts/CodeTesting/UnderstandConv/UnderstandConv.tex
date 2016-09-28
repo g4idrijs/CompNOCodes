@@ -74,30 +74,24 @@ Considering now autocorrelation:
 \end{align*}
 So, autocorrelation is similarly not linear.
 \section*{Model Ultrasound System as LTI System}
-Consider a single ultrasound transducer, and assume that we use it to transmit a signal, which is then reflected and received by the transducer. Let us define an ultrasound system $U$ that maps from transducer input excitation to the final signal decoded by the transducer:
+Consider a single ultrasound transducer, and assume that we use it to transmit a signal, which then interacts with one scatter and is then received by the transducer. Let us define an ultrasound system $U$ that maps from transducer input excitation to the final signal decoded by the transducer:
 \begin{align*}
-U = T_x \circ M_x \circ R_x
+U = T \circ B \circ R
 \end{align*}
-where $T_x$ is the transmission operator, $M_x$ is the reflection operator (acts like a ``mirror"), and $R_x$  is the receiving operator.
+where $T$ is the transmission operator, $B$ is the reflection (``bounce") operator, and $R$  is the receiving operator.
 \\\\
-If we ignore the transmission delay, and assume that the reflected signal is identical to the transmitted signal up to a change in amplitude, then:
-\begin{align*}
-\op{M_x}{x[n]} = A \cdot x[n]
-\end{align*}
-where $A \in \mathbb{R}$.
-\\\\
-In our simulations we assume that the both $T_x$ and $R_x$ are LTI systems, with the same impulse response. Call this common transducer impulse response $h$. 
+Field II carries out the reflection operator by assuming it is an LTI system and then convolving with its impulse response, $b_p$. Since this system (and thus impulse response) varies with the point $p \in \mathbb{R}^3$ in space we are bouncing the beam off of, it is termed the ``spatial impulse response". Field II also assumes that $T$ and $R$ are LTI systems. We model these systems as having the same impulse response, and call this common transducer impulse response $h$. 
 \\\\
 Using these definitions, we can calculate the output of the ultrasound system:
 \begin{align*}
-\op{U}{x[n]} &= \op{T_x \circ M_x \circ R_x}{x[n]} \\
-&= h[n] *(A \cdot h[n] * x[n]) \\
-&= A \cdot \ (h[n] * h[n]) *x[n]
+\op{U}{x[n]}(p) &= (\op{T \circ B \circ R}{x[n]})(p) \\
+&= h[n] *b_p[n] * h[n] * x[n] \\
+&= b_p[n] * (h[n] * h[n]) *x[n]
 \end{align*}
 where we have used the fact that convolution is commutative.
 \clearpage
 \subsection*{Motivation}
-So, in order to understand the action of the ultrasound system, it would be useful to understand the properties of $h[n] * h[n]$, since this is the impulse response of the entire system (up to a scalar multiple).
+So, in order to understand the action of the ultrasound system, it would be useful to understand the properties of $h[n] * h[n]$.
 \section*{Problem Statement}
 Investigate the properties of  the self convolution $(h*h)[n]$ of a sequence $h: \mathbb{Z} \rightarrow \mathbb{R}$, in the context of an ultrasound system.
 \section*{Solution}

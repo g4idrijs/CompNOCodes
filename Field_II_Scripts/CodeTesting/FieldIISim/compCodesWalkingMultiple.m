@@ -13,7 +13,7 @@ addpath('../../Field_II', '../../bft_64bit', '../QuantClutter');
 
 %% Simulation properties - Higher Level
 
-onlySimCentLine = 0; % Only simulate center line
+onlySimCentLine = 1; % Only simulate center line
 doneCent = 0; % Have we simulated the center line already?
 
 % Plot center line
@@ -39,7 +39,7 @@ impPos = [0 0 40]/1000;
 % Use single pair of codes for all transmissions
 useCustomCode = 0;
 
-custCode1 = triangle(2,30); %sin(linspace(0,2*pi,100)); %  % [repelem(1,10) repelem(-1,10)]; % % First code in pair
+custCode1 =  [repelem(1,50) repelem(-1,50)]; % sin(linspace(0,2*pi,100)); % triangle(2,30); % % [repelem(1,10) repelem(-1,10)]; % % First code in pair
 custCode1 = custCode1.*hanning(length(custCode1))';
 custCode2 = custCode1;  % Second code in pair
 
@@ -47,7 +47,7 @@ custCode2 = custCode1;  % Second code in pair
 useEnv = 0;
 
 % Transducer sampling frequency [Hz]
-fs = 1*100e6;             
+fs = 10*100e6;             
 
 %% Simulation properties - Lower Level
 
@@ -58,7 +58,7 @@ codeSet = tempLoad.('x');
 lenCodes = size(codeSet,2);
 
 % Store codes in a cell array for later use
-numCodesX = 3; % Number of parallel focal zones in X
+numCodesX = 1; % Number of parallel focal zones in X
 numCodesZ = 1; % Number of parallel focal zones in Z
 numFocZones = numCodesX * numCodesZ;
 
@@ -73,7 +73,7 @@ end
  
 % Store codes
 % Repeat elements in codes @numRepeat times
-numRepeat = 1;
+numRepeat = 15;
 for i = 1:numCodesX
     for j = 1:numCodesZ   
         if(useCustomCode == 1) % Use user specified codes as desired (for all pairs)
@@ -118,7 +118,7 @@ rxApodFunc = @(x) hanning(x); % Function to use for receive apodization
 
 image_width = 12/1000;  % Image width to simulate [m]
 
-forceMaxDelay = 50+337+7+5;    % Forces the maximum delay in manual focusing to 
+forceMaxDelay = 50+337+7+5+3470;    % Forces the maximum delay in manual focusing to 
                         % this value. This is needed to align multiple 
                         % focused beams in the Z direction. [samples]
 
@@ -433,38 +433,51 @@ if(plotCent == 1)
 end
 %% Show expected central line
 if(plotExpCent == 1)
-    % Convolve with impulse response at scatterer location
-    spatialImpResp = calc_h(xmt, [0 0 40]/1000);
-    spatialImpResp = spatialImpResp/max(spatialImpResp);
-    spatialImpResp = spatialImpResp(1:50);    
+    % Get transmit impulse response at scatterer location
+    [spatialImpRespTrans,startTimeImp] = calc_h(xmt, [0 0 40]/1000);
+    spatialImpRespTrans = spatialImpRespTrans(1:50);        
+    spatialImpResp = [1];
     
-%     spatialImpResp = [1];
-    travelledCode1 = conv(spatialImpResp,codes{1}.code{1} );
-    travelledCode2 = conv(spatialImpResp,codes{1}.ccode{1} );
+    % Get receive impulse response at scatterer location
+    [spatialImpRespRcv,~] = calc_h(rcv, [0 0 40]/1000);
+    spatialImpRespRcv = spatialImpRespRcv(1:50);    
+    spatialImpRespRcv = [1];
     
-    centSlice = abs(xcorr(codes{1}.code{1},travelledCode1) + xcorr(codes{1}.ccode{1},travelledCode2));
+    % Get version of codes we correlate against by convolving with:
+    % transducer impulse response
+    % transmit spatial impulse response
+    % receive spatial impulse response
+    % transducer impulse response
+    travelledCode1 = conv(impulse_response,conv(spatialImpRespRcv,conv(spatialImpRespTrans,conv(impulse_response,codes{1}.code{1}))));
+    travelledCode2 = conv(impulse_response,conv(spatialImpRespRcv,conv(spatialImpRespTrans,conv(impulse_response,codes{1}.ccode{1}))));
     
-    
+    % Correlate received data with sent out code
+    centSlice = abs(xcorr(codes{1}.code{1},travelledCode1) + xcorr(codes{1}.ccode{1},travelledCode2));        
     
     % Normalize
-    centSlice = centSlice/max(max(centSlice));
-  
-%    
-%    % Pad with zeroes to make same length as received data
-%    idealMidInd = ceil(numel(centSlice)/2);
-%    simMidInd = ceil(numel(midLine)/2);
-%    zeroBefore = simMidInd - idealMidInd;
+    centSlice = centSlice/max(max(centSlice));  
+%   
+%    % Shift to start at right time, and 
+%    % pad with zeroes to make same length as received data
+%    zeroBefore = round(startTimeImp*fs);
 %    centSlice = [zeros(1,zeroBefore), centSlice];
 %    centSlice = [centSlice zeros(1,numel(midLine) - numel(centSlice))];
 %    
-%    plot(linspace(Rmin,Rmax, numel(centSlice))*1000,20*log10(centSlice + 1e-5))   
-   
-%    legend('Simulated', 'Sum of Code Autocorrelation')
+%    plot(linspace(Rmin,Rmax, numel(centSlice))*1000,20*log10(centSlice + eps))   
+%    
+%    legend('calc\_scat\_multi simulation', 'Using model')
     figure
     plot(20*log10(centSlice+eps))
     title('Expected Central Line')
     xlabel('Time Index ->')
     ylabel('Magnitude')
+    
+%     % Show autocorrelation of codes
+%     figure
+%     plot( 20*log10(abs(xcorr(codes{1}.code{1}) + xcorr(codes{1}.ccode{1})))+eps);
+%     title('Code Autocorrelation')
+%     xlabel('Index')
+%     ylabel('Value (dB)')
 end
 
 %% Plot entire image
