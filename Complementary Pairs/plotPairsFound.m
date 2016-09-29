@@ -1,4 +1,18 @@
 clear
+<<<<<<< HEAD:GeneratedCompPairs/plotPairsFound.m
+figure
+
+addpath('C:\Users\Zemp-Lab\Desktop\OvernightPairGeneration\GitCodes\CompNOCodes\FastCompOptimizer')
+
+%% Load in the appropriate pairs
+
+% tempDat = load('bestPairsSQP41');
+tempDat = load('NeighborCodes_Sept29_69neigh');
+
+x = tempDat.('x');
+numPairs = size(x,1)/2;
+N = size(x,2);
+=======
 
 addpath('C:\Users\User\Dropbox\Grad_School\HighSpeedCodes\CompNOCodes\FastCompOptimizer')
 
@@ -11,6 +25,7 @@ N = 10;
 
 tempDat = load('len10_16codes_minInt2');
 x= tempDat.('x');
+>>>>>>> 9b10fd8837391a6235f15fd375c34bf63c5d8521:Complementary Pairs/plotPairsFound.m
 
 
 
@@ -22,8 +37,12 @@ x= tempDat.('x');
 % Max cross correlation of normalized codes
 % We set the magnitude of each individual pair to sqrt(2)
 disp('Welch metric:') 
+<<<<<<< HEAD:GeneratedCompPairs/plotPairsFound.m
+disp(maxXcorr(normr(x)/sqrt(2),[]))
+=======
 intervals = [];
 disp(maxXcorr(normr(x)/sqrt(2),intervals))
+>>>>>>> 9b10fd8837391a6235f15fd375c34bf63c5d8521:Complementary Pairs/plotPairsFound.m
 
 
 %% Plot autocorrelation
@@ -50,7 +69,11 @@ for i=1:numPairs
 end    
 
 % Min ACF mainlobe to CCF sidelobe ratio
+<<<<<<< HEAD:GeneratedCompPairs/plotPairsFound.m
+ACFToCCF = minACFMain / maxXcorr(x,[]);
+=======
 ACFToCCF = minACFMain / maxXcorr(x, intervals);
+>>>>>>> 9b10fd8837391a6235f15fd375c34bf63c5d8521:Complementary Pairs/plotPairsFound.m
 disp('ACF to CCF:');
 disp(ACFToCCF);
 
