@@ -13,14 +13,14 @@ addpath('../../Field_II', '../../bft_64bit', '../QuantClutter');
 
 %% Simulation properties - Higher Level
 
-onlySimCentLine = 1; % Only simulate center line
+onlySimCentLine = 0; % Only simulate center line
 doneCent = 0; % Have we simulated the center line already?
 
 % Plot center line
 plotCent = 1;
 
 % Plot expected center line
-plotExpCent = 1;
+plotExpCent = 0;
 
 % Create a video of the transmitted beam (first code) in the center line
 visBeam = 0; % Visualize the beam (either single spot, or animation)
@@ -44,24 +44,51 @@ custCode1 = custCode1.*hanning(length(custCode1))';
 custCode2 = custCode1;  % Second code in pair
 
 % Envelope the received response
-useEnv = 0;
+useEnv = 1;
 
 % Transducer sampling frequency [Hz]
-fs = 10*100e6;             
+fs = 1*100e6;             
+
+% Number of focal zones
+numCodesX = 3; % Number of parallel focal zones in X
+numCodesZ = 3; % Number of parallel focal zones in Z
+numFocZones = numCodesX * numCodesZ;
+
+% Use two codes that get along well as neighbors to construct code set
+useNeigh = 1; 
+
+% Sets focal zone spacing
+image_width = 12/1000;  % Image width to simulate [m]
+no_lines = 151;         % Number of lines in image 
+
+% Repeat elements in codes @numRepeat times
+numRepeat = 1;
 
 %% Simulation properties - Lower Level
 
 % Load codes used for excitation
-% tempLoad =  load('../../../Complementary Pairs/len10_16codes_minInt2.mat');
-tempLoad =  load('../../../Complementary Pairs/len100_10codes.mat');
-codeSet = tempLoad.('x');
+
+% Use two codes that are good neighbors
+if(useNeigh == 1)
+%     tempLoad =  load('../../../Complementary Pairs/NeighborCodes_Sept29_69neigh.mat');
+    tempLoad =  load('../../../Complementary Pairs/len10_2codes_1150.mat');
+    codeSet = tempLoad.('x');
+    if(size(codeSet,1) ~= 2*2)
+       error('Only two neighbors allowed for now.') 
+    end
+    
+    codeSet =  codeFromNeigh(codeSet(1:2,:), codeSet(3:4,:), numCodesX, numCodesZ);
+else
+
+%     tempLoad =  load('../../../Complementary Pairs/len10_16codes_minInt2.mat');
+%     tempLoad =  load('../../../Complementary Pairs/len100_10codes.mat');
+    tempLoad =  load('../../../Complementary Pairs/len10_9codes3P3.mat');
+    codeSet = tempLoad.('x');
+end
+
 lenCodes = size(codeSet,2);
 
 % Store codes in a cell array for later use
-numCodesX = 1; % Number of parallel focal zones in X
-numCodesZ = 1; % Number of parallel focal zones in Z
-numFocZones = numCodesX * numCodesZ;
-
 codes = cell(0);
 codesToUse = [1:2:numCodesX*numCodesZ*2-1]; % Which codes to use from code set
 
@@ -72,8 +99,6 @@ else
 end
  
 % Store codes
-% Repeat elements in codes @numRepeat times
-numRepeat = 15;
 for i = 1:numCodesX
     for j = 1:numCodesZ   
         if(useCustomCode == 1) % Use user specified codes as desired (for all pairs)
@@ -98,7 +123,6 @@ width = 0.2/1000;       % Width of element [m]
 height = 5/1000;        % Height of element [m]
 kerf = 0.02/1000;       % Kerf [m] 
 
-no_lines =151;         % Number of lines in image 
 no_active_tx = 64;     % Number of active elements for transmit 
                         % sub-aperture
 rx_fnum_constant = 0;  % F-number for constant f-num reconstruction.
@@ -116,9 +140,7 @@ rx_focus = [0 0 40/1000]; % Receive focus for calculaing number of active
                         
 rxApodFunc = @(x) hanning(x); % Function to use for receive apodization
 
-image_width = 12/1000;  % Image width to simulate [m]
-
-forceMaxDelay = 50+337+7+5+3470;    % Forces the maximum delay in manual focusing to 
+forceMaxDelay = 5+389+2+3;    % Forces the maximum delay in manual focusing to 
                         % this value. This is needed to align multiple 
                         % focused beams in the Z direction. [samples]
 
@@ -135,11 +157,12 @@ end
                         
 %% Phantom definition
 
-%  Define the phantom
-pht_pos = [     0 0 40  
-%            0 0 30; 0 0 35; 0 0 40; 0 0 45; 0 0 50;           
-%            -6 0 30; -6 0 35; -6 0 40; -6 0 45; -6 0 50;
-%            6 0 30; 6 0 35; 6 0 40; 6 0 45; 6 0 50;
+%  Define the phantompht
+pHWidth = 4; % Phantom half width (mm)
+pht_pos = [ 
+           0 0 30; 0 0 35; 0 0 40; 0 0 45; 0 0 50;           
+           -pHWidth 0 30; -pHWidth 0 35; -pHWidth 0 40; -pHWidth 0 45; -pHWidth 0 50;
+           pHWidth 0 30; pHWidth 0 35; pHWidth 0 40; pHWidth 0 45; pHWidth 0 50;
            ] / 1000; %  The position of the phantom points (x,y,z)
 pht_amp = ones(size(pht_pos, 1),1); %  The amplitude of the back-scatter
 
@@ -218,7 +241,7 @@ for lineNo = 1:focalZoneSpacing_x
     % Jump straight to middle line if desired
     if (onlySimCentLine == 1)
         if(doneCent == 0)
-            lineNo = round(focalZoneSpacing_x/2); 
+            lineNo = round((numel(x_lines)/length(codes))/2); 
             doneCent = 1;
         else
             break
@@ -325,7 +348,7 @@ for lineNo = 1:focalZoneSpacing_x
     end
     
     % Plot echo energy in the middle line as it passes through visLocEcho
-    if(visEcho == 1 && lineNo == round(focalZoneSpacing_x/2))
+    if(visEcho == 1 && lineNo == round(numel(x_lines)/2))
         visEchoSubModule(visLocEcho, xmt, rcv);
     end
     
@@ -415,7 +438,7 @@ env_bf = env_bf / max(max(env_bf));
 %% Plot central line
 if(plotCent == 1)
     figure
-    midLine = env_bf(:,round(focalZoneSpacing_x/2)); 
+    midLine = env_bf(:,round(numel(x_lines)/2)); 
     midLine = midLine/max(max(midLine));
     xAxisSimLine = linspace(Rmin,Rmax, numel(midLine))*1000;
     plot(xAxisSimLine, 20*log10(midLine+eps));
@@ -423,7 +446,7 @@ if(plotCent == 1)
     if(usedDelta == 1)
         title(sprintf('Central Line of PSF using Delta Transducer Impulse Response \n %d Focal Zone(s). Code length: %d. Times repeated: %d. f_s: %d MHz.', numFocZones, lenCodes, numRepeat, fs/(1e6)))
     else
-        title(sprintf('Central Line of PSF \n %d Focal Zone(s). Code length: %d. Times repeated: %d. f_s: %d MHz.', numFocZones, lenCodes, numRepeat, fs/(1e6)))
+        title(sprintf('Central Line of PSF with Image Width %.0f mm, %.0f Lines. \n %d Focal Zone(s). Code length: %d. Times repeated: %d. f_s: %d MHz. \n Neighbors: %i', image_width*1000, no_lines, numFocZones, lenCodes, numRepeat, fs/(1e6),useNeigh))
     end
 
     xlabel('Axial Distance (mm)')
@@ -468,7 +491,7 @@ if(plotExpCent == 1)
 %    legend('calc\_scat\_multi simulation', 'Using model')
     figure
     plot(20*log10(centSlice+eps))
-    title('Expected Central Line')
+    title('Expected Central Line if No Cross Beam Interference')
     xlabel('Time Index ->')
     ylabel('Magnitude')
     
@@ -484,7 +507,7 @@ end
 if(onlySimCentLine == 0)
     figure;
     imagesc([x_lines(1) x_lines(end)]*1000, [Rmin Rmax]*1000, 20*log10(env_bf+eps));
-    title(sprintf('Simulated part of PSF. \n %d Focal Zone(s). Code length: %d. Times repeated: %d. f_s: %d MHz.',numFocZones,lenCodes, numRepeat, fs/(1e6)));
+    title(sprintf('Simulated part of PSF. Neighbors: %i. \n %d Focal Zone(s). Code length: %d. Times repeated: %d. f_s: %d MHz.',useNeigh, numFocZones,lenCodes, numRepeat, fs/(1e6)));
     xlabel('Lateral distance [mm]');
     ylabel('Axial distance [mm]')
     axis('image')
