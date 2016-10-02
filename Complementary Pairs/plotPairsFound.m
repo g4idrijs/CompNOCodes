@@ -1,18 +1,18 @@
 clear
 figure
 
+plotLog = 1;
+
 addpath('C:\Users\Zemp-Lab\Desktop\OvernightPairGeneration\GitCodes\CompNOCodes\FastCompOptimizer')
 
 %% Load in the appropriate pairs
 
 % tempDat = load('bestPairsSQP41');
-tempDat = load('NeighborCodes_Sept29_44neigh');
+tempDat = load('len10_2codes_1150');
 
 x = tempDat.('x');
 numPairs = size(x,1)/2;
 N = size(x,2);
-
-addpath('C:\Users\User\Dropbox\Grad_School\HighSpeedCodes\CompNOCodes\FastCompOptimizer')
 
 %% Compare to Welch bound
 % disp('Welch bound:')    
@@ -21,10 +21,10 @@ addpath('C:\Users\User\Dropbox\Grad_School\HighSpeedCodes\CompNOCodes\FastCompOp
 % Would like to be welch bound
 % Max cross correlation of normalized codes
 % We set the magnitude of each individual pair to sqrt(2)
-disp('Welch metric:') 
-disp(maxXcorr(normr(x)/sqrt(2),[]))
-intervals = [];
-disp(maxXcorr(normr(x)/sqrt(2),intervals))
+% disp('Welch metric:') 
+% disp(maxXcorr(normr(x)/sqrt(2),[]))
+% intervals = [];
+% disp(maxXcorr(normr(x)/sqrt(2),intervals))
 
 
 %% Plot autocorrelation
@@ -41,7 +41,12 @@ for i=1:numPairs
     
     % mainToSide = maxVal/sideMax; % Check main-sidelobe in ACF is good
     
-    plot(xAxis,xcorr(currPair(1,:)) + xcorr(currPair(2,:)));        
+    if(plotLog == 1)
+       plot(xAxis,20*log10(abs(xcorr(currPair(1,:)) + xcorr(currPair(2,:))) + eps));   
+    else
+       plot(xAxis,xcorr(currPair(1,:)) + xcorr(currPair(2,:)));  
+    end
+           
     hold on
     
     % Keep track of smallest mainlobe value
@@ -52,7 +57,7 @@ end
 
 % Min ACF mainlobe to CCF sidelobe ratio
 ACFToCCF = minACFMain / maxXcorr(x,[]);
-ACFToCCF = minACFMain / maxXcorr(x, intervals);
+% ACFToCCF = minACFMain / maxXcorr(x, intervals);
 disp('ACF to CCF:');
 disp(ACFToCCF);
 
@@ -70,7 +75,11 @@ if (plotCcSum == 1 && numPairs > 1)
         secPair = x((2*currChoices(2)-1):2*currChoices(2),:);
 
         currXcorr = xcorr(firstPair(1,:),secPair(1,:)) + xcorr(firstPair(2,:),secPair(2,:));
-        plot(xAxis,currXcorr)
+        if(plotLog == 1)
+            plot(xAxis,20*log10(abs(currXcorr)+eps));
+        else
+            plot(xAxis,currXcorr)
+        end
         hold on
     end
     title(sprintf('Optimized: ACF and CCF with Code Length = %d and #Pairs = %d', N,numPairs));
@@ -79,7 +88,11 @@ else
 end
 
 xlabel('Shift amount')
-ylabel('Magnitude')    
+if(plotLog == 1)
+   ylabel('Magnitude (dB)') 
+else
+   ylabel('Magnitude')  
+end
 
 % Record the ACF to CCF ratio
 str = sprintf('ACF to CCF ratio: %1.2f',ACFToCCF);
