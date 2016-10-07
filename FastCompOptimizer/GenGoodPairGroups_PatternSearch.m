@@ -19,7 +19,7 @@ fZero = @(x)0; % Use this if we don't care about cross correlation
 N = 100;
 
 % Set number of pairs
-numPairs = 10;
+numPairs = 2;
 
 % Load in an appropriate number of pairs that satisfy
 % the autocorrelation constraints

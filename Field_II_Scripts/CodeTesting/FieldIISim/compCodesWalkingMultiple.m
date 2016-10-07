@@ -71,7 +71,10 @@ numRepeat = 1;
 % Use two codes that are good neighbors
 if(useNeigh == 1)
 %     tempLoad =  load('../../../Complementary Pairs/NeighborCodes_Sept29_69neigh.mat');
+%     tempLoad =  load('../../../Complementary Pairs/len10_2codes_1150.mat');
     tempLoad =  load('../../../Complementary Pairs/len10_2codes_1150.mat');
+%     tempLoad =  load('../../../Complementary Pairs/len10_8436113.mat');
+    
     codeSet = tempLoad.('x');
     if(size(codeSet,1) ~= 2*2)
        error('Only two neighbors allowed for now.') 

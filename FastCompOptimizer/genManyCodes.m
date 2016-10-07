@@ -8,16 +8,29 @@ bestSoFar = 0; % Best ACF/CCF so far
 intervals = [];
 maxCC = @(x)maxXcorr(x, intervals);
 mainLobe = @(x)minMainLobe(x, intervals);
-fRatio =  @(x)maxCC(x)/mainLobe(x); 
+
 fZero = @(x)0; % Use this if we don't care about cross correlation
 
-
+% Define function to minimize
+minPairCC = 1; % Minimize cross correlation between codes in a pair
+if(minPairCC == 1)
+    % Minimize cross correlation between codes in a pair
+    % as well as the sum of cross correlation between pairs
+    if(isempty(intervals))
+        maxSelfCC = @(x)maxSelfCCFun(x);
+        fRatio =  @(x)(maxCC(x)+maxSelfCC(x))/mainLobe(x);  
+    else
+        error('Intervals not supported for minimizing self cross correlation.')
+    end
+else
+    fRatio =  @(x)maxCC(x)/mainLobe(x); % Minimize cross correlation to autocorrelation between pairs
+end
 
 while(1 == 1)
     
     % Initial guess 
     % Set code length
-    N = 50;
+    N = 10;
     % Set number of pairs
     numPairs = 2;
     
@@ -68,7 +81,7 @@ while(1 == 1)
     % disp(startLoad)
     % save(strcat('NRI_Aug29',num2str(startLoad),'.mat'),'x')
     if(metric > bestSoFar)
-        save(strcat('C:\Users\Zemp-Lab\Desktop\OvernightPairGeneration\GitCodes\CompNOCodes\FastCompOptimizer\2pairs_length50\2len50_',num2str(metric),'.mat'),'x')
+        save(strcat('C:\Users\Zemp-Lab\Desktop\OvernightPairGeneration\GitCodes\CompNOCodes\FastCompOptimizer\lowSelfCC_2pairs_length10\lowSelfCC_2pairs_length10_',num2str(metric),'.mat'),'x')
         bestSoFar = metric;
     end
 end

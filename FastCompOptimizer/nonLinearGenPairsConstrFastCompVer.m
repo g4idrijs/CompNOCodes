@@ -10,9 +10,22 @@ intervals = [];
 % Set to zero if you just want good autocorrelation
 % Is ratio of cross correlation side lobe
 % to autocorrelation main lobe
-maxCC = @(x)maxXcorr(x, intervals);
-mainLobe = @(x)minMainLobe(x, intervals);
-fRatio =  @(x)maxCC(x)/mainLobe(x); 
+maxCC = @(x)maxXcorr(x, intervals); % Cross correlation sum between pairs
+mainLobe = @(x)minMainLobe(x, intervals); % Autocorrelation of pairs
+
+minPairCC = 1; % Minimize cross correlation between codes in a pair
+if(minPairCC == 1)
+    % Minimize cross correlation between codes in a pair
+    % as well as the sum of cross correlation between pairs
+    if(isempty(intervals))
+        maxSelfCC(x) = @(x)maxSelfCCFun(x);
+        fRatio =  @(x)(maxCC(x)+maxSelfCC(x))/mainLobe(x);  
+    else
+        error('Intervals not supported for minimizing self cross correlation.')
+    end
+else
+    fRatio =  @(x)maxCC(x)/mainLobe(x); % Minimize cross correlation to autocorrelation between pairs
+end
 fZero = @(x)0; % Use this if we don't care about cross correlation
 
 
