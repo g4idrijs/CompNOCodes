@@ -1,3 +1,5 @@
+% OLD: USe genManyCodes.m instead
+
 %clear
 
 % x holds all the codes
@@ -13,13 +15,15 @@ intervals = [];
 maxCC = @(x)maxXcorr(x, intervals); % Cross correlation sum between pairs
 mainLobe = @(x)minMainLobe(x, intervals); % Autocorrelation of pairs
 
-minPairCC = 1; % Minimize cross correlation between codes in a pair
-if(minPairCC == 1)
+% Assume all codes are fired at once and minimize worse case cross
+% correlation
+allAtOnce = 1;
+if(allAtOnce == 1)
     % Minimize cross correlation between codes in a pair
     % as well as the sum of cross correlation between pairs
     if(isempty(intervals))
-        maxSelfCC(x) = @(x)maxSelfCCFun(x);
-        fRatio =  @(x)(maxCC(x)+maxSelfCC(x))/mainLobe(x);  
+        allAtOnceCC(x) = @(x)maxAllXCorr(x);
+        fRatio =  @(x)(allAtOnceCC(x))/mainLobe(x);  
     else
         error('Intervals not supported for minimizing self cross correlation.')
     end

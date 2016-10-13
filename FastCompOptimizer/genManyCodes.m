@@ -1,5 +1,8 @@
+% Generates complementary code pairs
+% While minimizing the metric fRatio
+
 clear 
-bestSoFar = 0; % Best ACF/CCF so far
+bestSoFar = 0; % Best metric value so far
 
 % f = The function we aim to minimize (maximize its reciprocal)
 % Set to zero if you just want good autocorrelation
@@ -9,28 +12,30 @@ intervals = [];
 maxCC = @(x)maxXcorr(x, intervals);
 mainLobe = @(x)minMainLobe(x, intervals);
 
-fZero = @(x)0; % Use this if we don't care about cross correlation
-
-% Define function to minimize
-minPairCC = 1; % Minimize cross correlation between codes in a pair
-if(minPairCC == 1)
+% Assume all codes are fired at once and minimize worse case cross
+% correlation
+allAtOnce = 1;
+if(allAtOnce == 1)
     % Minimize cross correlation between codes in a pair
     % as well as the sum of cross correlation between pairs
     if(isempty(intervals))
-        maxSelfCC = @(x)maxSelfCCFun(x);
-        fRatio =  @(x)(maxCC(x)+maxSelfCC(x))/mainLobe(x);  
+        allAtOnceCC = @(x)maxAllXCorr(x);
+        fRatio =  @(x)(allAtOnceCC(x))/mainLobe(x);  
     else
         error('Intervals not supported for minimizing self cross correlation.')
     end
-else
+else % Multiple transmit events
     fRatio =  @(x)maxCC(x)/mainLobe(x); % Minimize cross correlation to autocorrelation between pairs
 end
+
+fZero = @(x)0; % Use this if we don't care about cross correlation
+
 
 while(1 == 1)
     
     % Initial guess 
     % Set code length
-    N = 10;
+    N = 100;
     % Set number of pairs
     numPairs = 2;
     
@@ -81,7 +86,7 @@ while(1 == 1)
     % disp(startLoad)
     % save(strcat('NRI_Aug29',num2str(startLoad),'.mat'),'x')
     if(metric > bestSoFar)
-        save(strcat('C:\Users\Zemp-Lab\Desktop\OvernightPairGeneration\GitCodes\CompNOCodes\FastCompOptimizer\lowSelfCC_2pairs_length10\lowSelfCC_2pairs_length10_',num2str(metric),'.mat'),'x')
+        save(strcat('C:\Users\Zemp-Lab\Desktop\OvernightPairGeneration\GitCodes\CompNOCodes\FastCompOptimizer\lowAllCC_2pairs_length100\lowAllCC_2pairs_length100_',num2str(metric),'.mat'),'x')
         bestSoFar = metric;
     end
 end
