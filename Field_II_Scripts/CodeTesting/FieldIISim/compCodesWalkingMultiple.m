@@ -163,7 +163,7 @@ end
                         
 %% Phantom definition
 
-%  Define the phantompht
+%  Define the phantom
 pHWidth = 4; % Phantom half width (mm)
 pht_pos = [ 
            0 0 30; 0 0 35; 0 0 40; 0 0 45; 0 0 50;           
