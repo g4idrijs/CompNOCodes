@@ -5,6 +5,8 @@
 
 % By Roger Zemp. Updated 9 Mar 2011.
 
+% (add the directory with Field II to the path here)
+
 f0              = 6.67e6;         % Transducer center frequency [Hz]
 number_cycles   = 2;              % number of cycles to transmit
 fs              = 100e6;          % Samping frequency [Hz]
