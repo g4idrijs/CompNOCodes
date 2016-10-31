@@ -17,7 +17,7 @@ mainLobe = @(x)minMainLobe(x, intervals); % Autocorrelation of pairs
 
 % Assume all codes are fired at once and minimize worse case cross
 % correlation
-allAtOnce = 1;
+allAtOnce = 0;
 if(allAtOnce == 1)
     % Minimize cross correlation between codes in a pair
     % as well as the sum of cross correlation between pairs
@@ -39,7 +39,7 @@ fZero = @(x)0; % Use this if we don't care about cross correlation
 N = 10;
 
 % Set number of pairs
-numPairs = 9;
+numPairs = 15;
 
 %startLoad = 1;
 % Load in an appropriate number of pairs that satisfy
@@ -74,7 +74,7 @@ ub = 3*ones(size(x0(:)));
 ACFConstr = @(x)ACFSumFuncConst(x,N,numPairs,intervals);
 
 % A good display option is 'final'. Also 'iter'.
-options = optimoptions('fmincon','Display','iter', 'UseParallel', 'always', 'MaxFunEvals',100000, 'algorithm', 'sqp');
+options = optimoptions('fmincon','Display','iter', 'UseParallel', 'always', 'MaxFunEvals',1000000, 'algorithm', 'sqp');
 %options = psoptimset('Display','iter', 'UseParallel', 'always');
 
 % Set tolerance on constraint (not to be confused with CCF requirements)

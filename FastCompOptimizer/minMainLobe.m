@@ -12,8 +12,7 @@ function minMainLobe = minMainLobe(pairs, intervals)
     numPairs = size(pairs,1)/2;
     minMainLobe = -1;
     
-    % If using NRI, add intervals of zeros between non-zero bits
-    x = pairs;
+    % If using NRI, add intervals of zeros between non-zero bits    
     if length(intervals)
         x = pairs;
         x_int = zeros(size(x, 1), size(x, 2)+sum(intervals(1:size(x, 2)-1)));

@@ -14,7 +14,7 @@ mainLobe = @(x)minMainLobe(x, intervals);
 
 % Assume all codes are fired at once and minimize worse case cross
 % correlation
-allAtOnce = 1;
+allAtOnce = 0;
 if(allAtOnce == 1)
     % Minimize cross correlation between codes in a pair
     % as well as the sum of cross correlation between pairs
@@ -35,9 +35,9 @@ while(1 == 1)
     
     % Initial guess 
     % Set code length
-    N = 100;
+    N = 10;
     % Set number of pairs
-    numPairs = 2;
+    numPairs = 30;
     
     % Random seed
     x0 = randn(numPairs*2, N);
@@ -56,7 +56,7 @@ while(1 == 1)
     ACFConstr = @(x)ACFSumFuncConst(x,N,numPairs,intervals);
 
     % A good display option is 'final'. Also 'iter'.
-    options = optimoptions('fmincon','Display','none', 'UseParallel', 'always', 'MaxFunEvals',5000000, 'algorithm', 'sqp');
+    options = optimoptions('fmincon','Display','iter', 'UseParallel', 'always', 'MaxFunEvals',5000000, 'algorithm', 'sqp');
     %options = psoptimset('Display','iter', 'UseParallel', 'always');
 
     % Set tolerance on constraint (not to be confused with CCF requirements)
@@ -86,7 +86,7 @@ while(1 == 1)
     % disp(startLoad)
     % save(strcat('NRI_Aug29',num2str(startLoad),'.mat'),'x')
     if(metric > bestSoFar)
-        save(strcat('C:\Users\Zemp-Lab\Desktop\OvernightPairGeneration\GitCodes\CompNOCodes\FastCompOptimizer\lowAllCC_2pairs_length100\lowAllCC_2pairs_length100_',num2str(metric),'.mat'),'x')
+        save(strcat('C:\Users\Zemp-Lab\Desktop\OvernightPairGeneration\GitCodes\CompNOCodes\FastCompOptimizer\30pairs_length10\30pairs_length10_',num2str(metric),'.mat'),'x')
         bestSoFar = metric;
     end
 end
