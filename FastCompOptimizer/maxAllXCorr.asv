@@ -1,4 +1,0 @@
-% Consider all pairs of codes in pairs - not just co 
-function maxAllXCorr = maxXcorr( pairs)
-
-
