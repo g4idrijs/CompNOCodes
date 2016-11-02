@@ -27,7 +27,7 @@ field_init(-1);
 set_field('c', c);
 set_field('fs', fs);
 
-% From Field II user guide
+% From Field II user guide (some plausible default values?)
 % Set the attenuation to 1.5 dB/cm and 0.5 dB/[MHz cm] around 3 MHz
 set_field ('att',1.5*100);
 set_field ('Freq_att',0.5*100/1e6);
@@ -83,11 +83,11 @@ max_code_length = numel(excit);
 beam = zeros(forceMaxDelay+max_code_length, no_elements);
 
 % Get actual voltages to feed to transmit subarray
-beam(:, transElemsInd) = focusBeam(excit, transFocus, xPosTransAp, fs, c, forceMaxDelay);
+beam(:, transElemsInd) = beam(:, transElemsInd) + focusBeam(excit, transFocus, xPosTransAp, fs, c, forceMaxDelay);
 
 %% Carry out transmit focus excitation
 % Set up excitation
-ele_waveform(xmt, (1:no_elements)', beam(:, :, 1)');
+ele_waveform(xmt, (1:no_elements)', beam(:, :)');
 
 % Fire the beam and record the scattering
 [rf_data, start_time] = calc_scat_multi(xmt, rcv, pht_pos, pht_amp);
@@ -97,9 +97,9 @@ ele_waveform(xmt, (1:no_elements)', beam(:, :, 1)');
 % Keep track of maximum data at different apodizations
 maxDataVect = [];
 
-rightMostInd = no_elements - numElSubAp; % Left-most index of rightmost subarray
-apodIndCollection = 1:rightMostInd; % Apodization left-most indices to loop through
-for rcvSubInd = apodIndCollection  % Loop through different apodizations
+rightMostInd = no_elements - numElSubAp;    % Left-most index of rightmost subarray
+apodIndCollection = 1:rightMostInd;         % Apodization left-most indices to loop through
+for rcvSubInd = apodIndCollection           % Loop through different apodizations
     rcvElemsInd =  rcvSubInd:(rcvSubInd + numElSubAp - 1);  % Choose elements to receive on
     apoData = rf_data(:,rcvElemsInd);                       % Get data that was received by those elements
     maxData = max(max(apoData));                            % Find the maximum voltage recorded in this apodization
@@ -122,13 +122,8 @@ else % Plot maximum voltages otherwise
     title('Energy Leakage due to Beam Transmitted by Leftmost Transducer')
 end
 
-
-
 %% Get magnitude of maximum voltage
 maxVolt = max(max(rf_data));
-
-
-
 
 %%
 % %% Align RF data 
