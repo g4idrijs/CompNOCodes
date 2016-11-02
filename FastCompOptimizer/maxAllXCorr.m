@@ -18,7 +18,7 @@ for currPair = 1:size(pairChoices,1)
     currXcorr = xcorr(firstCode, secCode);
     currMax = max(abs(currXcorr));        
 
-    % Store the largest cross cross correlation value
+    % Store the largest cross correlation value
     if (currMax > maxXcorr || maxXcorr == -1)
         maxXcorr = currMax;
     end

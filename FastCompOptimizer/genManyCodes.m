@@ -14,7 +14,7 @@ mainLobe = @(x)minMainLobe(x, intervals);
 
 % Assume all codes are fired at once and minimize worse case cross
 % correlation
-allAtOnce = 0;
+allAtOnce = 1;
 if(allAtOnce == 1)
     % Minimize cross correlation between codes in a pair
     % as well as the sum of cross correlation between pairs
@@ -37,7 +37,7 @@ while(1 == 1)
     % Set code length
     N = 10;
     % Set number of pairs
-    numPairs = 30;
+    numPairs = 10;
     
     % Random seed
     x0 = randn(numPairs*2, N);
@@ -86,7 +86,7 @@ while(1 == 1)
     % disp(startLoad)
     % save(strcat('NRI_Aug29',num2str(startLoad),'.mat'),'x')
     if(metric > bestSoFar)
-        save(strcat('C:\Users\Zemp-Lab\Desktop\OvernightPairGeneration\GitCodes\CompNOCodes\FastCompOptimizer\30pairs_length10\30pairs_length10_',num2str(metric),'.mat'),'x')
+        save(strcat('C:\Users\Zemp-Lab\Desktop\OvernightPairGeneration\GitCodes\CompNOCodes\FastCompOptimizer\lowAllCC_10pairs_length10\lowAllCC_10pairs_length10',num2str(metric),'.mat'),'x')
         bestSoFar = metric;
     end
 end
