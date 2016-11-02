@@ -66,7 +66,7 @@ xdc_apodization(rcv, 0, ones(1,no_elements))
 
 
 image_width = 40/1000;
-d_x_line = image_width*no_elements / (no_lines-1);
+d_x_line = width*no_elements / (no_lines-1);
 x_line = -(no_lines-1) / 2 * d_x_line;
 
 %xmt_r = (max(focus_r) + min(focus_r) )/2;

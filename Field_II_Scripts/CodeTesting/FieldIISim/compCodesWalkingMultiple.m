@@ -50,8 +50,8 @@ useEnv = 1;
 fs = 1*100e6;             
 
 % Number of focal zones
-numCodesX = 3; % Number of parallel focal zones in X
-numCodesZ = 3; % Number of parallel focal zones in Z
+numCodesX = 2; % Number of parallel focal zones in X
+numCodesZ = 1; % Number of parallel focal zones in Z
 numFocZones = numCodesX * numCodesZ;
 
 % Use two codes that get along well as neighbors to construct code set
@@ -72,8 +72,10 @@ numRepeat = 1;
 if(useNeigh == 1)
 %     tempLoad =  load('../../../Complementary Pairs/NeighborCodes_Sept29_69neigh.mat');
 %     tempLoad =  load('../../../Complementary Pairs/len10_2codes_1150.mat');
-    tempLoad =  load('../../../Complementary Pairs/len10_2codes_1150.mat');
-%     tempLoad =  load('../../../Complementary Pairs/len10_8436113.mat');
+%     tempLoad =  load('../../../Complementary Pairs/len10_2codes_1150.mat');
+    tempLoad =  load('../../../Complementary Pairs/len10_8436113.mat');
+%     tempLoad = load('../../../Complementary Pairs/2OrthCompGolay.mat');
+%     tempLoad = load('../../../Complementary Pairs/lowAllCC_2pairs_length100_15p8')
     
     codeSet = tempLoad.('x');
     if(size(codeSet,1) ~= 2*2)
@@ -108,8 +110,9 @@ for i = 1:numCodesX
             codes{i}.code{j} = custCode1;
             codes{i}.ccode{j} = custCode2;
         else
-            codes{i}.code{j} = repelem(codeSet(codesToUse(1+(i-1)*numCodesZ+(j-1)), :),1,numRepeat); % 1st pair code
-            codes{i}.ccode{j} =  repelem(codeSet(codesToUse(1+(i-1)*numCodesZ+(j-1))+1, :),1,numRepeat); % 2nd pair code
+            % ADJUSTED - need to check results!
+            codes{i}.code{j} = repelem(codeSet(codesToUse(1+(i-1)*numCodesZ+(j-1)), :),numRepeat); % 1st pair code
+            codes{i}.ccode{j} =  repelem(codeSet(codesToUse(1+(i-1)*numCodesZ+(j-1))+1, :),numRepeat); % 2nd pair code
         end
         
         codes{i}.focusZ(j) = focalPoints_z(j);
@@ -160,7 +163,7 @@ end
                         
 %% Phantom definition
 
-%  Define the phantompht
+%  Define the phantom
 pHWidth = 4; % Phantom half width (mm)
 pht_pos = [ 
            0 0 30; 0 0 35; 0 0 40; 0 0 45; 0 0 50;           
@@ -510,7 +513,7 @@ end
 if(onlySimCentLine == 0)
     figure;
     imagesc([x_lines(1) x_lines(end)]*1000, [Rmin Rmax]*1000, 20*log10(env_bf+eps));
-    title(sprintf('Simulated part of PSF. Neighbors: %i. \n %d Focal Zone(s). Code length: %d. Times repeated: %d. f_s: %d MHz.',useNeigh, numFocZones,lenCodes, numRepeat, fs/(1e6)));
+    title(sprintf('PR. Simulated part of PSF. Neighbors: %i. \n %d Focal Zone(s). Code length: %d. Times repeated: %d. f_s: %d MHz.',useNeigh, numFocZones,lenCodes, numRepeat, fs/(1e6)));
     xlabel('Lateral distance [mm]');
     ylabel('Axial distance [mm]')
     axis('image')

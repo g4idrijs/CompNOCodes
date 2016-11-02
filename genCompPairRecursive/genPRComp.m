@@ -4,7 +4,7 @@
 merit = 0;
 meritThresh = 4;
 
-numPairs = 5;
+numPairs = 2;
 while(merit < meritThresh)
 
     % Generate a few codes and see how they cross correlate
