@@ -50,7 +50,7 @@ useEnv = 1;
 fs = 1*100e6;             
 
 % Number of focal zones
-numCodesX = 2; % Number of parallel focal zones in X
+numCodesX = 1; % Number of parallel focal zones in X
 numCodesZ = 1; % Number of parallel focal zones in Z
 numFocZones = numCodesX * numCodesZ;
 
@@ -60,9 +60,6 @@ useNeigh = 1;
 % Sets focal zone spacing
 image_width = 12/1000;  % Image width to simulate [m]
 no_lines = 151;         % Number of lines in image 
-
-% Repeat elements in codes @numRepeat times
-numRepeat = 1;
 
 %% Simulation properties - Lower Level
 
@@ -87,7 +84,14 @@ else
 
 %     tempLoad =  load('../../../Complementary Pairs/len10_16codes_minInt2.mat');
 %     tempLoad =  load('../../../Complementary Pairs/len100_10codes.mat');
-    tempLoad =  load('../../../Complementary Pairs/len10_9codes3P3.mat');
+
+%     tempLoad =  load('../../../Complementary Pairs/compPairs_len_10_simMain.mat');
+%     codeSet = tempLoad.('pairsSoFar');
+    
+%     tempLoad =  load('../../../Complementary Pairs/len10_9codes3P3.mat');
+%     codeSet = tempLoad.('x');
+
+    tempLoad = load('../../../FastCompOptimizer/lowAllCC_10pairs_length10/lowAllCC_10pairs_length103.5774.mat');
     codeSet = tempLoad.('x');
 end
 
@@ -103,22 +107,6 @@ else
    focalPoints_z = linspace(30, 50, numCodesZ)/1000;
 end
  
-% Store codes
-for i = 1:numCodesX
-    for j = 1:numCodesZ   
-        if(useCustomCode == 1) % Use user specified codes as desired (for all pairs)
-            codes{i}.code{j} = custCode1;
-            codes{i}.ccode{j} = custCode2;
-        else
-            % ADJUSTED - need to check results!
-            codes{i}.code{j} = repelem(codeSet(codesToUse(1+(i-1)*numCodesZ+(j-1)), :),numRepeat); % 1st pair code
-            codes{i}.ccode{j} =  repelem(codeSet(codesToUse(1+(i-1)*numCodesZ+(j-1))+1, :),numRepeat); % 2nd pair code
-        end
-        
-        codes{i}.focusZ(j) = focalPoints_z(j);
-    end
-end
-
 % Transducer properties
 f0 = 6.67e6;            % Central frequency                        [Hz]
 number_cycles = 2;      % Number of cycles for impulse response
@@ -159,6 +147,25 @@ if(isequal(impulse_response,1))
    usedDelta = 1; 
 else
     usedDelta = 0;
+end
+
+% Repeat elements in codes @numRepeat times
+numRepeat = round(numel(impulse_response)/4);
+
+% Store codes
+for i = 1:numCodesX
+    for j = 1:numCodesZ   
+        if(useCustomCode == 1) % Use user specified codes as desired (for all pairs)
+            codes{i}.code{j} = custCode1;
+            codes{i}.ccode{j} = custCode2;
+        else
+            % ADJUSTED - need to check results!
+            codes{i}.code{j} = repelem(codeSet(codesToUse(1+(i-1)*numCodesZ+(j-1)), :),numRepeat); % 1st pair code
+            codes{i}.ccode{j} =  repelem(codeSet(codesToUse(1+(i-1)*numCodesZ+(j-1))+1, :),numRepeat); % 2nd pair code
+        end
+        
+        codes{i}.focusZ(j) = focalPoints_z(j);
+    end
 end
                         
 %% Phantom definition
@@ -513,7 +520,7 @@ end
 if(onlySimCentLine == 0)
     figure;
     imagesc([x_lines(1) x_lines(end)]*1000, [Rmin Rmax]*1000, 20*log10(env_bf+eps));
-    title(sprintf('PR. Simulated part of PSF. Neighbors: %i. \n %d Focal Zone(s). Code length: %d. Times repeated: %d. f_s: %d MHz.',useNeigh, numFocZones,lenCodes, numRepeat, fs/(1e6)));
+    title(sprintf('Fire Separately. Neighbors: %i. \n %d Focal Zone(s). Code length: %d. Times repeated: %d. f_s: %d MHz.',useNeigh, numFocZones,lenCodes, numRepeat, fs/(1e6)));
     xlabel('Lateral distance [mm]');
     ylabel('Axial distance [mm]')
     axis('image')

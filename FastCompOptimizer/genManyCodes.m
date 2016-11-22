@@ -1,7 +1,15 @@
+function genManyCodes()
+
 % Generates complementary code pairs
 % While minimizing the metric fRatio
 
-clear 
+% addpath('C:\Users\User\Google Drive\Grad_School\HighSpeedCodes\CompNOCodes\Field_II_Scripts\Field_II')
+% addpath('C:\Users\User\Google Drive\Grad_School\HighSpeedCodes\CompNOCodes\Field_II_Scripts\bft_64bit')
+% field_init(-1);
+% bft_init;
+
+clear
+
 bestSoFar = 0; % Best metric value so far
 
 % f = The function we aim to minimize (maximize its reciprocal)
@@ -15,32 +23,44 @@ mainLobe = @(x)minMainLobe(x, intervals);
 % Assume all codes are fired at once and minimize worse case cross
 % correlation
 allAtOnce = 1;
-if(allAtOnce == 1)
+if(allAtOnce == 1) % Fire both in pair at same time
+%     % Create image and measure metric
+    fRatio = @(x)1/imageAndGetMetric(x); % Thing we want to minimize
+    
+% Minimizes cross correlation relative to autocorrelation between all pairs
     % Minimize cross correlation between codes in a pair
     % as well as the sum of cross correlation between pairs
-    if(isempty(intervals))
-        allAtOnceCC = @(x)maxAllXCorr(x);
-        fRatio =  @(x)(allAtOnceCC(x))/mainLobe(x);  
-    else
-        error('Intervals not supported for minimizing self cross correlation.')
-    end
+%     if(isempty(intervals))
+%         allAtOnceCC = @(x)maxAllXCorr(x);
+%         fRatio =  @(x)(allAtOnceCC(x))/mainLobe(x);  
+%     else
+%         error('Intervals not supported for minimizing self cross correlation.')
+%     end    
+    
 else % Multiple transmit events
     fRatio =  @(x)maxCC(x)/mainLobe(x); % Minimize cross correlation to autocorrelation between pairs
 end
 
 fZero = @(x)0; % Use this if we don't care about cross correlation
 
-
 while(1 == 1)
     
     % Initial guess 
     % Set code length
-    N = 10;
-    % Set number of pairs
-    numPairs = 10;
+    N = 3;
+    % Set number of pairs that should get along
+    numPairs = 1;
     
     % Random seed
-    x0 = randn(numPairs*2, N);
+    if(numPairs == 1)
+        % Complementary pair
+        addpath('C:\Users\User\Google Drive\Grad_School\HighSpeedCodes\CompNOCodes\genCompPairRecursive');
+        x0 = genCompPair(ones(N-1,1)');   
+    else
+        % Random
+        x0 = randn(numPairs*2, N);
+    end    
+    
 
     %% Run algorithm
 
@@ -48,24 +68,29 @@ while(1 == 1)
     A = []; b = []; Aeq = []; beq = []; 
 
     % Bound constraints (how large can the values be in the codes?)
-    lb = -3*ones(size(x0(:)));
-    ub = 3*ones(size(x0(:)));
+    lb = -10*ones(size(x0(:)));
+    ub = 10*ones(size(x0(:)));
 
     % Nonlinear constraint (ACF not at center goes to zero)
     % Returns vector of ratios of sidelobes to mainlobes in ACfs
     ACFConstr = @(x)ACFSumFuncConst(x,N,numPairs,intervals);
 
+    % Get starting time (to keep track of how long we've been running)
+    startTime = clock;    
+    
     % A good display option is 'final'. Also 'iter'.
-    options = optimoptions('fmincon','Display','iter', 'UseParallel', 'always', 'MaxFunEvals',5000000, 'algorithm', 'sqp');
+    options = optimoptions('fmincon','Display','iter', 'UseParallel', 'never',...
+        'MaxFunEvals',5000000, 'algorithm', 'sqp', 'OutputFcn',@optTimer);
     %options = psoptimset('Display','iter', 'UseParallel', 'always');
 
     % Set tolerance on constraint (not to be confused with CCF requirements)
     % How big can the ratio of sidelobe / mainlobe in ACF be?
-    options.TolCon = 1e-4;
-
+    options.TolCon = 5e-3; %1e-4
+    
+    % Optimize
     [x,~,~,output] = fmincon(fRatio,x0,A,b,Aeq,beq,lb, ub, ACFConstr, options);
-    metric = 1/fRatio(x);
-    %x = reshape(x, [5*2, 8]);
+%   
+       
 
     % If using NRI, add intervals of zeros between non-zero bits
     if length(intervals)
@@ -80,13 +105,26 @@ while(1 == 1)
         x = x_int;
         N = size(x, 2);
     end
-
-    disp(['minAutoCorr/maxCrossCor = ', num2str(metric)]);
-    % Save the results
-    % disp(startLoad)
-    % save(strcat('NRI_Aug29',num2str(startLoad),'.mat'),'x')
+    
+    % Save the results, labelled by the metric value
+    metric = 1/fRatio(x); 
     if(metric > bestSoFar)
-        save(strcat('C:\Users\Zemp-Lab\Desktop\OvernightPairGeneration\GitCodes\CompNOCodes\FastCompOptimizer\lowAllCC_10pairs_length10\lowAllCC_10pairs_length10',num2str(metric),'.mat'),'x')
+        save(strcat('C:\Users\User\Google Drive\Grad_School\HighSpeedCodes\CompNOCodes\FastCompOptimizer\allOnce_sigClutMetr\allOnce_sigClutMetr_',num2str(N)','_',num2str(metric),'.mat'),'x')
         bestSoFar = metric;
+    end
+end
+    % Define a nested function to display information while the
+    % optimization function is running (and save codes so far)
+    function stop = optTimer(x,optimvalues,state)
+        stop = false;
+        
+        % Display total elapsed time that it took to get to this iteration
+        if isequal(state,'iter')
+            disp(sprintf('Time so far: %.1f s',etime(clock,startTime)))
+            % Store codes so far
+            save(strcat('C:\Users\User\Google Drive\Grad_School\HighSpeedCodes\CompNOCodes\FastCompOptimizer\allOnce_sigClutMetr\allOnce_sigClutMetr_','temp','.mat'),'x')
+
+        end        
+
     end
 end

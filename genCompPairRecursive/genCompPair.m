@@ -11,7 +11,7 @@ maxCodeLen = 1+sum(S);  % The longest length of codes defined using S
 % Real numbers - hopefully can use to determine frequency properties
 % A = [-1 2 3 -2 -1 1];  
 seedMean = 0;
-seedStd = 1;
+seedStd = 0.5;
 A = random('Normal',seedMean,seedStd,1,length(S));
 
 % Initial setup

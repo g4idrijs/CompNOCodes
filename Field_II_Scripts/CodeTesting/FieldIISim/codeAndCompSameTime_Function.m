@@ -1,5 +1,7 @@
-% codeAndCompSameTime
+% For firing both elements in the pair at once, and forming one line at a time
+% Currently, phantom is single point at [0 0 40e-3]
 
+function figureImg = codeAndCompSameTime_Function(codesIn)
 % Based on compCodesWalkingMultiple
 % Transmit both codes in the pair at the same time.
 % Otherwise, do everything else the same.
@@ -11,9 +13,12 @@
 % codes. Number of parallel zones in X direction determine how many lines 
 % will be simultaneously walked, and number of parallel zones in Z 
 % direction determine how many parallel focal zones in the Z direction.
-clear
 
-addpath('../../Field_II', '../../bft_64bit', '../QuantClutter');
+addpath('C:\Users\User\Google Drive\Grad_School\HighSpeedCodes\CompNOCodes\Field_II_Scripts\Field_II')
+addpath('C:\Users\User\Google Drive\Grad_School\HighSpeedCodes\CompNOCodes\Field_II_Scripts\bft_64bit')
+addpath('C:\Users\User\Google Drive\Grad_School\HighSpeedCodes\CompNOCodes\Field_II_Scripts\CodeTesting\QuantClutter')
+field_init(-1);
+bft_init;
 
 %% Simulation properties - Higher Level
 
@@ -21,7 +26,7 @@ onlySimCentLine = 0; % Only simulate center line
 doneCent = 0; % Have we simulated the center line already?
 
 % Plot center line
-plotCent = 1;
+plotCent = 0;
 
 % Plot expected center line
 plotExpCent = 0;
@@ -62,43 +67,13 @@ numFocZones = numCodesX * numCodesZ;
 useNeigh = 0;
 
 % Sets focal zone spacing
-image_width = 12/1000;  % Image width to simulate [m]
-no_lines = 151;         % Number of lines in image 
+image_width = 7/1000;  % Image width to simulate [m]
+no_lines = 50;         % Number of lines in image 
 
 %% Simulation properties - Lower Level
 
-% Load codes used for excitation
-
-% Use two codes that are good neighbors
-if(useNeigh == 1)
-%     tempLoad =  load('../../../Complementary Pairs/NeighborCodes_Sept29_69neigh.mat');
-%     tempLoad =  load('../../../Complementary Pairs/len10_8436113.mat');
-%     tempLoad = load('../../../Complementary Pairs/2OrthCompGolay.mat');
-%     tempLoad = load('../../../Complementary Pairs/lowAllCC_2pairs_length100_15p8')
-    tempLoad = load('../../../FastCompOptimizer/lowSelfCC_2pairs_length10/lowSelfCC_2pairs_length10_499.4844.mat');
-    
-    codeSet = tempLoad.('x');
-    if(size(codeSet,1) ~= 2*2)
-       error('Only two neighbors allowed for now.') 
-    end
-    
-    codeSet =  codeFromNeigh(codeSet(1:2,:), codeSet(3:4,:), numCodesX, numCodesZ);
-else
-
-    % Put in some codes meant for simultaneous transmission here
-%     tempLoad =  load('../../../Complementary Pairs/compPairs_len_10_simMain.mat');
-%     tempLoad =  load('../../../Complementary Pairs/len100_10codes.mat');
-%     tempLoad =  load('../../../FastCompOptimizer/lowAllCC_2pairs_length10/lowAllCC_2pairs_length10_6.0693.mat');
-%     tempLoad =  load('../../../FastCompOptimizer/lowAllCC_10pairs_length10/lowAllCC_10pairs_length103.5774.mat');
-%     codeSet = tempLoad.('x');   
-         
-%     tempLoad =  load('../../../Complementary Pairs/compPairs_len_10_simMain.mat');
-%     codeSet = tempLoad.('pairsSoFar');
-%     tempLoad =  load('../../../FastCompOptimizer/lowSelfCC_1pair_length10/lowSelfCC_1pair_length10_17.1111.mat');
-%     tempLoad = load('../../../FastCompOptimizer/allOnce_sigClutMetr/allOnce_sigClutMetr_1.0971_len3.mat');
- tempLoad = load('../../../FastCompOptimizer/allOnce_sigClutMetr/allOnce_sigClutMetr_len10Old_18.4755.mat');
-    codeSet = tempLoad.('x');
-end
+% Load codes used for excitation (should be just one pair)
+codeSet = codesIn;
 
 lenCodes = size(codeSet,2);
 
@@ -178,11 +153,12 @@ end
 
 %  Define the phantom
 pHWidth = 4; % Phantom half width (mm)
-pht_pos = [ 
-           0 0 30; 0 0 35; 0 0 40; 0 0 45; 0 0 50;           
-           -pHWidth 0 30; -pHWidth 0 35; -pHWidth 0 40; -pHWidth 0 45; -pHWidth 0 50;
-           pHWidth 0 30; pHWidth 0 35; pHWidth 0 40; pHWidth 0 45; pHWidth 0 50;
-           ] / 1000; %  The position of the phantom points (x,y,z)
+pht_pos = [0 0 40e-3]; % m
+% pht_pos = [
+%            0 0 30; 0 0 35; 0 0 40; 0 0 45; 0 0 50;           
+%            -pHWidth 0 30; -pHWidth 0 35; -pHWidth 0 40; -pHWidth 0 45; -pHWidth 0 50;
+%            pHWidth 0 30; pHWidth 0 35; pHWidth 0 40; pHWidth 0 45; pHWidth 0 50;
+%            ] / 1000; %  The position of the phantom points (x,y,z)
 pht_amp = ones(size(pht_pos, 1),1); %  The amplitude of the back-scatter
 
 % Calculate start and end distance, sample, and time for phantom
@@ -191,9 +167,6 @@ pht_amp = ones(size(pht_pos, 1),1); %  The amplitude of the back-scatter
 calcSampleTimeRanges(pht_pos, codes, c, fs);
 
 %% Field II and BFT setup
-%  Initialize Field II and BFT
-field_init(-1);
-bft_init;
 
 %  Set Field and BFT parameters
 set_field('c', c);
@@ -241,7 +214,7 @@ T = z_points/c*2;
 
 % Store raw RF data for each element in rf_data_m
 % 3rd dimension is transmit event/code pair index
-rf_data_m = zeros(no_rf_samples_c, no_elements, 2);
+rf_data_m = zeros(no_rf_samples_c, no_elements);
 
 % Get x position of transducer elements directly from Field II
 xmt_info = xdc_get(xmt, 'rect');
@@ -268,9 +241,9 @@ for lineNo = 1:focalZoneSpacing_x
     end
     
     % Print current line number on same line
-    fprintf(repmat('\b', 1, length(outputMsg)));
-    outputMsg = sprintf('Line set %d/%d', lineNo, focalZoneSpacing_x);
-    fprintf(outputMsg);
+%     fprintf(repmat('\b', 1, length(outputMsg)));
+%     outputMsg = sprintf('Line set %d/%d', lineNo, focalZoneSpacing_x);
+%     fprintf(outputMsg);
     
     % Build up the beam for each pair of codes and sum the beams into one    
     beam = zeros(forceMaxDelay+max_code_length, no_elements);
@@ -349,35 +322,30 @@ for lineNo = 1:focalZoneSpacing_x
     % The corresponding sample window is [Smin_c, Smax_c]
     % Also need to shift rf_data by forceMaxDelay before or after aligning 
     % to account for focusing delays.
-    ele_waveform(xmt, (1:no_elements)', beam'); 
+    
+    % Each column of beam is the excitation over time for one element
+%     for currEl = 1:no_elements
+%         % Set current element to be the only one that transmits
+%         apoVect = zeros(1,no_elements);
+%         apoVect(currEl) = 1;       
+%         xdc_apodization(xmt,0,apoVect);
+%         
+%         % Fire the beam for the current element
+%         currBeam = beam(:,currEl)';
+%         xdc_excitation(xmt,currBeam)
+%         
+%         % Collect scattering data from this beam, and trim/align in time
+%         [rf_data, start_time] = calc_scat_multi(xmt, rcv, pht_pos, pht_amp);  
+%         rf_data = [rf_data(1+forceMaxDelay:end, :); zeros(forceMaxDelay, size(rf_data, 2))];  
+%         newRFData = alignRF(rf_data,start_time,fs,Smin_c,Smax_c,no_rf_samples_c,no_elements);
+%         rf_data_m = rf_data_m + newRFData;
+%     end
+
+    ele_waveform(xmt, (1:no_elements)', beam'); % Replace with xdc excitation, since ele_waveform has memory issues    
     [rf_data, start_time] = calc_scat_multi(xmt, rcv, pht_pos, pht_amp);
     rf_data = [rf_data(1+forceMaxDelay:end, :); zeros(forceMaxDelay, size(rf_data, 2))];
     rf_data_m = alignRF(rf_data,start_time,fs,Smin_c,Smax_c,no_rf_samples_c,no_elements);
-    
-    
-    % Visualize the beam
-    if(visBeam == 1 && lineNo == round(focalZoneSpacing_x/2))   
-        % animInfo stores animation information
-        % allows us to grab different frame later
-        animInfo = visBeamSubModule(xmt,codes,c,fs,plotSingLoc);
-        doneVisBeam = 1;
-    end
-    
-    % Plot echo energy in the middle line as it passes through visLocEcho
-    if(visEcho == 1 && lineNo == round(numel(x_lines)/2))
-        visEchoSubModule(visLocEcho, xmt, rcv);
-    end
-    
-    % Visualize spatial impulse response
-    if(visImpRe == 1 && lineNo == round(focalZoneSpacing_x/2))
-       [h, ~] = calc_h(xmt, impPos);
-       figure
-       plot(h)
-       title(sprintf('Spatial impulse response at depth of %d mm', (impPos(3)*1000)))
-       ylabel('Spatial impulse response (m/s)')
-       xlabel('Time Index (right is later in time)')       
-    end       
-    
+
     %% Decode each line in the current line set for this transmit event
 
     % Store RF data for a single code pair (3rd dimension is transmit)
@@ -443,89 +411,19 @@ end
 
 env_bf = env_bf / max(max(env_bf));
 
-%% Plot central line
-if(plotCent == 1)
-    figure
-    midLine = env_bf(:,round(numel(x_lines)/2)); 
-    midLine = midLine/max(max(midLine));
-    xAxisSimLine = linspace(Rmin,Rmax, numel(midLine))*1000;
-    plot(xAxisSimLine, 20*log10(midLine+eps));
 
-    if(usedDelta == 1)
-        title(sprintf('Central Line of PSF using Delta Transducer Impulse Response \n %d Focal Zone(s). Code length: %d. Times repeated: %d. f_s: %d MHz.', numFocZones, lenCodes, numRepeat, fs/(1e6)))
-    else
-        title(sprintf('Central Line of PSF with Image Width %.0f mm, %.0f Lines. \n %d Focal Zone(s). Code length: %d. Times repeated: %d. f_s: %d MHz. \n Neighbors: %i', image_width*1000, no_lines, numFocZones, lenCodes, numRepeat, fs/(1e6),useNeigh))
-    end
+figureImg = figure('visible','of');
+imagesc([x_lines(1) x_lines(end)]*1000, [Rmin Rmax]*1000, 20*log10(env_bf+eps));
+title(sprintf('Both Fired Pair at Once. Neighbors: %i. \n %d Focal Zone(s). Code length: %d. Times repeated: %d. f_s: %d MHz.',useNeigh, numFocZones,lenCodes, numRepeat, fs/(1e6)));
+xlabel('Lateral distance [mm]');
+ylabel('Axial distance [mm]')
+axis('image')
 
-    xlabel('Axial Distance (mm)')
-    ylabel('Normalized Intensity (dB)')    
-
-    hold on
-end
-%% Show expected central line
-if(plotExpCent == 1)
-    % Get transmit impulse response at scatterer location
-    [spatialImpRespTrans,startTimeImp] = calc_h(xmt, [0 0 40]/1000);
-    spatialImpRespTrans = spatialImpRespTrans(1:50);        
-    spatialImpResp = [1];
-    
-    % Get receive impulse response at scatterer location
-    [spatialImpRespRcv,~] = calc_h(rcv, [0 0 40]/1000);
-    spatialImpRespRcv = spatialImpRespRcv(1:50);    
-    spatialImpRespRcv = [1];
-    
-    % Get version of codes we correlate against by convolving with:
-    % transducer impulse response
-    % transmit spatial impulse response
-    % receive spatial impulse response
-    % transducer impulse response
-    travelledCode1 = conv(impulse_response,conv(spatialImpRespRcv,conv(spatialImpRespTrans,conv(impulse_response,codes{1}.code{1}))));
-    travelledCode2 = conv(impulse_response,conv(spatialImpRespRcv,conv(spatialImpRespTrans,conv(impulse_response,codes{1}.ccode{1}))));
-    
-    % Correlate received data with sent out code
-    centSlice = abs(xcorr(codes{1}.code{1},travelledCode1) + xcorr(codes{1}.ccode{1},travelledCode2));        
-    
-    % Normalize
-    centSlice = centSlice/max(max(centSlice));  
-%   
-%    % Shift to start at right time, and 
-%    % pad with zeroes to make same length as received data
-%    zeroBefore = round(startTimeImp*fs);
-%    centSlice = [zeros(1,zeroBefore), centSlice];
-%    centSlice = [centSlice zeros(1,numel(midLine) - numel(centSlice))];
-%    
-%    plot(linspace(Rmin,Rmax, numel(centSlice))*1000,20*log10(centSlice + eps))   
-%    
-%    legend('calc\_scat\_multi simulation', 'Using model')
-    figure
-    plot(20*log10(centSlice+eps))
-    title('Expected Central Line if No Cross Beam Interference')
-    xlabel('Time Index ->')
-    ylabel('Magnitude')
-    
-%     % Show autocorrelation of codes
-%     figure
-%     plot( 20*log10(abs(xcorr(codes{1}.code{1}) + xcorr(codes{1}.ccode{1})))+eps);
-%     title('Code Autocorrelation')
-%     xlabel('Index')
-%     ylabel('Value (dB)')
-end
-
-%% Plot entire image
-if(onlySimCentLine == 0)
-    figure;
-    imagesc([x_lines(1) x_lines(end)]*1000, [Rmin Rmax]*1000, 20*log10(env_bf+eps));
-    title(sprintf('Both Fired Pair at Once. Neighbors: %i. \n %d Focal Zone(s). Code length: %d. Times repeated: %d. f_s: %d MHz.',useNeigh, numFocZones,lenCodes, numRepeat, fs/(1e6)));
-    xlabel('Lateral distance [mm]');
-    ylabel('Axial distance [mm]')
-    axis('image')
-
-    colorbar
-    %colormap(gray);
-    caxis([-55 0]);
-end
-
+colorbar
+%colormap(gray);
+caxis([-55 0]);
 
 % Release memory used by Field II and BFT
 field_end
 bft_end
+
